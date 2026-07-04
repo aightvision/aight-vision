@@ -31,7 +31,7 @@
       text-transform: uppercase;
     }
 
-    /* ── Auth ── */
+    /* ── Auth ────────────────────────────────────────────────────── */
 
     #auth {
       display: flex;
@@ -39,7 +39,6 @@
       width: 100%;
       max-width: 360px;
     }
-
     #auth.hidden { display: none; }
 
     #secret-input {
@@ -54,7 +53,6 @@
       outline: none;
       transition: border-color 0.2s;
     }
-
     #secret-input:focus { border-color: rgba(255,255,255,0.4); }
     #secret-input.error { border-color: #c0392b; }
 
@@ -70,24 +68,23 @@
       transition: border-color 0.2s, color 0.2s;
       white-space: nowrap;
     }
-
     #auth-btn:hover { border-color: #555; color: #fff; }
 
-    /* ── Upload area ── */
+    /* ── Upload area ─────────────────────────────────────────────── */
 
     #upload-area {
       display: none;
       flex-direction: column;
       align-items: center;
       width: 100%;
-      max-width: 560px;
+      max-width: 1080px;
       gap: 20px;
     }
-
     #upload-area.visible { display: flex; }
 
     #drop-zone {
       width: 100%;
+      max-width: 560px;
       border: 1.5px dashed #2a2a2a;
       border-radius: 10px;
       padding: 40px 24px;
@@ -96,22 +93,17 @@
       align-items: center;
       gap: 20px;
       transition: border-color 0.2s, background 0.2s;
-      cursor: default;
     }
-
     #drop-zone.drag-over {
       border-color: rgba(255,255,255,0.4);
       background: rgba(255,255,255,0.03);
     }
-
     #drop-zone p {
       color: rgba(255,255,255,0.2);
       letter-spacing: 0.1em;
       font-size: 12px;
       text-transform: uppercase;
     }
-
-    /* hide drop zone hint on mobile where DnD doesn't work */
     @media (hover: none) { #drop-hint { display: none; } }
 
     .btn-row {
@@ -134,179 +126,74 @@
       transition: border-color 0.2s, color 0.2s;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
-    }
-
-    label.pick-btn:hover, button.pick-btn:hover { border-color: #555; color: #fff; }
-
-    input[type=file] { display: none; }
-
-    /* ── Queue ── */
-
-    #queue {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .q-item {
-      background: #141414;
-      border: 1px solid #222;
-      border-radius: 7px;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       gap: 6px;
     }
+    label.pick-btn:hover, button.pick-btn:hover { border-color: #555; color: #fff; }
+    input[type=file] { display: none; }
 
-    .q-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
+    /* ── Queue ───────────────────────────────────────────────────── */
 
-    .q-name {
-      font-size: 12px;
-      color: #aaa;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-    }
+    #queue { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; }
 
-    .q-status {
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
+    .q-item { background: #141414; border: 1px solid #222; border-radius: 7px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .q-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .q-name { font-size: 12px; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .q-status { font-size: 11px; letter-spacing: 0.08em; white-space: nowrap; flex-shrink: 0; }
     .q-status.pending  { color: #555; }
     .q-status.uploading { color: #888; }
     .q-status.done     { color: #4caf50; }
     .q-status.error    { color: #e57373; }
-
-    .q-bar-wrap {
-      height: 2px;
-      background: #222;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .q-bar {
-      height: 100%;
-      background: rgba(255,255,255,0.5);
-      border-radius: 2px;
-      transition: width 0.2s;
-      width: 0%;
-    }
-
+    .q-bar-wrap { height: 2px; background: #222; border-radius: 2px; overflow: hidden; }
+    .q-bar { height: 100%; background: rgba(255,255,255,0.5); border-radius: 2px; transition: width 0.2s; width: 0%; }
     .q-bar.done  { background: #4caf50; width: 100%; }
     .q-bar.error { background: #e57373; width: 100%; }
 
-    /* ── Summary ── */
+    #summary { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; }
 
-    #summary {
-      font-size: 11px;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 0.1em;
-    }
-
-    /* ── Library ── */
+    /* ── Library ─────────────────────────────────────────────────── */
 
     #library {
       display: none;
       width: 100%;
-      max-width: 1080px;
       margin-top: 28px;
       padding-top: 24px;
       border-top: 1px solid #1a1a1a;
       flex-direction: column;
       gap: 14px;
     }
-
     #library.visible { display: flex; }
 
-    .lib-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+    .lib-header { display: flex; align-items: center; gap: 12px; }
+    .lib-title { font-size: 11px; letter-spacing: 0.3em; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+    .lib-count { font-size: 11px; color: rgba(255,255,255,0.2); }
+    .lib-header .push { margin-left: auto; }
+    .lib-header .pick-btn { padding: 6px 12px; font-size: 10px; }
+    .lib-header .pick-btn svg { width: 14px; height: 14px; }
 
-    .lib-title {
-      font-size: 11px;
-      letter-spacing: 0.3em;
-      color: rgba(255,255,255,0.35);
-      text-transform: uppercase;
-    }
+    #library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
 
-    .lib-count {
-      font-size: 11px;
-      color: rgba(255,255,255,0.2);
-    }
+    .lib-item { position: relative; background: #141414; border: 1px solid #222; border-radius: 7px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.15s; }
+    .lib-item:hover { border-color: #333; }
 
-    .lib-header .pick-btn {
-      margin-left: auto;
-      padding: 6px 14px;
-      font-size: 10px;
-    }
-
-    #library-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 10px;
-    }
-
-    .lib-item {
-      position: relative;
-      background: #141414;
-      border: 1px solid #222;
-      border-radius: 7px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .lib-thumb-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      background: #0a0a0a;
-      overflow: hidden;
-    }
-
-    .lib-thumb {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #0a0a0a;
-      display: block;
-    }
-
-    .lib-name {
-      font-size: 10px;
-      color: rgba(255,255,255,0.5);
-      padding: 6px 8px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .lib-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #0a0a0a; overflow: hidden; }
+    .lib-thumb { width: 100%; height: 100%; object-fit: cover; background: #0a0a0a; display: block; }
+    .lib-name { font-size: 10px; color: rgba(255,255,255,0.5); padding: 6px 8px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lib-tags { padding: 0 8px 6px; display: flex; flex-wrap: wrap; gap: 3px; }
+    .lib-tag-chip { font-size: 9px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.03em; }
 
     .lib-delete {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 24px;
-      height: 24px;
+      top: 6px; right: 6px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       background: rgba(0,0,0,0.7);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(255,255,255,0.15);
       color: rgba(255,255,255,0.75);
-      font-size: 14px;
-      line-height: 1;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -315,22 +202,254 @@
       -webkit-tap-highlight-color: transparent;
       z-index: 2;
     }
+    .lib-delete svg { width: 14px; height: 14px; }
+    .lib-delete:hover, .lib-delete:active { background: rgba(220,60,60,0.85); color: #fff; }
 
-    .lib-delete:hover, .lib-delete:active {
-      background: rgba(220,60,60,0.85);
+    .lib-empty { color: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.1em; padding: 20px 0; text-align: center; grid-column: 1 / -1; }
+
+    /* ── Tag filter panel (for grid) ─────────────────────────────── */
+
+    #tag-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    #tag-panel.open { opacity: 1; pointer-events: auto; }
+
+    .tag-panel-inner {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: min(340px, 82vw);
+      background: rgba(12,12,12,0.95);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.28s ease;
+      padding: 20px 22px 24px;
+    }
+    #tag-panel.open .tag-panel-inner { transform: translateX(0); }
+
+    .tag-panel-head { display: flex; align-items: center; margin-bottom: 16px; }
+    .tag-panel-title { font-size: 11px; letter-spacing: 0.32em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .tag-panel-close { margin-left: auto; width: 30px; height: 30px; background: transparent; border: none; color: rgba(255,255,255,0.55); cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .tag-panel-close svg { width: 18px; height: 18px; }
+
+    .tag-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .tag-row { display: flex; align-items: center; padding: 10px 4px; color: rgba(255,255,255,0.75); font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; border-bottom: 1px solid rgba(255,255,255,0.04); transition: color 0.15s; }
+    .tag-row:hover { color: #fff; }
+    .tag-row.selected { color: #fff; }
+    .tag-row .tag-marker { width: 8px; height: 8px; border-radius: 50%; background: transparent; border: 1px solid rgba(255,255,255,0.35); margin-right: 12px; flex-shrink: 0; transition: background 0.15s, border-color 0.15s; }
+    .tag-row.selected .tag-marker { background: #fff; border-color: #fff; }
+    .tag-row .tag-name { flex: 1; }
+    .tag-row .tag-count { color: rgba(255,255,255,0.35); font-size: 12px; margin-left: 8px; }
+    .tag-row.tag-all, .tag-row.tag-none { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
+
+    .tag-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .tag-reset { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 8px 14px; border-radius: 6px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color 0.15s, border-color 0.15s; }
+    .tag-reset:hover { color: #fff; border-color: #fff; }
+
+    /* ── Modal (video detail) ────────────────────────────────────── */
+
+    #modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #modal.open { opacity: 1; pointer-events: auto; }
+
+    .modal-inner {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 720px;
+      max-height: calc(100vh - 40px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px; right: 12px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .modal-close svg { width: 16px; height: 16px; }
+    .modal-close:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+
+    #modal-video {
+      width: 100%;
+      max-height: 55vh;
+      background: #000;
+      display: block;
+    }
+
+    .modal-body { padding: 14px 18px 18px; overflow-y: auto; }
+
+    .modal-name-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; min-height: 32px; }
+    .modal-name-text {
+      font-size: 14px;
+      color: #ddd;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+    .modal-name-input {
+      background: #1a1a1a;
+      border: 1px solid #333;
       color: #fff;
+      padding: 6px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      flex: 1;
+      display: none;
+    }
+    .modal-name-input:focus { border-color: rgba(255,255,255,0.4); }
+    .modal-name-wrap.editing .modal-name-text { display: none; }
+    .modal-name-wrap.editing .modal-name-input { display: block; }
+
+    .modal-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
     }
 
-    .lib-empty {
-      color: rgba(255,255,255,0.2);
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      padding: 20px 0;
-      text-align: center;
+    .modal-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.85);
+      padding: 4px 4px 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
     }
+    .modal-tag-chip button {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .modal-tag-chip button:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .modal-tag-add {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      width: 130px;
+      transition: border-color 0.15s;
+    }
+    .modal-tag-add:focus { border-color: rgba(255,255,255,0.4); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .modal-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .modal-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .modal-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .modal-btn.danger:hover { background: rgba(220,60,60,0.85); border-color: rgba(220,60,60,0.85); color: #fff; }
   </style>
 </head>
 <body>
+
+<!-- Reusable SVG icon definitions -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20h9"/>
+    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+  </symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="3 6 5 6 21 6"/>
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+    <path d="M10 11v6"/>
+    <path d="M14 11v6"/>
+    <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+  </symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </symbol>
+  <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="9" x2="20" y2="9"/>
+    <line x1="4" y1="15" x2="20" y2="15"/>
+    <line x1="10" y1="3" x2="8" y2="21"/>
+    <line x1="16" y1="3" x2="14" y2="21"/>
+  </symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="6" y1="6" x2="18" y2="18"/>
+    <line x1="18" y1="6" x2="6" y2="18"/>
+  </symbol>
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="20" y1="12" x2="4" y2="12"/>
+    <polyline points="10 6 4 12 10 18"/>
+  </symbol>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <polyline points="14 6 20 12 14 18"/>
+  </symbol>
+</svg>
 
 <h1>AIGHT.VISION &mdash; upload</h1>
 
@@ -357,9 +476,56 @@
     <div class="lib-header">
       <span class="lib-title">library</span>
       <span class="lib-count" id="lib-count"></span>
+      <button class="pick-btn push" id="lib-filter" aria-label="Filter">
+        <svg><use href="#icon-hash"/></svg> tags
+      </button>
       <button class="pick-btn" id="lib-refresh">refresh</button>
     </div>
     <div id="library-grid"></div>
+  </div>
+</div>
+
+<!-- Tag filter panel for the library grid -->
+<div id="tag-panel" aria-hidden="true">
+  <div class="tag-panel-inner">
+    <div class="tag-panel-head">
+      <span class="tag-panel-title">tags</span>
+      <button class="tag-panel-close" id="tag-panel-close" aria-label="Close">
+        <svg><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="tag-list" id="tag-list"></div>
+    <div class="tag-actions">
+      <button class="tag-reset" id="tag-reset">reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Video playback modal -->
+<div id="modal" aria-hidden="true">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-close" aria-label="Close">
+      <svg><use href="#icon-x"/></svg>
+    </button>
+
+    <video id="modal-video" controls playsinline preload="metadata"></video>
+
+    <div class="modal-body">
+      <div class="modal-name-wrap" id="modal-name-wrap">
+        <span class="modal-name-text" id="modal-name-text"></span>
+        <input class="modal-name-input" id="modal-name-input" spellcheck="false" autocomplete="off">
+      </div>
+
+      <div class="modal-tag-list" id="modal-tag-list"></div>
+
+      <div class="modal-actions">
+        <button class="modal-btn" id="modal-prev" aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
+        <button class="modal-btn" id="modal-rename" aria-label="Rename"><svg><use href="#icon-pencil"/></svg></button>
+        <button class="modal-btn" id="modal-download" aria-label="Download"><svg><use href="#icon-download"/></svg></button>
+        <button class="modal-btn danger" id="modal-delete" aria-label="Delete"><svg><use href="#icon-trash"/></svg></button>
+        <button class="modal-btn" id="modal-next" aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -369,52 +535,84 @@
   const MAX_CONCURRENT = 2;
 
   let secret = sessionStorage.getItem('uploadSecret') || '';
-  let queue   = [];
+  let queue = [];
   let running = 0;
 
-  const authEl    = document.getElementById('auth');
-  const secretIn  = document.getElementById('secret-input');
-  const authBtn   = document.getElementById('auth-btn');
-  const uploadArea = document.getElementById('upload-area');
-  const dropZone  = document.getElementById('drop-zone');
-  const queueEl   = document.getElementById('queue');
-  const summaryEl = document.getElementById('summary');
-  const libraryEl = document.getElementById('library');
-  const libraryGrid = document.getElementById('library-grid');
-  const libCount  = document.getElementById('lib-count');
+  let libraryItems = [];           // Full list from /api/videos
+  let libraryFiltered = [];        // After tag filter
+  let modalIdx = -1;               // Position within libraryFiltered
 
-  // ── Auth ────────────────────────────────────────────────────────────────────
+  // Filter state (grid)
+  const selectedTags = new Set();
+  let selectNoTags = false;
+  let selectAll = true;
+
+  // ── DOM ─────────────────────────────────────────────────────────
+
+  const authEl      = document.getElementById('auth');
+  const secretIn    = document.getElementById('secret-input');
+  const authBtn     = document.getElementById('auth-btn');
+  const uploadArea  = document.getElementById('upload-area');
+  const dropZone    = document.getElementById('drop-zone');
+  const queueEl     = document.getElementById('queue');
+  const summaryEl   = document.getElementById('summary');
+  const libEl       = document.getElementById('library');
+  const libGrid     = document.getElementById('library-grid');
+  const libCount    = document.getElementById('lib-count');
+  const tagPanel    = document.getElementById('tag-panel');
+  const tagListEl   = document.getElementById('tag-list');
+  const modalEl     = document.getElementById('modal');
+  const modalVideo  = document.getElementById('modal-video');
+  const modalNameWrap = document.getElementById('modal-name-wrap');
+  const modalNameText = document.getElementById('modal-name-text');
+  const modalNameInput = document.getElementById('modal-name-input');
+  const modalTagListEl = document.getElementById('modal-tag-list');
+
+  // ── Utils ───────────────────────────────────────────────────────
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function displayName(key) { return key.replace(/^\d+_/, '') || key; }
+  function normalizeTag(raw) {
+    return String(raw || '').trim().toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+  function authedFetch(url, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({}, opts.headers || {}, { 'x-upload-secret': secret });
+    return fetch(url, opts);
+  }
+
+  // ── Auth ────────────────────────────────────────────────────────
 
   function unlock(key) {
     secret = key;
     sessionStorage.setItem('uploadSecret', key);
     authEl.classList.add('hidden');
     uploadArea.classList.add('visible');
-    libraryEl.classList.add('visible');
+    libEl.classList.add('visible');
     loadLibrary();
   }
 
-  if (secret) {
-    unlock(secret);
-  } else {
-    authBtn.addEventListener('click', function () {
-      const val = secretIn.value.trim();
-      if (!val) { secretIn.classList.add('error'); return; }
-      secretIn.classList.remove('error');
-      unlock(val);
-    });
+  if (secret) unlock(secret);
 
-    secretIn.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') authBtn.click();
-      secretIn.classList.remove('error');
-    });
-  }
+  authBtn.addEventListener('click', function () {
+    const val = secretIn.value.trim();
+    if (!val) { secretIn.classList.add('error'); return; }
+    secretIn.classList.remove('error');
+    unlock(val);
+  });
+  secretIn.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') authBtn.click();
+    secretIn.classList.remove('error');
+  });
 
-  // ── File collection ─────────────────────────────────────────────────────────
+  // ── File collection (drag/drop, file picker, folder picker) ──────
 
-  function isVideo(name) {
-    return VIDEO_EXT.test(name);
-  }
+  function isVideo(name) { return VIDEO_EXT.test(name); }
 
   function collectFromEntry(entry) {
     return new Promise(function (resolve) {
@@ -426,18 +624,14 @@
         (function readAll() {
           reader.readEntries(function (entries) {
             if (!entries.length) {
-              Promise.all(collected).then(function (groups) {
-                resolve(groups.flat());
-              });
+              Promise.all(collected).then(function (groups) { resolve(groups.flat()); });
               return;
             }
             for (const e of entries) collected.push(collectFromEntry(e));
             readAll();
           });
         }());
-      } else {
-        resolve([]);
-      }
+      } else { resolve([]); }
     });
   }
 
@@ -447,35 +641,24 @@
     for (const f of filtered) {
       const item = { id: Math.random().toString(36).slice(2), file: f, status: 'pending', pct: 0 };
       queue.push(item);
-      renderItem(item);
+      renderQueueItem(item);
     }
     processQueue();
-    updateSummary();
+    updateQueueSummary();
   }
 
-  // ── Drag & drop ─────────────────────────────────────────────────────────────
-
-  dropZone.addEventListener('dragover', function (e) {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-
-  dropZone.addEventListener('dragleave', function () {
-    dropZone.classList.remove('drag-over');
-  });
-
+  dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
   dropZone.addEventListener('drop', function (e) {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-
     const items = e.dataTransfer.items;
     if (items && items.length) {
       const promises = [];
       for (let i = 0; i < items.length; i++) {
         const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
-        if (entry) {
-          promises.push(collectFromEntry(entry));
-        } else {
+        if (entry) promises.push(collectFromEntry(entry));
+        else {
           const f = items[i].getAsFile();
           if (f) promises.push(Promise.resolve(isVideo(f.name) ? [f] : []));
         }
@@ -486,24 +669,13 @@
     }
   });
 
-  // ── File inputs ─────────────────────────────────────────────────────────────
-
-  document.getElementById('file-input').addEventListener('change', function () {
-    addFiles(Array.from(this.files));
-    this.value = '';
-  });
-
-  document.getElementById('folder-input').addEventListener('change', function () {
-    addFiles(Array.from(this.files));
-    this.value = '';
-  });
-
-  // Hide folder button on mobile (webkitdirectory not supported)
+  document.getElementById('file-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
+  document.getElementById('folder-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
   if (/Mobi|Android/i.test(navigator.userAgent)) {
     document.getElementById('folder-label').style.display = 'none';
   }
 
-  // ── Upload queue ────────────────────────────────────────────────────────────
+  // ── Upload queue ────────────────────────────────────────────────
 
   function processQueue() {
     while (running < MAX_CONCURRENT) {
@@ -513,7 +685,6 @@
       running++;
       uploadItem(item);
     }
-    // Everything finished — refresh the library to show new uploads
     if (running === 0 && queue.some(function (i) { return i.status === 'done'; })) {
       loadLibrary();
     }
@@ -527,47 +698,30 @@
     xhr.setRequestHeader('x-file-type', item.file.type || 'application/octet-stream');
 
     xhr.upload.addEventListener('progress', function (e) {
-      if (e.lengthComputable) {
-        item.pct = e.loaded / e.total;
-        updateItem(item);
-      }
+      if (e.lengthComputable) { item.pct = e.loaded / e.total; updateQueueItem(item); }
     });
-
     xhr.addEventListener('load', function () {
       running--;
       if (xhr.status === 200 || xhr.status === 201) {
         item.status = 'done';
       } else if (xhr.status === 401) {
-        item.status = 'error';
-        item.error = 'invalid key';
-        // clear bad secret so user is re-prompted next time
+        item.status = 'error'; item.error = 'invalid key';
         sessionStorage.removeItem('uploadSecret');
       } else {
-        item.status = 'error';
-        item.error = 'failed (' + xhr.status + ')';
+        item.status = 'error'; item.error = 'failed (' + xhr.status + ')';
       }
-      updateItem(item);
-      updateSummary();
-      processQueue();
+      updateQueueItem(item); updateQueueSummary(); processQueue();
     });
-
     xhr.addEventListener('error', function () {
       running--;
-      item.status = 'error';
-      item.error = 'network error';
-      updateItem(item);
-      updateSummary();
-      processQueue();
+      item.status = 'error'; item.error = 'network error';
+      updateQueueItem(item); updateQueueSummary(); processQueue();
     });
-
-    // Send the raw file body — no FormData buffering
     xhr.send(item.file);
-    updateItem(item);
+    updateQueueItem(item);
   }
 
-  // ── Queue UI ─────────────────────────────────────────────────────────────────
-
-  function renderItem(item) {
+  function renderQueueItem(item) {
     const el = document.createElement('div');
     el.className = 'q-item';
     el.id = 'qi-' + item.id;
@@ -580,46 +734,27 @@
     queueEl.prepend(el);
   }
 
-  function updateItem(item) {
+  function updateQueueItem(item) {
     const el = document.getElementById('qi-' + item.id);
     if (!el) return;
     const statusEl = el.querySelector('.q-status');
     const bar      = el.querySelector('.q-bar');
-
     statusEl.className = 'q-status ' + item.status;
-
-    if (item.status === 'pending') {
-      statusEl.textContent = 'pending';
-      bar.style.width = '0%';
-    } else if (item.status === 'uploading') {
-      statusEl.textContent = Math.round(item.pct * 100) + '%';
-      bar.style.width = Math.round(item.pct * 100) + '%';
-    } else if (item.status === 'done') {
-      statusEl.textContent = 'done';
-      bar.className = 'q-bar done';
-    } else if (item.status === 'error') {
-      statusEl.textContent = item.error || 'error';
-      bar.className = 'q-bar error';
-    }
+    if (item.status === 'pending')   { statusEl.textContent = 'pending'; bar.style.width = '0%'; }
+    else if (item.status === 'uploading') { statusEl.textContent = Math.round(item.pct * 100) + '%'; bar.style.width = Math.round(item.pct * 100) + '%'; }
+    else if (item.status === 'done') { statusEl.textContent = 'done'; bar.className = 'q-bar done'; }
+    else if (item.status === 'error'){ statusEl.textContent = item.error || 'error'; bar.className = 'q-bar error'; }
   }
 
-  function updateSummary() {
+  function updateQueueSummary() {
     if (!queue.length) { summaryEl.textContent = ''; return; }
-    const done   = queue.filter(function (i) { return i.status === 'done'; }).length;
+    const done = queue.filter(function (i) { return i.status === 'done'; }).length;
     const errors = queue.filter(function (i) { return i.status === 'error'; }).length;
-    const total  = queue.length;
-    summaryEl.textContent = done + ' / ' + total + ' uploaded' + (errors ? ' · ' + errors + ' failed' : '');
+    summaryEl.textContent = done + ' / ' + queue.length + ' uploaded' + (errors ? ' · ' + errors + ' failed' : '');
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  // ── Library ─────────────────────────────────────────────────────
 
-  // ── Library ────────────────────────────────────────────────────────────────
-
-  // Only load thumbnail metadata when tile scrolls near the viewport.
-  // With hundreds of videos this is essential — otherwise the browser tries
-  // to fetch metadata for every one at once.
   const thumbObserver = new IntersectionObserver(function (entries) {
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
@@ -634,72 +769,81 @@
 
   async function loadLibrary() {
     try {
-      const res = await fetch('/api/videos', {
-        headers: { 'x-upload-secret': secret },
-      });
+      const res = await authedFetch('/api/videos');
       if (res.status === 401) {
         sessionStorage.removeItem('uploadSecret');
-        libraryGrid.innerHTML = '<div class="lib-empty">invalid key</div>';
+        libGrid.innerHTML = '<div class="lib-empty">invalid key</div>';
         return;
       }
       if (!res.ok) throw new Error('list ' + res.status);
       const data = await res.json();
-      renderLibrary(data.items || []);
+      libraryItems = data.items || [];
+      applyGridFilter();
     } catch (err) {
       console.error('Library load failed:', err);
-      libraryGrid.innerHTML = '<div class="lib-empty">could not load library</div>';
+      libGrid.innerHTML = '<div class="lib-empty">could not load library</div>';
     }
   }
 
-  function renderLibrary(items) {
-    libCount.textContent = items.length ? '(' + items.length + ')' : '';
-    libraryGrid.innerHTML = '';
+  function applyGridFilter() {
+    if (selectAll) {
+      libraryFiltered = libraryItems.slice();
+    } else {
+      libraryFiltered = libraryItems.filter(function (item) {
+        const empty = !item.tags || item.tags.length === 0;
+        if (selectNoTags && empty) return true;
+        if (selectedTags.size === 0) return false;
+        for (const t of item.tags) if (selectedTags.has(t)) return true;
+        return false;
+      });
+    }
+    renderLibrary();
+  }
 
-    if (!items.length) {
-      libraryGrid.innerHTML = '<div class="lib-empty">no videos yet</div>';
+  function renderLibrary() {
+    libCount.textContent = libraryFiltered.length ? '(' + libraryFiltered.length + '/' + libraryItems.length + ')' : '';
+    libGrid.innerHTML = '';
+    if (!libraryFiltered.length) {
+      libGrid.innerHTML = '<div class="lib-empty">' + (libraryItems.length ? 'no matches' : 'no videos yet') + '</div>';
       return;
     }
-
-    for (const item of items) {
+    for (let i = 0; i < libraryFiltered.length; i++) {
+      const item = libraryFiltered[i];
       const tile = document.createElement('div');
       tile.className = 'lib-item';
       tile.dataset.key = item.key;
-
-      // Strip timestamp prefix (e.g. 1720000000_) from the display name
-      const displayName = item.key.replace(/^\d+_/, '');
-
+      const dn = displayName(item.key);
+      const tagsHtml = (item.tags || []).map(function (t) { return '<span class="lib-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
       tile.innerHTML =
         '<div class="lib-thumb-wrap">' +
           '<video class="lib-thumb" muted playsinline preload="none"></video>' +
-          '<button class="lib-delete" aria-label="Delete">&times;</button>' +
+          '<button class="lib-delete" aria-label="Delete"><svg><use href="#icon-x"/></svg></button>' +
         '</div>' +
-        '<div class="lib-name" title="' + escHtml(displayName) + '">' + escHtml(displayName) + '</div>';
-
+        '<div class="lib-name" title="' + escHtml(dn) + '">' + escHtml(dn) + '</div>' +
+        (tagsHtml ? '<div class="lib-tags">' + tagsHtml + '</div>' : '');
       const thumb = tile.querySelector('.lib-thumb');
       thumb.dataset.url = item.url;
       thumbObserver.observe(thumb);
-
+      // Click tile (excluding delete) → open modal
+      tile.addEventListener('click', function () { openModalAt(i); });
       tile.querySelector('.lib-delete').addEventListener('click', function (e) {
         e.stopPropagation();
         deleteItem(item.key, tile);
       });
-
-      libraryGrid.appendChild(tile);
+      libGrid.appendChild(tile);
     }
   }
 
   async function deleteItem(key, tileEl) {
     if (!confirm('Delete this video? This cannot be undone.')) return;
     try {
-      const res = await fetch('/api/videos?key=' + encodeURIComponent(key), {
-        method: 'DELETE',
-        headers: { 'x-upload-secret': secret },
-      });
+      const res = await authedFetch('/api/videos?key=' + encodeURIComponent(key), { method: 'DELETE' });
       if (!res.ok) throw new Error('delete ' + res.status);
-      tileEl.remove();
-      const remaining = libraryGrid.querySelectorAll('.lib-item').length;
-      libCount.textContent = remaining ? '(' + remaining + ')' : '';
-      if (!remaining) libraryGrid.innerHTML = '<div class="lib-empty">no videos yet</div>';
+      if (tileEl && tileEl.parentNode) tileEl.remove();
+      libraryItems = libraryItems.filter(function (i) { return i.key !== key; });
+      libraryFiltered = libraryFiltered.filter(function (i) { return i.key !== key; });
+      libCount.textContent = libraryFiltered.length ? '(' + libraryFiltered.length + '/' + libraryItems.length + ')' : '';
+      if (!libraryFiltered.length) libGrid.innerHTML = '<div class="lib-empty">' + (libraryItems.length ? 'no matches' : 'no videos yet') + '</div>';
     } catch (err) {
       console.error('Delete failed:', err);
       alert('Failed to delete. Try again.');
@@ -707,6 +851,269 @@
   }
 
   document.getElementById('lib-refresh').addEventListener('click', loadLibrary);
+
+  // ── Tag panel (grid filter) ─────────────────────────────────────
+
+  document.getElementById('lib-filter').addEventListener('click', function () {
+    renderTagPanel();
+    tagPanel.classList.add('open');
+  });
+  document.getElementById('tag-panel-close').addEventListener('click', function () { tagPanel.classList.remove('open'); });
+  document.getElementById('tag-reset').addEventListener('click', function () {
+    selectedTags.clear();
+    selectNoTags = false;
+    selectAll = true;
+    applyGridFilter();
+    renderTagPanel();
+  });
+  tagPanel.addEventListener('click', function (e) { if (e.target === tagPanel) tagPanel.classList.remove('open'); });
+
+  function aggregateTags() {
+    const counts = new Map();
+    let noTagCount = 0;
+    for (const item of libraryItems) {
+      if (!item.tags || item.tags.length === 0) { noTagCount++; continue; }
+      for (const t of item.tags) counts.set(t, (counts.get(t) || 0) + 1);
+    }
+    const list = Array.from(counts.entries()).sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); });
+    return { list: list, noTagCount: noTagCount, total: libraryItems.length };
+  }
+
+  function renderTagPanel() {
+    const agg = aggregateTags();
+    tagListEl.innerHTML = '';
+
+    const allRow = document.createElement('div');
+    allRow.className = 'tag-row tag-all' + (selectAll ? ' selected' : '');
+    allRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">all videos</span><span class="tag-count">' + agg.total + '</span>';
+    allRow.addEventListener('click', function () {
+      selectedTags.clear(); selectNoTags = false; selectAll = true;
+      applyGridFilter(); renderTagPanel();
+    });
+    tagListEl.appendChild(allRow);
+
+    const noneRow = document.createElement('div');
+    noneRow.className = 'tag-row tag-none' + (selectNoTags ? ' selected' : '');
+    noneRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">no tags</span><span class="tag-count">' + agg.noTagCount + '</span>';
+    noneRow.addEventListener('click', function () {
+      selectNoTags = !selectNoTags; selectAll = false;
+      if (!selectNoTags && selectedTags.size === 0) selectAll = true;
+      applyGridFilter(); renderTagPanel();
+    });
+    tagListEl.appendChild(noneRow);
+
+    for (const [t, c] of agg.list) {
+      const row = document.createElement('div');
+      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
+      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
+      row.addEventListener('click', function () {
+        if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
+        selectAll = false;
+        if (selectedTags.size === 0 && !selectNoTags) selectAll = true;
+        applyGridFilter(); renderTagPanel();
+      });
+      tagListEl.appendChild(row);
+    }
+  }
+
+  // ── Modal ───────────────────────────────────────────────────────
+
+  function openModalAt(i) {
+    if (i < 0 || i >= libraryFiltered.length) return;
+    modalIdx = i;
+    renderModal();
+    modalEl.classList.add('open');
+  }
+
+  function closeModal() {
+    modalEl.classList.remove('open');
+    modalVideo.pause();
+    modalVideo.removeAttribute('src');
+    modalVideo.load();
+    exitRenameMode();
+    modalIdx = -1;
+  }
+
+  function currentItem() { return modalIdx >= 0 ? libraryFiltered[modalIdx] : null; }
+
+  function renderModal() {
+    const item = currentItem();
+    if (!item) return;
+    modalVideo.src = item.url;
+    modalVideo.load();
+    modalNameText.textContent = displayName(item.key);
+    modalNameInput.value = displayName(item.key);
+    renderModalTags();
+  }
+
+  function renderModalTags() {
+    const item = currentItem();
+    if (!item) return;
+    modalTagListEl.innerHTML = '';
+    for (const t of (item.tags || [])) {
+      const chip = document.createElement('span');
+      chip.className = 'modal-tag-chip';
+      chip.innerHTML = '#' + escHtml(t) + ' <button aria-label="Remove tag">&times;</button>';
+      chip.querySelector('button').addEventListener('click', function () { updateTags(item.tags.filter(function (x) { return x !== t; })); });
+      modalTagListEl.appendChild(chip);
+    }
+    // Add-tag input
+    const input = document.createElement('input');
+    input.className = 'modal-tag-add';
+    input.type = 'text';
+    input.placeholder = '+ add tag';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const t = normalizeTag(input.value);
+        if (!t) { input.value = ''; return; }
+        const existing = currentItem().tags || [];
+        if (existing.includes(t)) { input.value = ''; return; }
+        updateTags(existing.concat([t]));
+      }
+    });
+    modalTagListEl.appendChild(input);
+  }
+
+  async function updateTags(newTags) {
+    const item = currentItem();
+    if (!item) return;
+    try {
+      const res = await authedFetch('/api/videos', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: item.key, tags: newTags }),
+      });
+      if (!res.ok) throw new Error('tags ' + res.status);
+      const data = await res.json();
+      // Update in both arrays
+      const master = libraryItems.find(function (x) { return x.key === item.key; });
+      if (master) master.tags = data.tags;
+      item.tags = data.tags;
+      renderModalTags();
+      // Update grid tile chips
+      const tile = libGrid.querySelector('.lib-item[data-key="' + CSS.escape(item.key) + '"]');
+      if (tile) {
+        let tagsEl = tile.querySelector('.lib-tags');
+        const tagsHtml = data.tags.map(function (t) { return '<span class="lib-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
+        if (tagsHtml) {
+          if (!tagsEl) { tagsEl = document.createElement('div'); tagsEl.className = 'lib-tags'; tile.appendChild(tagsEl); }
+          tagsEl.innerHTML = tagsHtml;
+        } else if (tagsEl) { tagsEl.remove(); }
+      }
+    } catch (err) {
+      console.error('Update tags failed:', err);
+      alert('Failed to update tags.');
+    }
+  }
+
+  function enterRenameMode() {
+    modalNameWrap.classList.add('editing');
+    modalNameInput.focus();
+    modalNameInput.select();
+  }
+  function exitRenameMode() { modalNameWrap.classList.remove('editing'); }
+
+  async function commitRename() {
+    const item = currentItem();
+    if (!item) { exitRenameMode(); return; }
+    const raw = modalNameInput.value.trim();
+    if (!raw || raw === displayName(item.key)) { exitRenameMode(); return; }
+    try {
+      const res = await authedFetch('/api/videos', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: item.key, newKey: raw }),
+      });
+      if (res.status === 409) { alert('A video with that name already exists.'); return; }
+      if (!res.ok) throw new Error('rename ' + res.status);
+      const data = await res.json();
+      // Update key/url in-place in both arrays
+      const master = libraryItems.find(function (x) { return x.key === item.key; });
+      if (master) { master.key = data.key; master.url = data.url; }
+      item.key = data.key;
+      item.url = data.url;
+      exitRenameMode();
+      renderLibrary();       // regenerate grid with new key/url
+      renderModal();         // reload the modal video src too
+    } catch (err) {
+      console.error('Rename failed:', err);
+      alert('Failed to rename.');
+    }
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  modalEl.addEventListener('click', function (e) { if (e.target === modalEl) closeModal(); });
+
+  document.getElementById('modal-prev').addEventListener('click', function () {
+    if (modalIdx > 0) { modalIdx--; renderModal(); }
+    else { modalIdx = libraryFiltered.length - 1; renderModal(); }
+  });
+  document.getElementById('modal-next').addEventListener('click', function () {
+    if (modalIdx < libraryFiltered.length - 1) { modalIdx++; renderModal(); }
+    else { modalIdx = 0; renderModal(); }
+  });
+
+  document.getElementById('modal-rename').addEventListener('click', function () {
+    if (modalNameWrap.classList.contains('editing')) commitRename();
+    else enterRenameMode();
+  });
+  modalNameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') commitRename();
+    else if (e.key === 'Escape') exitRenameMode();
+  });
+
+  document.getElementById('modal-delete').addEventListener('click', function () {
+    const item = currentItem();
+    if (!item) return;
+    if (!confirm('Delete this video? This cannot be undone.')) return;
+    authedFetch('/api/videos?key=' + encodeURIComponent(item.key), { method: 'DELETE' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('delete ' + res.status);
+        libraryItems = libraryItems.filter(function (x) { return x.key !== item.key; });
+        applyGridFilter();
+        closeModal();
+      })
+      .catch(function (err) { console.error(err); alert('Failed to delete.'); });
+  });
+
+  document.getElementById('modal-download').addEventListener('click', function () {
+    const item = currentItem();
+    if (!item) return;
+    const a = document.createElement('a');
+    a.href = '/api/download?key=' + encodeURIComponent(item.key) + '&s=' + encodeURIComponent(secret);
+    a.download = displayName(item.key);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  // Modal keyboard shortcuts
+  document.addEventListener('keydown', function (e) {
+    if (!modalEl.classList.contains('open')) return;
+    if (modalNameWrap.classList.contains('editing')) return; // don't hijack keys during rename
+    if (e.key === 'Escape')       closeModal();
+    else if (e.key === 'ArrowLeft')  document.getElementById('modal-prev').click();
+    else if (e.key === 'ArrowRight') document.getElementById('modal-next').click();
+  });
+
+  // Modal swipe (touch)
+  let mTouchX = 0, mTouchY = 0, mTouchT = 0;
+  modalVideo.addEventListener('touchstart', function (e) {
+    const t = e.changedTouches[0];
+    mTouchX = t.clientX; mTouchY = t.clientY; mTouchT = Date.now();
+  }, { passive: true });
+  modalVideo.addEventListener('touchend', function (e) {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - mTouchX;
+    const dy = t.clientY - mTouchY;
+    const dt = Date.now() - mTouchT;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 600) {
+      if (dx < 0) document.getElementById('modal-next').click();
+      else document.getElementById('modal-prev').click();
+    }
+  }, { passive: true });
 
 }());
 </script>

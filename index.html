@@ -30,6 +30,8 @@
     #v0 { z-index: 1; }
     #v1 { z-index: 0; }
 
+    /* ── Bottom controls (prev / mute / next) ─────────────────────── */
+
     #controls {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -73,6 +75,169 @@
       border-color: rgba(255,255,255,0.6);
     }
 
+    .btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── Top-left tag filter button ───────────────────────────────── */
+
+    #btn-tags {
+      position: fixed;
+      top: 20px; left: 20px;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    #btn-tags.show { opacity: 1; pointer-events: auto; }
+
+    /* ── Tag panel (opens from left) ──────────────────────────────── */
+
+    #tag-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    #tag-panel.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .tag-panel-inner {
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: min(340px, 82vw);
+      background: rgba(12,12,12,0.95);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.28s ease;
+      padding: 20px 22px 24px;
+    }
+
+    #tag-panel.open .tag-panel-inner {
+      transform: translateX(0);
+    }
+
+    .tag-panel-head {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .tag-panel-title {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+
+    .tag-panel-close {
+      margin-left: auto;
+      width: 30px; height: 30px;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tag-panel-close svg { width: 18px; height: 18px; }
+
+    .tag-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tag-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 4px;
+      color: rgba(255,255,255,0.75);
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: color 0.15s;
+    }
+
+    .tag-row:hover { color: #fff; }
+
+    .tag-row.selected {
+      color: #fff;
+    }
+
+    .tag-row .tag-marker {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.35);
+      margin-right: 12px;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .tag-row.selected .tag-marker {
+      background: #fff;
+      border-color: #fff;
+    }
+
+    .tag-row .tag-name { flex: 1; }
+
+    .tag-row .tag-count {
+      color: rgba(255,255,255,0.35);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .tag-row.tag-all,
+    .tag-row.tag-none {
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .tag-actions {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .tag-reset {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tag-reset:hover { color: #fff; border-color: #fff; }
+
+    /* ── Home overlay ─────────────────────────────────────────────── */
+
     #overlay {
       position: fixed;
       inset: 0;
@@ -92,32 +257,97 @@
 </head>
 <body>
 
+<!-- Reusable SVG icon definitions -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4"  y1="9"  x2="20" y2="9"/>
+    <line x1="4"  y1="15" x2="20" y2="15"/>
+    <line x1="10" y1="3"  x2="8"  y2="21"/>
+    <line x1="16" y1="3"  x2="14" y2="21"/>
+  </symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="6"  y1="6"  x2="18" y2="18"/>
+    <line x1="18" y1="6"  x2="6"  y2="18"/>
+  </symbol>
+  <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="20" y1="12" x2="4" y2="12"/>
+    <polyline points="10 6 4 12 10 18"/>
+  </symbol>
+  <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="12" x2="20" y2="12"/>
+    <polyline points="14 6 20 12 14 18"/>
+  </symbol>
+  <symbol id="icon-speaker-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 010 7.07"/>
+    <path d="M19.07 4.93a10 10 0 010 14.14"/>
+  </symbol>
+  <symbol id="icon-speaker-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/>
+    <line x1="17" y1="9" x2="23" y2="15"/>
+  </symbol>
+</svg>
+
 <div id="stage">
   <video id="v0" playsinline preload="auto" muted></video>
   <video id="v1" playsinline preload="auto" muted></video>
 </div>
 
+<button class="btn" id="btn-tags" aria-label="Filter by tag">
+  <svg><use href="#icon-hash"/></svg>
+</button>
+
 <div id="controls">
-  <button class="btn" id="btn-prev"  aria-label="Previous">&#8592;</button>
-  <button class="btn" id="btn-mute"  aria-label="Mute">&#128266;</button>
-  <button class="btn" id="btn-next"  aria-label="Next">&#8594;</button>
+  <button class="btn" id="btn-prev" aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
+  <button class="btn" id="btn-mute" aria-label="Mute"><svg><use href="#icon-speaker-on"/></svg></button>
+  <button class="btn" id="btn-next" aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+</div>
+
+<div id="tag-panel" aria-hidden="true">
+  <div class="tag-panel-inner">
+    <div class="tag-panel-head">
+      <span class="tag-panel-title">tags</span>
+      <button class="tag-panel-close" id="tag-panel-close" aria-label="Close">
+        <svg><use href="#icon-x"/></svg>
+      </button>
+    </div>
+    <div class="tag-list" id="tag-list"></div>
+    <div class="tag-actions">
+      <button class="tag-reset" id="tag-reset">reset</button>
+    </div>
+  </div>
 </div>
 
 <div id="overlay" role="button" aria-label="Start"></div>
 
 <script>
 (function () {
-  const v        = [document.getElementById('v0'), document.getElementById('v1')];
-  const controls = document.getElementById('controls');
-  const overlay  = document.getElementById('overlay');
+  const v         = [document.getElementById('v0'), document.getElementById('v1')];
+  const controls  = document.getElementById('controls');
+  const overlay   = document.getElementById('overlay');
+  const stage     = document.getElementById('stage');
+  const tagBtn    = document.getElementById('btn-tags');
+  const tagPanel  = document.getElementById('tag-panel');
+  const tagListEl = document.getElementById('tag-list');
 
-  let playlist     = [];
-  let idx          = 0;
-  let active       = 0;
-  let started      = false;
-  let pendingStart = false;
-  let hideTimer    = null;
-  let prevPressAt  = 0;
+  let masterPlaylist = [];        // Full array of { url, tags }
+  let playlist       = [];        // Currently active (filtered + shuffled) list
+  let idx            = 0;
+  let active         = 0;
+  let started        = false;
+  let pendingStart   = false;
+  let hideTimer      = null;
+  let prevPressAt    = 0;
+
+  // Filter state
+  const selectedTags = new Set();  // tag strings currently selected
+  let selectNoTags   = false;      // "no tags" filter chosen
+  let selectAll      = true;       // "all videos" — mutually exclusive with the two above
+
+  // Swipe tracking
+  let touchStartX = 0, touchStartY = 0, touchStartT = 0;
+  let consumeNextClick = false;
 
   // ── Utilities ──────────────────────────────────────────────────────────────
 
@@ -134,19 +364,60 @@
     return ((i % playlist.length) + playlist.length) % playlist.length;
   }
 
-  // ── Playlist ───────────────────────────────────────────────────────────────
+  function urlOf(item) { return item && item.url; }
 
-  async function fetchPlaylist() {
-    const res = await fetch('/api/playlist');
-    if (!res.ok) throw new Error('playlist ' + res.status);
-    return res.json();
+  // ── Filtering ──────────────────────────────────────────────────────────────
+
+  function computeFiltered() {
+    if (selectAll) return masterPlaylist.slice();
+    return masterPlaylist.filter(function (item) {
+      const isEmpty = !item.tags || item.tags.length === 0;
+      if (selectNoTags && isEmpty) return true;
+      if (selectedTags.size === 0) return false;
+      for (const t of item.tags) {
+        if (selectedTags.has(t)) return true; // OR semantics
+      }
+      return false;
+    });
+  }
+
+  function applyFilter() {
+    const currentUrl = started ? urlOf(playlist[idx]) : null;
+    const filtered = computeFiltered();
+
+    if (!filtered.length) {
+      // No matches — keep whatever's playing, but future advance() will loop
+      playlist = [];
+      return;
+    }
+
+    playlist = shuffle(filtered);
+
+    // Try to keep current index roughly aligned with what's playing.
+    // If the current video is excluded by the new filter, we set idx to -1 so
+    // the next advance() plays playlist[0] (rather than skipping to [1]).
+    if (currentUrl) {
+      const found = playlist.findIndex(function (i) { return i.url === currentUrl; });
+      idx = found >= 0 ? found : -1;
+    } else {
+      idx = Math.floor(Math.random() * playlist.length);
+    }
+
+    // Refresh the background preload to match the new "next"
+    if (started) {
+      const bg = active ^ 1;
+      v[bg].removeAttribute('data-src');
+      v[bg].src = '';
+      setTimeout(function () { preloadBg(idx + 1); }, 50);
+    }
   }
 
   // ── Playback ───────────────────────────────────────────────────────────────
 
   function preloadBg(futureIdx) {
+    if (!playlist.length) return;
     const bg  = active ^ 1;
-    const url = playlist[wrap(futureIdx)];
+    const url = urlOf(playlist[wrap(futureIdx)]);
     if (v[bg].getAttribute('data-src') !== url) {
       v[bg].setAttribute('data-src', url);
       v[bg].src = url;
@@ -163,9 +434,7 @@
 
     v[outgoing].pause();
 
-    const url = playlist[idx];
-    // If the incoming element was already preloaded with this URL, reuse it —
-    // re-assigning .src (even to the same value) discards the buffered data.
+    const url = urlOf(playlist[idx]);
     if (v[incoming].getAttribute('data-src') !== url) {
       v[incoming].setAttribute('data-src', url);
       v[incoming].src = url;
@@ -176,10 +445,10 @@
     v[incoming].style.zIndex = 1;
     v[outgoing].style.zIndex = 0;
 
-    v[incoming].play().catch(() => {});
+    v[incoming].play().catch(function () {});
     active = incoming;
 
-    setTimeout(() => { if (active === incoming) preloadBg(idx + 1); }, 350);
+    setTimeout(function () { if (active === incoming) preloadBg(idx + 1); }, 350);
   }
 
   function advance() {
@@ -196,41 +465,41 @@
   // ── Start ──────────────────────────────────────────────────────────────────
 
   function beginPlayback() {
+    if (started || !playlist.length) return;
     started = true;
     overlay.classList.add('gone');
 
-    v[0].src = playlist[idx];
+    const url = urlOf(playlist[idx]);
+    v[0].src = url;
+    v[0].setAttribute('data-src', url);
     v[0].muted = false;
     v[0].style.zIndex = 1;
     v[1].style.zIndex = 0;
     active = 0;
 
-    v[0].play().catch(() => {
-      // Browser blocked autoplay with sound — fall back to muted.
+    v[0].play().catch(function () {
       v[0].muted = true;
       v[1].muted = true;
-      v[0].play().catch(() => {});
+      v[0].play().catch(function () {});
       updateMuteIcon();
     });
 
     v[0].addEventListener('ended', advance);
     v[1].addEventListener('ended', advance);
 
-    setTimeout(() => preloadBg(idx + 1), 350);
+    setTimeout(function () { preloadBg(idx + 1); }, 350);
   }
 
   function updateMuteIcon() {
     const btn = document.getElementById('btn-mute');
-    // 🔊 speaker with waves = sound on;  🔇 speaker with X = muted
-    btn.innerHTML = v[active].muted ? '&#128263;' : '&#128266;';
+    btn.innerHTML = v[active].muted
+      ? '<svg><use href="#icon-speaker-off"/></svg>'
+      : '<svg><use href="#icon-speaker-on"/></svg>';
   }
 
   function handleTapToBegin() {
     if (started) return;
-    if (!playlist.length) {
-      pendingStart = true;
-      return;
-    }
+    if (!playlist.length) { pendingStart = true; return; }
     beginPlayback();
   }
 
@@ -238,9 +507,97 @@
 
   function showControls() {
     controls.classList.add('show');
+    tagBtn.classList.add('show');
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => controls.classList.remove('show'), 3000);
+    hideTimer = setTimeout(function () {
+      controls.classList.remove('show');
+      tagBtn.classList.remove('show');
+    }, 3000);
   }
+
+  // ── Tag panel ──────────────────────────────────────────────────────────────
+
+  function aggregateTags() {
+    const counts = new Map();
+    let noTagCount = 0;
+    for (const item of masterPlaylist) {
+      if (!item.tags || item.tags.length === 0) { noTagCount++; continue; }
+      for (const t of item.tags) {
+        counts.set(t, (counts.get(t) || 0) + 1);
+      }
+    }
+    const list = Array.from(counts.entries())
+      .sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); });
+    return { list: list, noTagCount: noTagCount, total: masterPlaylist.length };
+  }
+
+  function renderTagList() {
+    const agg = aggregateTags();
+    tagListEl.innerHTML = '';
+
+    // All videos
+    const allRow = document.createElement('div');
+    allRow.className = 'tag-row tag-all' + (selectAll ? ' selected' : '');
+    allRow.innerHTML =
+      '<span class="tag-marker"></span>' +
+      '<span class="tag-name">all videos</span>' +
+      '<span class="tag-count">' + agg.total + '</span>';
+    allRow.addEventListener('click', function () {
+      selectedTags.clear();
+      selectNoTags = false;
+      selectAll = true;
+      applyFilter();
+      renderTagList();
+    });
+    tagListEl.appendChild(allRow);
+
+    // No tags
+    const noneRow = document.createElement('div');
+    noneRow.className = 'tag-row tag-none' + (selectNoTags ? ' selected' : '');
+    noneRow.innerHTML =
+      '<span class="tag-marker"></span>' +
+      '<span class="tag-name">no tags</span>' +
+      '<span class="tag-count">' + agg.noTagCount + '</span>';
+    noneRow.addEventListener('click', function () {
+      selectNoTags = !selectNoTags;
+      selectAll = false;
+      if (!selectNoTags && selectedTags.size === 0) { selectAll = true; }
+      applyFilter();
+      renderTagList();
+    });
+    tagListEl.appendChild(noneRow);
+
+    // Individual tags
+    for (const pair of agg.list) {
+      const t = pair[0];
+      const c = pair[1];
+      const row = document.createElement('div');
+      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
+      row.innerHTML =
+        '<span class="tag-marker"></span>' +
+        '<span class="tag-name">' + escHtml(t) + '</span>' +
+        '<span class="tag-count">' + c + '</span>';
+      row.addEventListener('click', function () {
+        if (selectedTags.has(t)) selectedTags.delete(t);
+        else selectedTags.add(t);
+        selectAll = false;
+        if (selectedTags.size === 0 && !selectNoTags) { selectAll = true; }
+        applyFilter();
+        renderTagList();
+      });
+      tagListEl.appendChild(row);
+    }
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function openTagPanel() {
+    renderTagList();
+    tagPanel.classList.add('open');
+  }
+  function closeTagPanel() { tagPanel.classList.remove('open'); }
 
   // ── Event wiring ───────────────────────────────────────────────────────────
 
@@ -252,7 +609,7 @@
       playAt(idx - 1);
     } else {
       v[active].currentTime = 0;
-      v[active].play().catch(() => {});
+      v[active].play().catch(function () {});
     }
     prevPressAt = now;
   });
@@ -271,16 +628,57 @@
     updateMuteIcon();
   });
 
-  // Tap anywhere on the video area to toggle pause/play.
-  // Buttons live outside #stage, so their clicks won't trigger this.
-  document.getElementById('stage').addEventListener('click', function () {
-    if (!started) return;
-    if (v[active].paused) {
-      v[active].play().catch(() => {});
-    } else {
-      v[active].pause();
-    }
+  tagBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    openTagPanel();
   });
+
+  document.getElementById('tag-panel-close').addEventListener('click', closeTagPanel);
+  document.getElementById('tag-reset').addEventListener('click', function () {
+    selectedTags.clear();
+    selectNoTags = false;
+    selectAll = true;
+    applyFilter();
+    renderTagList();
+  });
+
+  // Click on the dimmed backdrop area (not the inner panel) closes it
+  tagPanel.addEventListener('click', function (e) {
+    if (e.target === tagPanel) closeTagPanel();
+  });
+
+  // Tap on the video area to toggle pause/play — unless it was a swipe.
+  stage.addEventListener('click', function () {
+    if (!started) return;
+    if (consumeNextClick) { consumeNextClick = false; return; }
+    if (v[active].paused) v[active].play().catch(function () {});
+    else v[active].pause();
+  });
+
+  // Swipe navigation on the video area
+  stage.addEventListener('touchstart', function (e) {
+    const t = e.changedTouches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchStartT = Date.now();
+  }, { passive: true });
+
+  stage.addEventListener('touchend', function (e) {
+    if (!started) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    const dt = Date.now() - touchStartT;
+
+    // Predominantly horizontal, at least 50px, under 600ms
+    if (absDx > 50 && absDx > absDy * 1.4 && dt < 600) {
+      consumeNextClick = true;
+      if (dx < 0) advance();
+      else document.getElementById('btn-prev').click();
+    }
+  }, { passive: true });
 
   overlay.addEventListener('touchend', function (e) {
     e.preventDefault();
@@ -292,6 +690,10 @@
   document.addEventListener('mousemove', showControls);
   document.addEventListener('touchstart', showControls, { passive: true });
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && tagPanel.classList.contains('open')) {
+      closeTagPanel();
+      return;
+    }
     showControls();
     if (!started) return;
     if (e.key === 'ArrowLeft')  document.getElementById('btn-prev').click();
@@ -300,16 +702,22 @@
 
   // ── Init ───────────────────────────────────────────────────────────────────
 
-  fetchPlaylist()
+  fetch('/api/playlist')
+    .then(function (r) {
+      if (!r.ok) throw new Error('playlist ' + r.status);
+      return r.json();
+    })
     .then(function (data) {
-      if (!data.length) throw new Error('empty playlist');
-      playlist = shuffle(data);
+      if (!Array.isArray(data) || !data.length) throw new Error('empty playlist');
+      // Normalize in case any items are strings (shouldn't be after backend update)
+      masterPlaylist = data.map(function (d) {
+        return typeof d === 'string' ? { url: d, tags: [] } : { url: d.url, tags: d.tags || [] };
+      });
+      playlist = shuffle(masterPlaylist.slice());
       idx = Math.floor(Math.random() * playlist.length);
       if (pendingStart) beginPlayback();
     })
-    .catch(function (err) {
-      console.error('Playlist error:', err);
-    });
+    .catch(function (err) { console.error('Playlist error:', err); });
 
 }());
 </script>

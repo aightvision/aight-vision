@@ -27,6 +27,7 @@ export async function onRequestPost({ request, env }) {
   // Stream the request body straight to R2 — no memory buffering
   await env.VIDEOS.put(key, request.body, {
     httpMetadata: { contentType },
+    customMetadata: { tags: '' },
   });
 
   return Response.json({ success: true, key }, { status: 201 });
