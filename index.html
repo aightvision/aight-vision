@@ -98,8 +98,9 @@
 </div>
 
 <div id="controls">
-  <button class="btn" id="btn-prev" aria-label="Previous">&#8592;</button>
-  <button class="btn" id="btn-next" aria-label="Next">&#8594;</button>
+  <button class="btn" id="btn-prev"  aria-label="Previous">&#8592;</button>
+  <button class="btn" id="btn-mute"  aria-label="Mute">&#128266;</button>
+  <button class="btn" id="btn-next"  aria-label="Next">&#8594;</button>
 </div>
 
 <div id="overlay" role="button" aria-label="Start"></div>
@@ -205,14 +206,23 @@
     active = 0;
 
     v[0].play().catch(() => {
+      // Browser blocked autoplay with sound — fall back to muted.
       v[0].muted = true;
+      v[1].muted = true;
       v[0].play().catch(() => {});
+      updateMuteIcon();
     });
 
     v[0].addEventListener('ended', advance);
     v[1].addEventListener('ended', advance);
 
     setTimeout(() => preloadBg(idx + 1), 350);
+  }
+
+  function updateMuteIcon() {
+    const btn = document.getElementById('btn-mute');
+    // 🔊 speaker with waves = sound on;  🔇 speaker with X = muted
+    btn.innerHTML = v[active].muted ? '&#128263;' : '&#128266;';
   }
 
   function handleTapToBegin() {
@@ -251,6 +261,25 @@
     e.stopPropagation();
     if (!started) return;
     advance();
+  });
+
+  document.getElementById('btn-mute').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const willMute = !v[active].muted;
+    v[0].muted = willMute;
+    v[1].muted = willMute;
+    updateMuteIcon();
+  });
+
+  // Tap anywhere on the video area to toggle pause/play.
+  // Buttons live outside #stage, so their clicks won't trigger this.
+  document.getElementById('stage').addEventListener('click', function () {
+    if (!started) return;
+    if (v[active].paused) {
+      v[active].play().catch(() => {});
+    } else {
+      v[active].pause();
+    }
   });
 
   overlay.addEventListener('touchend', function (e) {
