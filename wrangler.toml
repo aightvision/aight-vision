@@ -1,7 +1,0 @@
-name = "aight-vision"
-pages_build_output_dir = "."
-
-# R2 binding for local dev: wrangler pages dev . --r2=VIDEOS
-[[r2_buckets]]
-binding = "VIDEOS"
-bucket_name = "aight-vision-videos"
