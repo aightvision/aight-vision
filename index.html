@@ -77,35 +77,17 @@
       position: fixed;
       inset: 0;
       z-index: 20;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
+      cursor: pointer;
+      background-image: url('homeimage.jpg');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% 100%;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
       -webkit-tap-highlight-color: transparent;
     }
 
     #overlay.gone { display: none; }
-
-    #site-name {
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-      font-size: clamp(20px, 4.5vw, 44px);
-      font-weight: 200;
-      letter-spacing: 0.35em;
-      color: rgba(255,255,255,0.88);
-      text-transform: uppercase;
-    }
-
-    #tap-hint {
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.22em;
-      color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-      transition: color 0.3s;
-    }
-
-    #tap-hint.loading { color: rgba(255,255,255,0.18); }
   </style>
 </head>
 <body>
@@ -120,17 +102,13 @@
   <button class="btn" id="btn-next" aria-label="Next">&#8594;</button>
 </div>
 
-<div id="overlay">
-  <div id="site-name">AIGHT.VISION</div>
-  <div id="tap-hint">tap to begin</div>
-</div>
+<div id="overlay" role="button" aria-label="Start"></div>
 
 <script>
 (function () {
-  const v       = [document.getElementById('v0'), document.getElementById('v1')];
+  const v        = [document.getElementById('v0'), document.getElementById('v1')];
   const controls = document.getElementById('controls');
   const overlay  = document.getElementById('overlay');
-  const tapHint  = document.getElementById('tap-hint');
 
   let playlist     = [];
   let idx          = 0;
@@ -241,8 +219,6 @@
     if (started) return;
     if (!playlist.length) {
       pendingStart = true;
-      tapHint.textContent = 'loading…';
-      tapHint.classList.add('loading');
       return;
     }
     beginPlayback();
@@ -304,7 +280,6 @@
     })
     .catch(function (err) {
       console.error('Playlist error:', err);
-      tapHint.textContent = 'unavailable';
     });
 
 }());
