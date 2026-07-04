@@ -19,3 +19,14 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Local video files never belong in the repo — they go to R2 via the upload page
+aightvision videos/
+*.mp4
+*.mov
+*.MP4
+*.MOV
+*.webm
+*.mkv
+*.avi
+*.m4v

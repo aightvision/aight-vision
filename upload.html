@@ -212,6 +212,122 @@
       color: rgba(255,255,255,0.25);
       letter-spacing: 0.1em;
     }
+
+    /* ── Library ── */
+
+    #library {
+      display: none;
+      width: 100%;
+      max-width: 1080px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #1a1a1a;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #library.visible { display: flex; }
+
+    .lib-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .lib-title {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+
+    .lib-count {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+    }
+
+    .lib-header .pick-btn {
+      margin-left: auto;
+      padding: 6px 14px;
+      font-size: 10px;
+    }
+
+    #library-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .lib-item {
+      position: relative;
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lib-thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+
+    .lib-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #0a0a0a;
+      display: block;
+    }
+
+    .lib-name {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      padding: 6px 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lib-delete {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.75);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      z-index: 2;
+    }
+
+    .lib-delete:hover, .lib-delete:active {
+      background: rgba(220,60,60,0.85);
+      color: #fff;
+    }
+
+    .lib-empty {
+      color: rgba(255,255,255,0.2);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 20px 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -236,6 +352,15 @@
 
   <div id="queue"></div>
   <div id="summary"></div>
+
+  <div id="library">
+    <div class="lib-header">
+      <span class="lib-title">library</span>
+      <span class="lib-count" id="lib-count"></span>
+      <button class="pick-btn" id="lib-refresh">refresh</button>
+    </div>
+    <div id="library-grid"></div>
+  </div>
 </div>
 
 <script>
@@ -254,6 +379,9 @@
   const dropZone  = document.getElementById('drop-zone');
   const queueEl   = document.getElementById('queue');
   const summaryEl = document.getElementById('summary');
+  const libraryEl = document.getElementById('library');
+  const libraryGrid = document.getElementById('library-grid');
+  const libCount  = document.getElementById('lib-count');
 
   // ── Auth ────────────────────────────────────────────────────────────────────
 
@@ -262,6 +390,8 @@
     sessionStorage.setItem('uploadSecret', key);
     authEl.classList.add('hidden');
     uploadArea.classList.add('visible');
+    libraryEl.classList.add('visible');
+    loadLibrary();
   }
 
   if (secret) {
@@ -383,6 +513,10 @@
       running++;
       uploadItem(item);
     }
+    // Everything finished — refresh the library to show new uploads
+    if (running === 0 && queue.some(function (i) { return i.status === 'done'; })) {
+      loadLibrary();
+    }
   }
 
   function uploadItem(item) {
@@ -480,6 +614,99 @@
   function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ── Library ────────────────────────────────────────────────────────────────
+
+  // Only load thumbnail metadata when tile scrolls near the viewport.
+  // With hundreds of videos this is essential — otherwise the browser tries
+  // to fetch metadata for every one at once.
+  const thumbObserver = new IntersectionObserver(function (entries) {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const vid = entry.target;
+      if (vid.dataset.loaded) continue;
+      vid.preload = 'metadata';
+      vid.src = vid.dataset.url + '#t=0.1';
+      vid.dataset.loaded = '1';
+      thumbObserver.unobserve(vid);
+    }
+  }, { rootMargin: '300px' });
+
+  async function loadLibrary() {
+    try {
+      const res = await fetch('/api/videos', {
+        headers: { 'x-upload-secret': secret },
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem('uploadSecret');
+        libraryGrid.innerHTML = '<div class="lib-empty">invalid key</div>';
+        return;
+      }
+      if (!res.ok) throw new Error('list ' + res.status);
+      const data = await res.json();
+      renderLibrary(data.items || []);
+    } catch (err) {
+      console.error('Library load failed:', err);
+      libraryGrid.innerHTML = '<div class="lib-empty">could not load library</div>';
+    }
+  }
+
+  function renderLibrary(items) {
+    libCount.textContent = items.length ? '(' + items.length + ')' : '';
+    libraryGrid.innerHTML = '';
+
+    if (!items.length) {
+      libraryGrid.innerHTML = '<div class="lib-empty">no videos yet</div>';
+      return;
+    }
+
+    for (const item of items) {
+      const tile = document.createElement('div');
+      tile.className = 'lib-item';
+      tile.dataset.key = item.key;
+
+      // Strip timestamp prefix (e.g. 1720000000_) from the display name
+      const displayName = item.key.replace(/^\d+_/, '');
+
+      tile.innerHTML =
+        '<div class="lib-thumb-wrap">' +
+          '<video class="lib-thumb" muted playsinline preload="none"></video>' +
+          '<button class="lib-delete" aria-label="Delete">&times;</button>' +
+        '</div>' +
+        '<div class="lib-name" title="' + escHtml(displayName) + '">' + escHtml(displayName) + '</div>';
+
+      const thumb = tile.querySelector('.lib-thumb');
+      thumb.dataset.url = item.url;
+      thumbObserver.observe(thumb);
+
+      tile.querySelector('.lib-delete').addEventListener('click', function (e) {
+        e.stopPropagation();
+        deleteItem(item.key, tile);
+      });
+
+      libraryGrid.appendChild(tile);
+    }
+  }
+
+  async function deleteItem(key, tileEl) {
+    if (!confirm('Delete this video? This cannot be undone.')) return;
+    try {
+      const res = await fetch('/api/videos?key=' + encodeURIComponent(key), {
+        method: 'DELETE',
+        headers: { 'x-upload-secret': secret },
+      });
+      if (!res.ok) throw new Error('delete ' + res.status);
+      tileEl.remove();
+      const remaining = libraryGrid.querySelectorAll('.lib-item').length;
+      libCount.textContent = remaining ? '(' + remaining + ')' : '';
+      if (!remaining) libraryGrid.innerHTML = '<div class="lib-empty">no videos yet</div>';
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert('Failed to delete. Try again.');
+    }
+  }
+
+  document.getElementById('lib-refresh').addEventListener('click', loadLibrary);
 
 }());
 </script>
