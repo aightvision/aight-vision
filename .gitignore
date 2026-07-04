@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code local state
+.claude/
+
+# Wrangler local dev
+.wrangler/
+.dev.vars
+
+# Node (in case wrangler gets installed later)
+node_modules/
+
+# Env files (secrets never in repo)
+.env
+.env.*
+!.env.example

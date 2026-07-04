@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AIGHT.VISION</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    #v0 { z-index: 1; }
+    #v1 { z-index: 0; }
+
+    #controls {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      padding: 32px 24px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    #controls.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .btn {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: #fff;
+      font-size: 19px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .btn:active {
+      background: rgba(255,255,255,0.18);
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #overlay.gone { display: none; }
+
+    #site-name {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: clamp(20px, 4.5vw, 44px);
+      font-weight: 200;
+      letter-spacing: 0.35em;
+      color: rgba(255,255,255,0.88);
+      text-transform: uppercase;
+    }
+
+    #tap-hint {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+
+    #tap-hint.loading { color: rgba(255,255,255,0.18); }
+  </style>
+</head>
+<body>
+
+<div id="stage">
+  <video id="v0" playsinline preload="auto" muted></video>
+  <video id="v1" playsinline preload="auto" muted></video>
+</div>
+
+<div id="controls">
+  <button class="btn" id="btn-prev" aria-label="Previous">&#8592;</button>
+  <button class="btn" id="btn-next" aria-label="Next">&#8594;</button>
+</div>
+
+<div id="overlay">
+  <div id="site-name">AIGHT.VISION</div>
+  <div id="tap-hint">tap to begin</div>
+</div>
+
+<script>
+(function () {
+  const v       = [document.getElementById('v0'), document.getElementById('v1')];
+  const controls = document.getElementById('controls');
+  const overlay  = document.getElementById('overlay');
+  const tapHint  = document.getElementById('tap-hint');
+
+  let playlist     = [];
+  let idx          = 0;
+  let active       = 0;
+  let started      = false;
+  let pendingStart = false;
+  let hideTimer    = null;
+  let prevPressAt  = 0;
+
+  // ── Utilities ──────────────────────────────────────────────────────────────
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function wrap(i) {
+    return ((i % playlist.length) + playlist.length) % playlist.length;
+  }
+
+  // ── Playlist ───────────────────────────────────────────────────────────────
+
+  async function fetchPlaylist() {
+    const res = await fetch('/api/playlist');
+    if (!res.ok) throw new Error('playlist ' + res.status);
+    return res.json();
+  }
+
+  // ── Playback ───────────────────────────────────────────────────────────────
+
+  function preloadBg(futureIdx) {
+    const bg  = active ^ 1;
+    const url = playlist[wrap(futureIdx)];
+    if (v[bg].getAttribute('data-src') !== url) {
+      v[bg].setAttribute('data-src', url);
+      v[bg].src = url;
+      v[bg].load();
+    }
+  }
+
+  function playAt(newIdx) {
+    if (!playlist.length) return;
+    idx = wrap(newIdx);
+
+    const incoming = active ^ 1;
+    const outgoing = active;
+
+    v[outgoing].pause();
+
+    const url = playlist[idx];
+    // If the incoming element was already preloaded with this URL, reuse it —
+    // re-assigning .src (even to the same value) discards the buffered data.
+    if (v[incoming].getAttribute('data-src') !== url) {
+      v[incoming].setAttribute('data-src', url);
+      v[incoming].src = url;
+    } else {
+      try { v[incoming].currentTime = 0; } catch (e) {}
+    }
+    v[incoming].muted = v[outgoing].muted;
+    v[incoming].style.zIndex = 1;
+    v[outgoing].style.zIndex = 0;
+
+    v[incoming].play().catch(() => {});
+    active = incoming;
+
+    setTimeout(() => { if (active === incoming) preloadBg(idx + 1); }, 350);
+  }
+
+  function advance() {
+    if (!started || !playlist.length) return;
+    const next = idx + 1;
+    if (next >= playlist.length) {
+      playlist = shuffle(playlist);
+      playAt(0);
+    } else {
+      playAt(next);
+    }
+  }
+
+  // ── Start ──────────────────────────────────────────────────────────────────
+
+  function beginPlayback() {
+    started = true;
+    overlay.classList.add('gone');
+
+    v[0].src = playlist[idx];
+    v[0].muted = false;
+    v[0].style.zIndex = 1;
+    v[1].style.zIndex = 0;
+    active = 0;
+
+    v[0].play().catch(() => {
+      v[0].muted = true;
+      v[0].play().catch(() => {});
+    });
+
+    v[0].addEventListener('ended', advance);
+    v[1].addEventListener('ended', advance);
+
+    setTimeout(() => preloadBg(idx + 1), 350);
+  }
+
+  function handleTapToBegin() {
+    if (started) return;
+    if (!playlist.length) {
+      pendingStart = true;
+      tapHint.textContent = 'loading…';
+      tapHint.classList.add('loading');
+      return;
+    }
+    beginPlayback();
+  }
+
+  // ── Controls visibility ────────────────────────────────────────────────────
+
+  function showControls() {
+    controls.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => controls.classList.remove('show'), 3000);
+  }
+
+  // ── Event wiring ───────────────────────────────────────────────────────────
+
+  document.getElementById('btn-prev').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!started) return;
+    const now = Date.now();
+    if (now - prevPressAt < 1500) {
+      playAt(idx - 1);
+    } else {
+      v[active].currentTime = 0;
+      v[active].play().catch(() => {});
+    }
+    prevPressAt = now;
+  });
+
+  document.getElementById('btn-next').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!started) return;
+    advance();
+  });
+
+  overlay.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    handleTapToBegin();
+  }, { passive: false });
+
+  overlay.addEventListener('click', handleTapToBegin);
+
+  document.addEventListener('mousemove', showControls);
+  document.addEventListener('touchstart', showControls, { passive: true });
+  document.addEventListener('keydown', function (e) {
+    showControls();
+    if (!started) return;
+    if (e.key === 'ArrowLeft')  document.getElementById('btn-prev').click();
+    if (e.key === 'ArrowRight') document.getElementById('btn-next').click();
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+
+  fetchPlaylist()
+    .then(function (data) {
+      if (!data.length) throw new Error('empty playlist');
+      playlist = shuffle(data);
+      idx = Math.floor(Math.random() * playlist.length);
+      if (pendingStart) beginPlayback();
+    })
+    .catch(function (err) {
+      console.error('Playlist error:', err);
+      tapHint.textContent = 'unavailable';
+    });
+
+}());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload — AIGHT.VISION</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background: #0a0a0a;
+      color: #ddd;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      gap: 28px;
+    }
+
+    h1 {
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+
+    /* ── Auth ── */
+
+    #auth {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    #auth.hidden { display: none; }
+
+    #secret-input {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #secret-input:focus { border-color: rgba(255,255,255,0.4); }
+    #secret-input.error { border-color: #c0392b; }
+
+    #auth-btn {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #aaa;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+
+    #auth-btn:hover { border-color: #555; color: #fff; }
+
+    /* ── Upload area ── */
+
+    #upload-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      gap: 20px;
+    }
+
+    #upload-area.visible { display: flex; }
+
+    #drop-zone {
+      width: 100%;
+      border: 1.5px dashed #2a2a2a;
+      border-radius: 10px;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: default;
+    }
+
+    #drop-zone.drag-over {
+      border-color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.03);
+    }
+
+    #drop-zone p {
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.1em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    /* hide drop zone hint on mobile where DnD doesn't work */
+    @media (hover: none) { #drop-hint { display: none; } }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    label.pick-btn, button.pick-btn {
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      color: #bbb;
+      padding: 9px 20px;
+      border-radius: 6px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    label.pick-btn:hover, button.pick-btn:hover { border-color: #555; color: #fff; }
+
+    input[type=file] { display: none; }
+
+    /* ── Queue ── */
+
+    #queue {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .q-item {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 7px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .q-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .q-name {
+      font-size: 12px;
+      color: #aaa;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .q-status {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .q-status.pending  { color: #555; }
+    .q-status.uploading { color: #888; }
+    .q-status.done     { color: #4caf50; }
+    .q-status.error    { color: #e57373; }
+
+    .q-bar-wrap {
+      height: 2px;
+      background: #222;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .q-bar {
+      height: 100%;
+      background: rgba(255,255,255,0.5);
+      border-radius: 2px;
+      transition: width 0.2s;
+      width: 0%;
+    }
+
+    .q-bar.done  { background: #4caf50; width: 100%; }
+    .q-bar.error { background: #e57373; width: 100%; }
+
+    /* ── Summary ── */
+
+    #summary {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>AIGHT.VISION &mdash; upload</h1>
+
+<div id="auth">
+  <input type="password" id="secret-input" placeholder="access key" autocomplete="off">
+  <button id="auth-btn">enter</button>
+</div>
+
+<div id="upload-area">
+  <div id="drop-zone">
+    <p id="drop-hint">drop videos here</p>
+    <div class="btn-row">
+      <label class="pick-btn" for="file-input">select files</label>
+      <input type="file" id="file-input" accept="video/*" multiple>
+      <label class="pick-btn" id="folder-label" for="folder-input">select folder</label>
+      <input type="file" id="folder-input" accept="video/*" webkitdirectory>
+    </div>
+  </div>
+
+  <div id="queue"></div>
+  <div id="summary"></div>
+</div>
+
+<script>
+(function () {
+  const VIDEO_EXT = /\.(mp4|mov|avi|webm|mkv|m4v|3gp|flv|wmv|hevc|ts|mts|m2ts)$/i;
+  const MAX_CONCURRENT = 2;
+
+  let secret = sessionStorage.getItem('uploadSecret') || '';
+  let queue   = [];
+  let running = 0;
+
+  const authEl    = document.getElementById('auth');
+  const secretIn  = document.getElementById('secret-input');
+  const authBtn   = document.getElementById('auth-btn');
+  const uploadArea = document.getElementById('upload-area');
+  const dropZone  = document.getElementById('drop-zone');
+  const queueEl   = document.getElementById('queue');
+  const summaryEl = document.getElementById('summary');
+
+  // ── Auth ────────────────────────────────────────────────────────────────────
+
+  function unlock(key) {
+    secret = key;
+    sessionStorage.setItem('uploadSecret', key);
+    authEl.classList.add('hidden');
+    uploadArea.classList.add('visible');
+  }
+
+  if (secret) {
+    unlock(secret);
+  } else {
+    authBtn.addEventListener('click', function () {
+      const val = secretIn.value.trim();
+      if (!val) { secretIn.classList.add('error'); return; }
+      secretIn.classList.remove('error');
+      unlock(val);
+    });
+
+    secretIn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') authBtn.click();
+      secretIn.classList.remove('error');
+    });
+  }
+
+  // ── File collection ─────────────────────────────────────────────────────────
+
+  function isVideo(name) {
+    return VIDEO_EXT.test(name);
+  }
+
+  function collectFromEntry(entry) {
+    return new Promise(function (resolve) {
+      if (entry.isFile) {
+        entry.file(function (f) { resolve(isVideo(f.name) ? [f] : []); });
+      } else if (entry.isDirectory) {
+        const reader = entry.createReader();
+        const collected = [];
+        (function readAll() {
+          reader.readEntries(function (entries) {
+            if (!entries.length) {
+              Promise.all(collected).then(function (groups) {
+                resolve(groups.flat());
+              });
+              return;
+            }
+            for (const e of entries) collected.push(collectFromEntry(e));
+            readAll();
+          });
+        }());
+      } else {
+        resolve([]);
+      }
+    });
+  }
+
+  function addFiles(files) {
+    const filtered = files.filter(function (f) { return isVideo(f.name); });
+    if (!filtered.length) return;
+    for (const f of filtered) {
+      const item = { id: Math.random().toString(36).slice(2), file: f, status: 'pending', pct: 0 };
+      queue.push(item);
+      renderItem(item);
+    }
+    processQueue();
+    updateSummary();
+  }
+
+  // ── Drag & drop ─────────────────────────────────────────────────────────────
+
+  dropZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', function () {
+    dropZone.classList.remove('drag-over');
+  });
+
+  dropZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+
+    const items = e.dataTransfer.items;
+    if (items && items.length) {
+      const promises = [];
+      for (let i = 0; i < items.length; i++) {
+        const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+        if (entry) {
+          promises.push(collectFromEntry(entry));
+        } else {
+          const f = items[i].getAsFile();
+          if (f) promises.push(Promise.resolve(isVideo(f.name) ? [f] : []));
+        }
+      }
+      Promise.all(promises).then(function (groups) { addFiles(groups.flat()); });
+    } else if (e.dataTransfer.files.length) {
+      addFiles(Array.from(e.dataTransfer.files));
+    }
+  });
+
+  // ── File inputs ─────────────────────────────────────────────────────────────
+
+  document.getElementById('file-input').addEventListener('change', function () {
+    addFiles(Array.from(this.files));
+    this.value = '';
+  });
+
+  document.getElementById('folder-input').addEventListener('change', function () {
+    addFiles(Array.from(this.files));
+    this.value = '';
+  });
+
+  // Hide folder button on mobile (webkitdirectory not supported)
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    document.getElementById('folder-label').style.display = 'none';
+  }
+
+  // ── Upload queue ────────────────────────────────────────────────────────────
+
+  function processQueue() {
+    while (running < MAX_CONCURRENT) {
+      const item = queue.find(function (i) { return i.status === 'pending'; });
+      if (!item) break;
+      item.status = 'uploading';
+      running++;
+      uploadItem(item);
+    }
+  }
+
+  function uploadItem(item) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.setRequestHeader('x-upload-secret', secret);
+    xhr.setRequestHeader('x-file-name', encodeURIComponent(item.file.name));
+    xhr.setRequestHeader('x-file-type', item.file.type || 'application/octet-stream');
+
+    xhr.upload.addEventListener('progress', function (e) {
+      if (e.lengthComputable) {
+        item.pct = e.loaded / e.total;
+        updateItem(item);
+      }
+    });
+
+    xhr.addEventListener('load', function () {
+      running--;
+      if (xhr.status === 200 || xhr.status === 201) {
+        item.status = 'done';
+      } else if (xhr.status === 401) {
+        item.status = 'error';
+        item.error = 'invalid key';
+        // clear bad secret so user is re-prompted next time
+        sessionStorage.removeItem('uploadSecret');
+      } else {
+        item.status = 'error';
+        item.error = 'failed (' + xhr.status + ')';
+      }
+      updateItem(item);
+      updateSummary();
+      processQueue();
+    });
+
+    xhr.addEventListener('error', function () {
+      running--;
+      item.status = 'error';
+      item.error = 'network error';
+      updateItem(item);
+      updateSummary();
+      processQueue();
+    });
+
+    // Send the raw file body — no FormData buffering
+    xhr.send(item.file);
+    updateItem(item);
+  }
+
+  // ── Queue UI ─────────────────────────────────────────────────────────────────
+
+  function renderItem(item) {
+    const el = document.createElement('div');
+    el.className = 'q-item';
+    el.id = 'qi-' + item.id;
+    el.innerHTML =
+      '<div class="q-item-top">' +
+        '<span class="q-name">' + escHtml(item.file.name) + '</span>' +
+        '<span class="q-status pending">pending</span>' +
+      '</div>' +
+      '<div class="q-bar-wrap"><div class="q-bar"></div></div>';
+    queueEl.prepend(el);
+  }
+
+  function updateItem(item) {
+    const el = document.getElementById('qi-' + item.id);
+    if (!el) return;
+    const statusEl = el.querySelector('.q-status');
+    const bar      = el.querySelector('.q-bar');
+
+    statusEl.className = 'q-status ' + item.status;
+
+    if (item.status === 'pending') {
+      statusEl.textContent = 'pending';
+      bar.style.width = '0%';
+    } else if (item.status === 'uploading') {
+      statusEl.textContent = Math.round(item.pct * 100) + '%';
+      bar.style.width = Math.round(item.pct * 100) + '%';
+    } else if (item.status === 'done') {
+      statusEl.textContent = 'done';
+      bar.className = 'q-bar done';
+    } else if (item.status === 'error') {
+      statusEl.textContent = item.error || 'error';
+      bar.className = 'q-bar error';
+    }
+  }
+
+  function updateSummary() {
+    if (!queue.length) { summaryEl.textContent = ''; return; }
+    const done   = queue.filter(function (i) { return i.status === 'done'; }).length;
+    const errors = queue.filter(function (i) { return i.status === 'error'; }).length;
+    const total  = queue.length;
+    summaryEl.textContent = done + ' / ' + total + ' uploaded' + (errors ? ' · ' + errors + ' failed' : '');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+}());
+</script>
+
+</body>
+</html>
