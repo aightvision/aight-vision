@@ -33,14 +33,8 @@
 
     /* ── Auth ────────────────────────────────────────────────────── */
 
-    #auth {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      max-width: 360px;
-    }
+    #auth { display: flex; gap: 10px; width: 100%; max-width: 360px; }
     #auth.hidden { display: none; }
-
     #secret-input {
       flex: 1;
       background: #1a1a1a;
@@ -55,20 +49,35 @@
     }
     #secret-input:focus { border-color: rgba(255,255,255,0.4); }
     #secret-input.error { border-color: #c0392b; }
-
     #auth-btn {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #aaa;
-      padding: 10px 18px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      transition: border-color 0.2s, color 0.2s;
-      white-space: nowrap;
+      background: #1a1a1a; border: 1px solid #333; color: #aaa;
+      padding: 10px 18px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; letter-spacing: 0.1em;
+      transition: border-color 0.2s, color 0.2s; white-space: nowrap;
     }
     #auth-btn:hover { border-color: #555; color: #fff; }
+
+    /* ── ffmpeg status pill (bottom-right after auth) ───────────── */
+
+    #ffmpeg-status {
+      position: fixed;
+      bottom: 12px; right: 12px;
+      z-index: 5;
+      background: rgba(20,20,20,0.85);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.4);
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #ffmpeg-status.show { opacity: 1; }
+    #ffmpeg-status.ready { color: rgba(100,200,120,0.7); }
+    #ffmpeg-status.error { color: rgba(230,120,120,0.9); }
 
     /* ── Upload area ─────────────────────────────────────────────── */
 
@@ -94,42 +103,19 @@
       gap: 20px;
       transition: border-color 0.2s, background 0.2s;
     }
-    #drop-zone.drag-over {
-      border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.03);
-    }
-    #drop-zone p {
-      color: rgba(255,255,255,0.2);
-      letter-spacing: 0.1em;
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-    @media (hover: none) { #drop-hint { display: none; } }
+    #drop-zone.drag-over { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.03); }
+    #drop-zone p { color: rgba(255,255,255,0.2); letter-spacing: 0.1em; font-size: 12px; text-transform: uppercase; }
 
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 
     label.pick-btn, button.pick-btn {
-      background: #1e1e1e;
-      border: 1px solid #2e2e2e;
-      color: #bbb;
-      padding: 9px 20px;
-      border-radius: 6px;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
+      background: #1e1e1e; border: 1px solid #2e2e2e; color: #bbb;
+      padding: 9px 20px; border-radius: 6px;
+      font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     }
     label.pick-btn:hover, button.pick-btn:hover { border-color: #555; color: #fff; }
     input[type=file] { display: none; }
@@ -142,14 +128,25 @@
     .q-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .q-name { font-size: 12px; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
     .q-status { font-size: 11px; letter-spacing: 0.08em; white-space: nowrap; flex-shrink: 0; }
-    .q-status.pending  { color: #555; }
+    .q-status.pending { color: #555; }
     .q-status.uploading { color: #888; }
-    .q-status.done     { color: #4caf50; }
-    .q-status.error    { color: #e57373; }
+    .q-status.done { color: #4caf50; }
+    .q-status.error { color: #e57373; }
+    .q-status.processing { color: #a3a3ff; }
     .q-bar-wrap { height: 2px; background: #222; border-radius: 2px; overflow: hidden; }
     .q-bar { height: 100%; background: rgba(255,255,255,0.5); border-radius: 2px; transition: width 0.2s; width: 0%; }
     .q-bar.done  { background: #4caf50; width: 100%; }
     .q-bar.error { background: #e57373; width: 100%; }
+
+    .q-trim-btn {
+      background: transparent; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.55); padding: 3px 8px; border-radius: 4px;
+      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .q-trim-btn:hover { color: #fff; border-color: #fff; }
+    .q-trim-info { font-size: 10px; color: rgba(163,163,255,0.7); letter-spacing: 0.05em; }
 
     #summary { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; }
 
@@ -181,23 +178,19 @@
     .lib-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #0a0a0a; overflow: hidden; }
     .lib-thumb { width: 100%; height: 100%; object-fit: cover; background: #0a0a0a; display: block; }
     .lib-name { font-size: 10px; color: rgba(255,255,255,0.5); padding: 6px 8px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lib-meta { padding: 0 8px 4px; display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 9px; color: rgba(255,255,255,0.3); }
     .lib-tags { padding: 0 8px 6px; display: flex; flex-wrap: wrap; gap: 3px; }
     .lib-tag-chip { font-size: 9px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.03em; }
 
     .lib-delete {
-      position: absolute;
-      top: 6px; right: 6px;
-      width: 26px; height: 26px;
-      border-radius: 50%;
+      position: absolute; top: 6px; right: 6px;
+      width: 26px; height: 26px; border-radius: 50%;
       background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(255,255,255,0.15);
       color: rgba(255,255,255,0.75);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       transition: background 0.15s, color 0.15s;
       -webkit-tap-highlight-color: transparent;
       z-index: 2;
@@ -210,26 +203,20 @@
     /* ── Tag filter panel (for grid) ─────────────────────────────── */
 
     #tag-panel {
-      position: fixed;
-      inset: 0;
-      z-index: 40;
+      position: fixed; inset: 0; z-index: 40;
       background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      opacity: 0;
-      pointer-events: none;
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none;
       transition: opacity 0.25s ease;
     }
     #tag-panel.open { opacity: 1; pointer-events: auto; }
 
     .tag-panel-inner {
-      position: absolute;
-      top: 0; left: 0; bottom: 0;
+      position: absolute; top: 0; left: 0; bottom: 0;
       width: min(340px, 82vw);
       background: rgba(12,12,12,0.95);
       border-right: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       transform: translateX(-100%);
       transition: transform 0.28s ease;
       padding: 20px 22px 24px;
@@ -242,6 +229,7 @@
     .tag-panel-close svg { width: 18px; height: 18px; }
 
     .tag-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .tag-section-title { font-size: 10px; letter-spacing: 0.22em; color: rgba(255,255,255,0.25); text-transform: uppercase; padding: 14px 4px 6px; }
     .tag-row { display: flex; align-items: center; padding: 10px 4px; color: rgba(255,255,255,0.75); font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; border-bottom: 1px solid rgba(255,255,255,0.04); transition: color 0.15s; }
     .tag-row:hover { color: #fff; }
     .tag-row.selected { color: #fff; }
@@ -249,7 +237,7 @@
     .tag-row.selected .tag-marker { background: #fff; border-color: #fff; }
     .tag-row .tag-name { flex: 1; }
     .tag-row .tag-count { color: rgba(255,255,255,0.35); font-size: 12px; margin-left: 8px; }
-    .tag-row.tag-all, .tag-row.tag-none { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
+    .tag-row.tag-all, .tag-row.tag-none, .tag-row.tag-length { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
 
     .tag-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
     .tag-reset { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 8px 14px; border-radius: 6px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color 0.15s, border-color 0.15s; }
@@ -258,18 +246,12 @@
     /* ── Modal (video detail) ────────────────────────────────────── */
 
     #modal {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
+      position: fixed; inset: 0; z-index: 50;
       background: rgba(0,0,0,0.88);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      opacity: 0;
-      pointer-events: none;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      opacity: 0; pointer-events: none;
       transition: opacity 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       padding: 20px;
     }
     #modal.open { opacity: 1; pointer-events: auto; }
@@ -282,172 +264,266 @@
       max-width: 720px;
       max-height: calc(100vh - 40px);
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       position: relative;
     }
 
     .modal-close {
-      position: absolute;
-      top: 12px; right: 12px;
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.85);
-      cursor: pointer;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; top: 12px; right: 12px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.85); cursor: pointer;
+      z-index: 4;
+      display: flex; align-items: center; justify-content: center;
       -webkit-tap-highlight-color: transparent;
       transition: color 0.15s, border-color 0.15s;
     }
     .modal-close svg { width: 16px; height: 16px; }
     .modal-close:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
 
-    #modal-video {
-      width: 100%;
-      max-height: 55vh;
-      background: #000;
-      display: block;
+    .modal-video-wrap { position: relative; }
+    #modal-video { width: 100%; max-height: 55vh; background: #000; display: block; }
+
+    /* Crop overlay (inside modal video area during crop mode) */
+    #crop-overlay {
+      position: absolute; inset: 0;
+      display: none;
+      z-index: 3;
     }
+    #crop-overlay.active { display: block; }
+
+    #crop-rect {
+      position: absolute;
+      border: 2px solid rgba(255,255,255,0.95);
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.65);
+      cursor: move;
+      touch-action: none;
+    }
+
+    .crop-handle {
+      position: absolute;
+      width: 14px; height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0,0,0,0.6);
+      touch-action: none;
+    }
+    .crop-handle.tl { top: 0; left: 0; transform: translate(-50%, -50%); cursor: nw-resize; }
+    .crop-handle.tr { top: 0; left: 100%; transform: translate(-50%, -50%); cursor: ne-resize; }
+    .crop-handle.bl { top: 100%; left: 0; transform: translate(-50%, -50%); cursor: sw-resize; }
+    .crop-handle.br { top: 100%; left: 100%; transform: translate(-50%, -50%); cursor: se-resize; }
+    .crop-handle.t  { top: 0; left: 50%; transform: translate(-50%, -50%); cursor: n-resize; }
+    .crop-handle.b  { top: 100%; left: 50%; transform: translate(-50%, -50%); cursor: s-resize; }
+    .crop-handle.l  { top: 50%; left: 0; transform: translate(-50%, -50%); cursor: w-resize; }
+    .crop-handle.r  { top: 50%; left: 100%; transform: translate(-50%, -50%); cursor: e-resize; }
 
     .modal-body { padding: 14px 18px 18px; overflow-y: auto; }
 
     .modal-name-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; min-height: 32px; }
-    .modal-name-text {
-      font-size: 14px;
-      color: #ddd;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-    }
+    .modal-name-text { font-size: 14px; color: #ddd; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
     .modal-name-input {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 5px;
-      font-size: 13px;
-      font-family: inherit;
-      outline: none;
-      flex: 1;
-      display: none;
+      background: #1a1a1a; border: 1px solid #333; color: #fff;
+      padding: 6px 10px; border-radius: 5px; font-size: 13px;
+      font-family: inherit; outline: none; flex: 1; display: none;
     }
     .modal-name-input:focus { border-color: rgba(255,255,255,0.4); }
     .modal-name-wrap.editing .modal-name-text { display: none; }
     .modal-name-wrap.editing .modal-name-input { display: block; }
 
-    .modal-tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
+    .modal-meta-row { display: flex; gap: 12px; margin-bottom: 12px; font-size: 11px; color: rgba(255,255,255,0.4); }
 
+    .modal-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .modal-tag-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.85);
-      padding: 4px 4px 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85);
+      padding: 4px 4px 4px 10px; border-radius: 12px; font-size: 12px;
     }
     .modal-tag-chip button {
-      background: transparent;
-      border: none;
-      color: rgba(255,255,255,0.5);
-      cursor: pointer;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      line-height: 1;
+      background: transparent; border: none; color: rgba(255,255,255,0.5);
+      cursor: pointer; width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; line-height: 1;
     }
     .modal-tag-chip button:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
     .modal-tag-add {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-family: inherit;
-      outline: none;
-      width: 130px;
-      transition: border-color 0.15s;
+      background: #1a1a1a; border: 1px solid #333; color: #fff;
+      padding: 4px 10px; border-radius: 12px; font-size: 12px; font-family: inherit;
+      outline: none; width: 130px; transition: border-color 0.15s;
     }
     .modal-tag-add:focus { border-color: rgba(255,255,255,0.4); }
 
-    .modal-actions {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      padding-top: 4px;
-    }
-
+    .modal-actions { display: flex; justify-content: center; gap: 10px; padding-top: 4px; flex-wrap: wrap; }
     .modal-btn {
-      width: 42px; height: 42px;
-      border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.15);
       background: rgba(255,255,255,0.03);
       color: rgba(255,255,255,0.85);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
-    .modal-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .modal-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
     .modal-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
     .modal-btn.danger:hover { background: rgba(220,60,60,0.85); border-color: rgba(220,60,60,0.85); color: #fff; }
+    .modal-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff; }
+
+    /* Edit mode toolbar (below normal actions when editing) */
+    .edit-toolbar {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .edit-toolbar.active { display: flex; }
+
+    .edit-mode-picker { display: flex; gap: 8px; justify-content: center; }
+    .edit-mode-picker button {
+      background: transparent; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.65); padding: 6px 14px; border-radius: 5px;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .edit-mode-picker button:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+    .edit-mode-picker button.selected { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
+
+    .edit-controls { padding: 8px 0; display: none; }
+    .edit-controls.active { display: block; }
+
+    .edit-confirm-row { display: flex; gap: 8px; justify-content: center; padding-top: 8px; }
+    .edit-confirm-row button {
+      background: transparent; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7); padding: 8px 18px; border-radius: 5px;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer;
+    }
+    .edit-confirm-row button.commit {
+      background: rgba(80,180,120,0.8); border-color: rgba(80,180,120,0.9); color: #fff;
+    }
+    .edit-confirm-row button.commit:hover { background: rgba(90,200,130,1); }
+    .edit-confirm-row button:hover { color: #fff; border-color: #fff; }
+
+    .edit-warning { text-align: center; font-size: 10px; color: rgba(255,180,80,0.7); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0; }
+
+    /* ── Trim UI (used both in edit-mode and in standalone trim modal) ── */
+
+    .trim-timeline { padding: 6px 4px; }
+    .trim-track-wrap { position: relative; height: 26px; padding: 0 8px; }
+    .trim-track {
+      position: relative;
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      margin-top: 10px;
+    }
+    .trim-selection {
+      position: absolute; top: 0; bottom: 0;
+      background: rgba(255,255,255,0.45);
+      border-radius: 3px;
+      pointer-events: none;
+    }
+    .trim-playhead {
+      position: absolute; top: -3px; bottom: -3px;
+      width: 2px; background: rgba(255,255,255,0.7);
+      pointer-events: none;
+    }
+    .trim-handle {
+      position: absolute;
+      top: 50%; transform: translate(-50%, -50%);
+      width: 16px; height: 22px;
+      background: #fff;
+      border-radius: 3px;
+      cursor: ew-resize;
+      touch-action: none;
+      z-index: 2;
+    }
+    .trim-label { display: flex; justify-content: space-between; padding: 6px 8px 0; font-size: 11px; color: rgba(255,255,255,0.6); font-variant-numeric: tabular-nums; }
+
+    /* ── Standalone Trim modal (queue trim + modal trim) ────────── */
+
+    #trim-modal {
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #trim-modal.open { opacity: 1; pointer-events: auto; }
+
+    .trim-inner {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      width: 100%; max-width: 720px;
+      max-height: calc(100vh - 40px);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    #trim-video { width: 100%; max-height: 55vh; background: #000; display: block; }
+
+    .trim-body { padding: 14px 18px 18px; }
+    .trim-title { font-size: 11px; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 10px; }
+
+    /* ── Processing overlay (for ffmpeg runs) ───────────────────── */
+
+    #processing {
+      position: fixed; inset: 0; z-index: 70;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #processing.open { opacity: 1; pointer-events: auto; }
+    .processing-inner {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 22px 26px;
+      width: min(340px, 82vw);
+      display: flex; flex-direction: column; gap: 12px;
+      align-items: center;
+    }
+    .processing-title { font-size: 12px; letter-spacing: 0.25em; color: rgba(255,255,255,0.65); text-transform: uppercase; }
+    .processing-bar-wrap { width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+    .processing-bar { height: 100%; background: rgba(255,255,255,0.65); width: 0%; transition: width 0.15s; }
+    .processing-info { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-align: center; }
   </style>
 </head>
 <body>
 
-<!-- Reusable SVG icon definitions -->
+<!-- Reusable SVG icons -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
   <symbol id="icon-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 20h9"/>
-    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
   </symbol>
   <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="3 6 5 6 21 6"/>
-    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-    <path d="M10 11v6"/>
-    <path d="M14 11v6"/>
-    <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
   </symbol>
   <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-    <polyline points="7 10 12 15 17 10"/>
-    <line x1="12" y1="15" x2="12" y2="3"/>
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
   </symbol>
   <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="4" y1="9" x2="20" y2="9"/>
-    <line x1="4" y1="15" x2="20" y2="15"/>
-    <line x1="10" y1="3" x2="8" y2="21"/>
-    <line x1="16" y1="3" x2="14" y2="21"/>
+    <line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>
   </symbol>
   <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="6" y1="6" x2="18" y2="18"/>
-    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
   </symbol>
   <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="20" y1="12" x2="4" y2="12"/>
-    <polyline points="10 6 4 12 10 18"/>
+    <line x1="20" y1="12" x2="4" y2="12"/><polyline points="10 6 4 12 10 18"/>
   </symbol>
   <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-    <line x1="4" y1="12" x2="20" y2="12"/>
-    <polyline points="14 6 20 12 14 18"/>
+    <line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/>
+  </symbol>
+  <symbol id="icon-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
   </symbol>
 </svg>
 
@@ -477,7 +553,7 @@
       <span class="lib-title">library</span>
       <span class="lib-count" id="lib-count"></span>
       <button class="pick-btn push" id="lib-filter" aria-label="Filter">
-        <svg><use href="#icon-hash"/></svg> tags
+        <svg><use href="#icon-hash"/></svg> filter
       </button>
       <button class="pick-btn" id="lib-refresh">refresh</button>
     </div>
@@ -485,11 +561,14 @@
   </div>
 </div>
 
-<!-- Tag filter panel for the library grid -->
+<!-- ffmpeg status pill -->
+<div id="ffmpeg-status">loading edit tools…</div>
+
+<!-- Tag / length filter panel -->
 <div id="tag-panel" aria-hidden="true">
   <div class="tag-panel-inner">
     <div class="tag-panel-head">
-      <span class="tag-panel-title">tags</span>
+      <span class="tag-panel-title">filter</span>
       <button class="tag-panel-close" id="tag-panel-close" aria-label="Close">
         <svg><use href="#icon-x"/></svg>
       </button>
@@ -501,14 +580,28 @@
   </div>
 </div>
 
-<!-- Video playback modal -->
+<!-- Video detail modal -->
 <div id="modal" aria-hidden="true">
   <div class="modal-inner">
     <button class="modal-close" id="modal-close" aria-label="Close">
       <svg><use href="#icon-x"/></svg>
     </button>
 
-    <video id="modal-video" controls playsinline preload="metadata"></video>
+    <div class="modal-video-wrap">
+      <video id="modal-video" controls playsinline preload="metadata"></video>
+      <div id="crop-overlay">
+        <div id="crop-rect">
+          <div class="crop-handle tl" data-handle="tl"></div>
+          <div class="crop-handle tr" data-handle="tr"></div>
+          <div class="crop-handle bl" data-handle="bl"></div>
+          <div class="crop-handle br" data-handle="br"></div>
+          <div class="crop-handle t"  data-handle="t"></div>
+          <div class="crop-handle b"  data-handle="b"></div>
+          <div class="crop-handle l"  data-handle="l"></div>
+          <div class="crop-handle r"  data-handle="r"></div>
+        </div>
+      </div>
+    </div>
 
     <div class="modal-body">
       <div class="modal-name-wrap" id="modal-name-wrap">
@@ -516,16 +609,94 @@
         <input class="modal-name-input" id="modal-name-input" spellcheck="false" autocomplete="off">
       </div>
 
+      <div class="modal-meta-row" id="modal-meta"></div>
+
       <div class="modal-tag-list" id="modal-tag-list"></div>
 
       <div class="modal-actions">
-        <button class="modal-btn" id="modal-prev" aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
-        <button class="modal-btn" id="modal-rename" aria-label="Rename"><svg><use href="#icon-pencil"/></svg></button>
+        <button class="modal-btn" id="modal-prev"     aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
+        <button class="modal-btn" id="modal-rename"   aria-label="Rename"><svg><use href="#icon-pencil"/></svg></button>
+        <button class="modal-btn" id="modal-wrench"   aria-label="Edit"><svg><use href="#icon-wrench"/></svg></button>
         <button class="modal-btn" id="modal-download" aria-label="Download"><svg><use href="#icon-download"/></svg></button>
         <button class="modal-btn danger" id="modal-delete" aria-label="Delete"><svg><use href="#icon-trash"/></svg></button>
-        <button class="modal-btn" id="modal-next" aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+        <button class="modal-btn" id="modal-next"     aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+      </div>
+
+      <div class="edit-toolbar" id="edit-toolbar">
+        <div class="edit-mode-picker">
+          <button data-mode="trim" id="edit-trim-btn">trim</button>
+          <button data-mode="crop" id="edit-crop-btn">crop</button>
+        </div>
+
+        <div class="edit-controls" id="edit-trim-panel">
+          <div class="trim-timeline">
+            <div class="trim-label">
+              <span id="edit-trim-start">0:00</span>
+              <span id="edit-trim-dur">0:00</span>
+              <span id="edit-trim-end">0:00</span>
+            </div>
+            <div class="trim-track-wrap">
+              <div class="trim-track" id="edit-trim-track">
+                <div class="trim-selection" id="edit-trim-sel"></div>
+                <div class="trim-playhead"  id="edit-trim-ph"></div>
+                <div class="trim-handle"    id="edit-trim-h-start"></div>
+                <div class="trim-handle"    id="edit-trim-h-end"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="edit-controls" id="edit-crop-panel">
+          <div class="edit-warning">crop re-encodes the video — may take a moment on longer clips</div>
+        </div>
+
+        <div class="edit-confirm-row">
+          <button id="edit-cancel">cancel</button>
+          <button class="commit" id="edit-commit">save (irreversible)</button>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Standalone Trim modal (used for queue items) -->
+<div id="trim-modal" aria-hidden="true">
+  <div class="trim-inner">
+    <button class="modal-close" id="trim-close" aria-label="Close">
+      <svg><use href="#icon-x"/></svg>
+    </button>
+    <video id="trim-video" controls playsinline preload="metadata"></video>
+    <div class="trim-body">
+      <div class="trim-title" id="trim-title">trim before upload</div>
+      <div class="trim-timeline">
+        <div class="trim-label">
+          <span id="trim-start-lbl">0:00</span>
+          <span id="trim-dur-lbl">0:00</span>
+          <span id="trim-end-lbl">0:00</span>
+        </div>
+        <div class="trim-track-wrap">
+          <div class="trim-track" id="trim-track">
+            <div class="trim-selection" id="trim-sel"></div>
+            <div class="trim-playhead"  id="trim-ph"></div>
+            <div class="trim-handle"    id="trim-h-start"></div>
+            <div class="trim-handle"    id="trim-h-end"></div>
+          </div>
+        </div>
+      </div>
+      <div class="edit-confirm-row">
+        <button id="trim-cancel">cancel</button>
+        <button class="commit" id="trim-commit">save trim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Processing overlay -->
+<div id="processing" aria-hidden="true">
+  <div class="processing-inner">
+    <div class="processing-title" id="processing-title">processing</div>
+    <div class="processing-bar-wrap"><div class="processing-bar" id="processing-bar"></div></div>
+    <div class="processing-info" id="processing-info">this may take a moment</div>
   </div>
 </div>
 
@@ -534,59 +705,99 @@
   const VIDEO_EXT = /\.(mp4|mov|avi|webm|mkv|m4v|3gp|flv|wmv|hevc|ts|mts|m2ts)$/i;
   const MAX_CONCURRENT = 2;
 
+  // Length buckets: [id, label, minSec, maxSec]
+  const LENGTH_BUCKETS = [
+    ['0-10',  'under 10s', 0,    10],
+    ['10-30', '10 – 30s',  10,   30],
+    ['30-60', '30 – 60s',  30,   60],
+    ['60+',   'over 60s',  60,   Infinity],
+  ];
+
   let secret = sessionStorage.getItem('uploadSecret') || '';
   let queue = [];
   let running = 0;
 
-  let libraryItems = [];           // Full list from /api/videos
-  let libraryFiltered = [];        // After tag filter
-  let modalIdx = -1;               // Position within libraryFiltered
+  let libraryItems = [];
+  let libraryFiltered = [];
+  let modalIdx = -1;
 
-  // Filter state (grid)
+  // Filter state
   const selectedTags = new Set();
+  const selectedLengths = new Set();
   let selectNoTags = false;
   let selectAll = true;
 
   // ── DOM ─────────────────────────────────────────────────────────
 
-  const authEl      = document.getElementById('auth');
-  const secretIn    = document.getElementById('secret-input');
-  const authBtn     = document.getElementById('auth-btn');
-  const uploadArea  = document.getElementById('upload-area');
-  const dropZone    = document.getElementById('drop-zone');
-  const queueEl     = document.getElementById('queue');
-  const summaryEl   = document.getElementById('summary');
-  const libEl       = document.getElementById('library');
-  const libGrid     = document.getElementById('library-grid');
-  const libCount    = document.getElementById('lib-count');
-  const tagPanel    = document.getElementById('tag-panel');
-  const tagListEl   = document.getElementById('tag-list');
-  const modalEl     = document.getElementById('modal');
-  const modalVideo  = document.getElementById('modal-video');
-  const modalNameWrap = document.getElementById('modal-name-wrap');
-  const modalNameText = document.getElementById('modal-name-text');
-  const modalNameInput = document.getElementById('modal-name-input');
-  const modalTagListEl = document.getElementById('modal-tag-list');
+  const $ = id => document.getElementById(id);
+  const authEl      = $('auth');
+  const secretIn    = $('secret-input');
+  const authBtn     = $('auth-btn');
+  const uploadArea  = $('upload-area');
+  const dropZone    = $('drop-zone');
+  const queueEl     = $('queue');
+  const summaryEl   = $('summary');
+  const libEl       = $('library');
+  const libGrid     = $('library-grid');
+  const libCount    = $('lib-count');
+  const tagPanel    = $('tag-panel');
+  const tagListEl   = $('tag-list');
+  const modalEl     = $('modal');
+  const modalVideo  = $('modal-video');
+  const modalNameWrap  = $('modal-name-wrap');
+  const modalNameText  = $('modal-name-text');
+  const modalNameInput = $('modal-name-input');
+  const modalMeta      = $('modal-meta');
+  const modalTagListEl = $('modal-tag-list');
+  const editToolbar    = $('edit-toolbar');
+  const editTrimPanel  = $('edit-trim-panel');
+  const editCropPanel  = $('edit-crop-panel');
+  const trimModal      = $('trim-modal');
+  const trimVideo      = $('trim-video');
+  const processingEl   = $('processing');
+  const processingBar  = $('processing-bar');
+  const processingInfo = $('processing-info');
+  const processingTitle = $('processing-title');
+  const ffmpegStatus   = $('ffmpeg-status');
+  const cropOverlay    = $('crop-overlay');
+  const cropRect       = $('crop-rect');
 
   // ── Utils ───────────────────────────────────────────────────────
 
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function displayName(key) { return key.replace(/^\d+_/, '') || key; }
   function normalizeTag(raw) {
-    return String(raw || '').trim().toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
+    return String(raw||'').trim().toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  }
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
   }
   function authedFetch(url, opts) {
     opts = opts || {};
     opts.headers = Object.assign({}, opts.headers || {}, { 'x-upload-secret': secret });
     return fetch(url, opts);
   }
+  function isVideo(name) { return VIDEO_EXT.test(name); }
+  function getDurationOfBlob(blob) {
+    return new Promise(function (resolve) {
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      const url = URL.createObjectURL(blob);
+      v.onloadedmetadata = function () {
+        const d = v.duration;
+        URL.revokeObjectURL(url);
+        resolve(isFinite(d) ? d : null);
+      };
+      v.onerror = function () { URL.revokeObjectURL(url); resolve(null); };
+      v.src = url;
+    });
+  }
 
-  // ── Auth ────────────────────────────────────────────────────────
+  // ── Auth + ffmpeg preload ───────────────────────────────────────
 
   function unlock(key) {
     secret = key;
@@ -595,8 +806,8 @@
     uploadArea.classList.add('visible');
     libEl.classList.add('visible');
     loadLibrary();
+    startFFmpegPreload();
   }
-
   if (secret) unlock(secret);
 
   authBtn.addEventListener('click', function () {
@@ -610,9 +821,109 @@
     secretIn.classList.remove('error');
   });
 
-  // ── File collection (drag/drop, file picker, folder picker) ──────
+  // ── ffmpeg.wasm loader (~30MB WASM lazy-loaded from CDN) ────────
 
-  function isVideo(name) { return VIDEO_EXT.test(name); }
+  const FFMPEG_LIB_URL  = 'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js';
+  const FFMPEG_CORE_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js';
+  const FFMPEG_WASM_URL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm';
+
+  let ffmpegPromise = null;
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve; s.onerror = function () { reject(new Error('failed to load ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  async function loadFFmpeg() {
+    if (ffmpegPromise) return ffmpegPromise;
+    ffmpegPromise = (async function () {
+      if (!window.FFmpegWASM) await loadScript(FFMPEG_LIB_URL);
+      const FFmpegClass = window.FFmpegWASM.FFmpeg;
+      const ff = new FFmpegClass();
+      await ff.load({ coreURL: FFMPEG_CORE_URL, wasmURL: FFMPEG_WASM_URL });
+      ff.on('progress', function (e) {
+        if (typeof e.progress === 'number') updateProgress(Math.min(1, Math.max(0, e.progress)));
+      });
+      return ff;
+    })();
+    return ffmpegPromise;
+  }
+
+  function startFFmpegPreload() {
+    ffmpegStatus.textContent = 'loading edit tools…';
+    ffmpegStatus.className = 'show';
+    loadFFmpeg().then(function () {
+      ffmpegStatus.textContent = 'edit tools ready';
+      ffmpegStatus.classList.add('ready');
+      setTimeout(function () { ffmpegStatus.classList.remove('show'); }, 2500);
+    }).catch(function (err) {
+      console.error(err);
+      ffmpegStatus.textContent = 'edit tools failed to load';
+      ffmpegStatus.classList.add('error');
+    });
+  }
+
+  // ── Processing overlay ──────────────────────────────────────────
+
+  function showProcessing(title, info) {
+    processingTitle.textContent = title || 'processing';
+    processingInfo.textContent = info || 'this may take a moment';
+    processingBar.style.width = '0%';
+    processingEl.classList.add('open');
+  }
+  function hideProcessing() { processingEl.classList.remove('open'); }
+  function updateProgress(pct) { processingBar.style.width = Math.round(pct * 100) + '%'; }
+
+  // ── FFmpeg operations ───────────────────────────────────────────
+
+  async function runTrim(blob, startSec, endSec) {
+    const ff = await loadFFmpeg();
+    const data = new Uint8Array(await blob.arrayBuffer());
+    const inName = 'in_' + Date.now() + '.mp4';
+    const outName = 'out_' + Date.now() + '.mp4';
+    await ff.writeFile(inName, data);
+    // -ss before -i: fast input seek (nearest keyframe). -c copy: no re-encode.
+    await ff.exec([
+      '-ss', String(startSec.toFixed(3)),
+      '-to', String(endSec.toFixed(3)),
+      '-i', inName,
+      '-c', 'copy',
+      '-avoid_negative_ts', 'make_zero',
+      '-movflags', '+faststart',
+      outName,
+    ]);
+    const out = await ff.readFile(outName);
+    try { await ff.deleteFile(inName); } catch (e) {}
+    try { await ff.deleteFile(outName); } catch (e) {}
+    return new Blob([out.buffer], { type: 'video/mp4' });
+  }
+
+  async function runCrop(blob, x, y, w, h) {
+    const ff = await loadFFmpeg();
+    const data = new Uint8Array(await blob.arrayBuffer());
+    const inName = 'in_' + Date.now() + '.mp4';
+    const outName = 'out_' + Date.now() + '.mp4';
+    await ff.writeFile(inName, data);
+    // crop=w:h:x:y — pixel coordinates from top-left of the source
+    await ff.exec([
+      '-i', inName,
+      '-vf', 'crop=' + Math.round(w) + ':' + Math.round(h) + ':' + Math.round(x) + ':' + Math.round(y),
+      '-c:v', 'libx264',
+      '-preset', 'ultrafast',
+      '-c:a', 'copy',
+      '-movflags', '+faststart',
+      outName,
+    ]);
+    const out = await ff.readFile(outName);
+    try { await ff.deleteFile(inName); } catch (e) {}
+    try { await ff.deleteFile(outName); } catch (e) {}
+    return new Blob([out.buffer], { type: 'video/mp4' });
+  }
+
+  // ── File collection (drag/drop, pickers) ────────────────────────
 
   function collectFromEntry(entry) {
     return new Promise(function (resolve) {
@@ -634,12 +945,11 @@
       } else { resolve([]); }
     });
   }
-
   function addFiles(files) {
     const filtered = files.filter(function (f) { return isVideo(f.name); });
     if (!filtered.length) return;
     for (const f of filtered) {
-      const item = { id: Math.random().toString(36).slice(2), file: f, status: 'pending', pct: 0 };
+      const item = { id: Math.random().toString(36).slice(2), file: f, name: f.name, status: 'pending', pct: 0, trimmed: null };
       queue.push(item);
       renderQueueItem(item);
     }
@@ -647,7 +957,7 @@
     updateQueueSummary();
   }
 
-  dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragover',  function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
   dropZone.addEventListener('drop', function (e) {
     e.preventDefault();
@@ -664,16 +974,11 @@
         }
       }
       Promise.all(promises).then(function (groups) { addFiles(groups.flat()); });
-    } else if (e.dataTransfer.files.length) {
-      addFiles(Array.from(e.dataTransfer.files));
-    }
+    } else if (e.dataTransfer.files.length) { addFiles(Array.from(e.dataTransfer.files)); }
   });
-
-  document.getElementById('file-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
-  document.getElementById('folder-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
-  if (/Mobi|Android/i.test(navigator.userAgent)) {
-    document.getElementById('folder-label').style.display = 'none';
-  }
+  $('file-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
+  $('folder-input').addEventListener('change', function () { addFiles(Array.from(this.files)); this.value = ''; });
+  if (/Mobi|Android/i.test(navigator.userAgent)) $('folder-label').style.display = 'none';
 
   // ── Upload queue ────────────────────────────────────────────────
 
@@ -690,26 +995,25 @@
     }
   }
 
-  function uploadItem(item) {
+  async function uploadItem(item) {
+    // Capture duration client-side so it's stored as metadata on R2
+    const duration = await getDurationOfBlob(item.file);
+
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload');
     xhr.setRequestHeader('x-upload-secret', secret);
-    xhr.setRequestHeader('x-file-name', encodeURIComponent(item.file.name));
+    xhr.setRequestHeader('x-file-name', encodeURIComponent(item.name));
     xhr.setRequestHeader('x-file-type', item.file.type || 'application/octet-stream');
+    if (duration != null) xhr.setRequestHeader('x-video-duration', String(duration));
 
     xhr.upload.addEventListener('progress', function (e) {
       if (e.lengthComputable) { item.pct = e.loaded / e.total; updateQueueItem(item); }
     });
     xhr.addEventListener('load', function () {
       running--;
-      if (xhr.status === 200 || xhr.status === 201) {
-        item.status = 'done';
-      } else if (xhr.status === 401) {
-        item.status = 'error'; item.error = 'invalid key';
-        sessionStorage.removeItem('uploadSecret');
-      } else {
-        item.status = 'error'; item.error = 'failed (' + xhr.status + ')';
-      }
+      if (xhr.status === 200 || xhr.status === 201) { item.status = 'done'; }
+      else if (xhr.status === 401) { item.status = 'error'; item.error = 'invalid key'; sessionStorage.removeItem('uploadSecret'); }
+      else { item.status = 'error'; item.error = 'failed (' + xhr.status + ')'; }
       updateQueueItem(item); updateQueueSummary(); processQueue();
     });
     xhr.addEventListener('error', function () {
@@ -727,23 +1031,42 @@
     el.id = 'qi-' + item.id;
     el.innerHTML =
       '<div class="q-item-top">' +
-        '<span class="q-name">' + escHtml(item.file.name) + '</span>' +
+        '<span class="q-name">' + escHtml(item.name) + '</span>' +
+        '<button class="q-trim-btn" data-id="' + item.id + '">trim</button>' +
         '<span class="q-status pending">pending</span>' +
       '</div>' +
       '<div class="q-bar-wrap"><div class="q-bar"></div></div>';
     queueEl.prepend(el);
+    el.querySelector('.q-trim-btn').addEventListener('click', function () { openQueueTrim(item); });
   }
 
   function updateQueueItem(item) {
-    const el = document.getElementById('qi-' + item.id);
+    const el = $('qi-' + item.id);
     if (!el) return;
     const statusEl = el.querySelector('.q-status');
     const bar      = el.querySelector('.q-bar');
+    const trimBtn  = el.querySelector('.q-trim-btn');
     statusEl.className = 'q-status ' + item.status;
-    if (item.status === 'pending')   { statusEl.textContent = 'pending'; bar.style.width = '0%'; }
-    else if (item.status === 'uploading') { statusEl.textContent = Math.round(item.pct * 100) + '%'; bar.style.width = Math.round(item.pct * 100) + '%'; }
-    else if (item.status === 'done') { statusEl.textContent = 'done'; bar.className = 'q-bar done'; }
-    else if (item.status === 'error'){ statusEl.textContent = item.error || 'error'; bar.className = 'q-bar error'; }
+
+    // Hide trim button once uploading/done/error
+    if (trimBtn) trimBtn.style.display = (item.status === 'pending' && !item.trimmed) ? '' : 'none';
+
+    // Insert or update trimmed-info label
+    let info = el.querySelector('.q-trim-info');
+    if (item.trimmed) {
+      if (!info) {
+        info = document.createElement('span');
+        info.className = 'q-trim-info';
+        el.querySelector('.q-item-top').insertBefore(info, statusEl);
+      }
+      info.textContent = fmtTime(item.trimmed.start) + '–' + fmtTime(item.trimmed.end);
+    } else if (info) { info.remove(); }
+
+    if (item.status === 'pending')       { statusEl.textContent = 'pending'; bar.style.width = '0%'; }
+    else if (item.status === 'processing'){ statusEl.textContent = 'trimming…'; bar.style.width = '0%'; }
+    else if (item.status === 'uploading'){ statusEl.textContent = Math.round(item.pct * 100) + '%'; bar.style.width = Math.round(item.pct * 100) + '%'; }
+    else if (item.status === 'done')     { statusEl.textContent = 'done'; bar.className = 'q-bar done'; }
+    else if (item.status === 'error')    { statusEl.textContent = item.error || 'error'; bar.className = 'q-bar error'; }
   }
 
   function updateQueueSummary() {
@@ -751,6 +1074,38 @@
     const done = queue.filter(function (i) { return i.status === 'done'; }).length;
     const errors = queue.filter(function (i) { return i.status === 'error'; }).length;
     summaryEl.textContent = done + ' / ' + queue.length + ' uploaded' + (errors ? ' · ' + errors + ' failed' : '');
+  }
+
+  // ── Trim (queue) ────────────────────────────────────────────────
+
+  function openQueueTrim(item) {
+    if (item.status !== 'pending') return;
+    openTrimModal({
+      title: 'trim: ' + item.name,
+      source: item.file,
+      onSave: async function (start, end) {
+        // Run ffmpeg trim on the file, replace item.file with the trimmed blob
+        item.status = 'processing';
+        updateQueueItem(item);
+        showProcessing('trimming', 'first trim loads editor (~30 MB), subsequent are fast');
+        try {
+          const outBlob = await runTrim(item.file, start, end);
+          const outFile = new File([outBlob], item.name, { type: 'video/mp4' });
+          item.file = outFile;
+          item.trimmed = { start, end };
+          item.status = 'pending';
+          hideProcessing();
+          updateQueueItem(item);
+          processQueue();
+        } catch (err) {
+          console.error('Trim failed:', err);
+          hideProcessing();
+          item.status = 'pending';
+          updateQueueItem(item);
+          alert('Trim failed. The original will upload instead.');
+        }
+      },
+    });
   }
 
   // ── Library ─────────────────────────────────────────────────────
@@ -772,29 +1127,58 @@
       const res = await authedFetch('/api/videos');
       if (res.status === 401) {
         sessionStorage.removeItem('uploadSecret');
-        libGrid.innerHTML = '<div class="lib-empty">invalid key</div>';
-        return;
+        libGrid.innerHTML = '<div class="lib-empty">invalid key</div>'; return;
       }
       if (!res.ok) throw new Error('list ' + res.status);
       const data = await res.json();
       libraryItems = data.items || [];
       applyGridFilter();
+      // opportunistic duration backfill for items missing duration
+      backfillMissingDurations();
     } catch (err) {
       console.error('Library load failed:', err);
       libGrid.innerHTML = '<div class="lib-empty">could not load library</div>';
     }
   }
 
+  // For items in the library without a duration, listen for the lazy thumb's
+  // loadedmetadata event and PATCH the duration back to the server. This runs
+  // silently in the background.
+  function backfillMissingDurations() {
+    for (const item of libraryItems) {
+      if (item.duration != null) continue;
+      // Attach a one-time listener via the observer's downstream video element
+      // We do this via loadedmetadata on the thumbnail video once it's loaded
+    }
+    // Actual event wiring happens per-tile below.
+  }
+
   function applyGridFilter() {
-    if (selectAll) {
-      libraryFiltered = libraryItems.slice();
-    } else {
+    if (selectAll) { libraryFiltered = libraryItems.slice(); }
+    else {
       libraryFiltered = libraryItems.filter(function (item) {
-        const empty = !item.tags || item.tags.length === 0;
-        if (selectNoTags && empty) return true;
-        if (selectedTags.size === 0) return false;
-        for (const t of item.tags) if (selectedTags.has(t)) return true;
-        return false;
+        // Tag axis
+        if (selectNoTags || selectedTags.size > 0) {
+          const empty = !item.tags || item.tags.length === 0;
+          let tagOk = false;
+          if (selectNoTags && empty) tagOk = true;
+          if (!tagOk && selectedTags.size > 0) {
+            for (const t of item.tags || []) if (selectedTags.has(t)) { tagOk = true; break; }
+          }
+          if (!tagOk) return false;
+        }
+        // Length axis
+        if (selectedLengths.size > 0) {
+          const d = item.duration || 0;
+          let lenOk = false;
+          for (const b of selectedLengths) {
+            const bucket = LENGTH_BUCKETS.find(function (x) { return x[0] === b; });
+            if (!bucket) continue;
+            if (d >= bucket[2] && d < bucket[3]) { lenOk = true; break; }
+          }
+          if (!lenOk) return false;
+        }
+        return true;
       });
     }
     renderLibrary();
@@ -814,27 +1198,48 @@
       tile.dataset.key = item.key;
       const dn = displayName(item.key);
       const tagsHtml = (item.tags || []).map(function (t) { return '<span class="lib-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
+      const durStr = item.duration != null ? fmtTime(item.duration) : '';
       tile.innerHTML =
         '<div class="lib-thumb-wrap">' +
           '<video class="lib-thumb" muted playsinline preload="none"></video>' +
           '<button class="lib-delete" aria-label="Delete"><svg><use href="#icon-x"/></svg></button>' +
         '</div>' +
         '<div class="lib-name" title="' + escHtml(dn) + '">' + escHtml(dn) + '</div>' +
+        '<div class="lib-meta">' + (durStr ? '<span>' + durStr + '</span>' : '<span></span>') + '</div>' +
         (tagsHtml ? '<div class="lib-tags">' + tagsHtml + '</div>' : '');
       const thumb = tile.querySelector('.lib-thumb');
       thumb.dataset.url = item.url;
       thumbObserver.observe(thumb);
-      // Click tile (excluding delete) → open modal
+      // Duration backfill opportunistic listener
+      if (item.duration == null) {
+        thumb.addEventListener('loadedmetadata', function once() {
+          const d = thumb.duration;
+          if (!isFinite(d)) return;
+          item.duration = d;
+          // Update the master too
+          const master = libraryItems.find(function (x) { return x.key === item.key; });
+          if (master) master.duration = d;
+          // Save to server (silent)
+          authedFetch('/api/videos', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: item.key, duration: d }),
+          }).catch(function () {});
+          // Update the tile's duration cell
+          const meta = tile.querySelector('.lib-meta span');
+          if (meta) meta.textContent = fmtTime(d);
+        }, { once: true });
+      }
       tile.addEventListener('click', function () { openModalAt(i); });
       tile.querySelector('.lib-delete').addEventListener('click', function (e) {
         e.stopPropagation();
-        deleteItem(item.key, tile);
+        deleteItemFromGrid(item.key, tile);
       });
       libGrid.appendChild(tile);
     }
   }
 
-  async function deleteItem(key, tileEl) {
+  async function deleteItemFromGrid(key, tileEl) {
     if (!confirm('Delete this video? This cannot be undone.')) return;
     try {
       const res = await authedFetch('/api/videos?key=' + encodeURIComponent(key), { method: 'DELETE' });
@@ -844,27 +1249,19 @@
       libraryFiltered = libraryFiltered.filter(function (i) { return i.key !== key; });
       libCount.textContent = libraryFiltered.length ? '(' + libraryFiltered.length + '/' + libraryItems.length + ')' : '';
       if (!libraryFiltered.length) libGrid.innerHTML = '<div class="lib-empty">' + (libraryItems.length ? 'no matches' : 'no videos yet') + '</div>';
-    } catch (err) {
-      console.error('Delete failed:', err);
-      alert('Failed to delete. Try again.');
-    }
+    } catch (err) { console.error('Delete failed:', err); alert('Failed to delete.'); }
   }
 
-  document.getElementById('lib-refresh').addEventListener('click', loadLibrary);
+  $('lib-refresh').addEventListener('click', loadLibrary);
 
-  // ── Tag panel (grid filter) ─────────────────────────────────────
+  // ── Filter panel ────────────────────────────────────────────────
 
-  document.getElementById('lib-filter').addEventListener('click', function () {
-    renderTagPanel();
-    tagPanel.classList.add('open');
-  });
-  document.getElementById('tag-panel-close').addEventListener('click', function () { tagPanel.classList.remove('open'); });
-  document.getElementById('tag-reset').addEventListener('click', function () {
-    selectedTags.clear();
-    selectNoTags = false;
-    selectAll = true;
-    applyGridFilter();
-    renderTagPanel();
+  $('lib-filter').addEventListener('click', function () { renderTagPanel(); tagPanel.classList.add('open'); });
+  $('tag-panel-close').addEventListener('click', function () { tagPanel.classList.remove('open'); });
+  $('tag-reset').addEventListener('click', function () {
+    selectedTags.clear(); selectedLengths.clear();
+    selectNoTags = false; selectAll = true;
+    applyGridFilter(); renderTagPanel();
   });
   tagPanel.addEventListener('click', function (e) { if (e.target === tagPanel) tagPanel.classList.remove('open'); });
 
@@ -872,22 +1269,34 @@
     const counts = new Map();
     let noTagCount = 0;
     for (const item of libraryItems) {
-      if (!item.tags || item.tags.length === 0) { noTagCount++; continue; }
-      for (const t of item.tags) counts.set(t, (counts.get(t) || 0) + 1);
+      if (!item.tags || item.tags.length === 0) noTagCount++;
+      else for (const t of item.tags) counts.set(t, (counts.get(t) || 0) + 1);
     }
     const list = Array.from(counts.entries()).sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); });
     return { list: list, noTagCount: noTagCount, total: libraryItems.length };
   }
 
+  function lengthCounts() {
+    const counts = {};
+    for (const b of LENGTH_BUCKETS) counts[b[0]] = 0;
+    for (const item of libraryItems) {
+      const d = item.duration != null ? item.duration : null;
+      if (d == null) continue;
+      for (const b of LENGTH_BUCKETS) if (d >= b[2] && d < b[3]) { counts[b[0]]++; break; }
+    }
+    return counts;
+  }
+
   function renderTagPanel() {
     const agg = aggregateTags();
+    const lc  = lengthCounts();
     tagListEl.innerHTML = '';
 
     const allRow = document.createElement('div');
     allRow.className = 'tag-row tag-all' + (selectAll ? ' selected' : '');
     allRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">all videos</span><span class="tag-count">' + agg.total + '</span>';
     allRow.addEventListener('click', function () {
-      selectedTags.clear(); selectNoTags = false; selectAll = true;
+      selectedTags.clear(); selectedLengths.clear(); selectNoTags = false; selectAll = true;
       applyGridFilter(); renderTagPanel();
     });
     tagListEl.appendChild(allRow);
@@ -897,11 +1306,38 @@
     noneRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">no tags</span><span class="tag-count">' + agg.noTagCount + '</span>';
     noneRow.addEventListener('click', function () {
       selectNoTags = !selectNoTags; selectAll = false;
-      if (!selectNoTags && selectedTags.size === 0) selectAll = true;
+      if (!selectNoTags && selectedTags.size === 0 && selectedLengths.size === 0) selectAll = true;
       applyGridFilter(); renderTagPanel();
     });
     tagListEl.appendChild(noneRow);
 
+    // Length section
+    const lenHead = document.createElement('div');
+    lenHead.className = 'tag-section-title';
+    lenHead.textContent = 'length';
+    tagListEl.appendChild(lenHead);
+    for (const b of LENGTH_BUCKETS) {
+      const row = document.createElement('div');
+      const sel = selectedLengths.has(b[0]);
+      row.className = 'tag-row tag-length' + (sel ? ' selected' : '');
+      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + b[1] + '</span><span class="tag-count">' + (lc[b[0]] || 0) + '</span>';
+      row.addEventListener('click', function () {
+        if (selectedLengths.has(b[0])) selectedLengths.delete(b[0]);
+        else selectedLengths.add(b[0]);
+        selectAll = false;
+        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        applyGridFilter(); renderTagPanel();
+      });
+      tagListEl.appendChild(row);
+    }
+
+    // Tags section
+    if (agg.list.length) {
+      const tagHead = document.createElement('div');
+      tagHead.className = 'tag-section-title';
+      tagHead.textContent = 'tags';
+      tagListEl.appendChild(tagHead);
+    }
     for (const [t, c] of agg.list) {
       const row = document.createElement('div');
       row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
@@ -909,7 +1345,7 @@
       row.addEventListener('click', function () {
         if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
         selectAll = false;
-        if (selectedTags.size === 0 && !selectNoTags) selectAll = true;
+        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
         applyGridFilter(); renderTagPanel();
       });
       tagListEl.appendChild(row);
@@ -921,19 +1357,18 @@
   function openModalAt(i) {
     if (i < 0 || i >= libraryFiltered.length) return;
     modalIdx = i;
+    exitEditMode();
     renderModal();
     modalEl.classList.add('open');
   }
-
   function closeModal() {
     modalEl.classList.remove('open');
     modalVideo.pause();
     modalVideo.removeAttribute('src');
     modalVideo.load();
-    exitRenameMode();
+    exitRenameMode(); exitEditMode();
     modalIdx = -1;
   }
-
   function currentItem() { return modalIdx >= 0 ? libraryFiltered[modalIdx] : null; }
 
   function renderModal() {
@@ -943,6 +1378,10 @@
     modalVideo.load();
     modalNameText.textContent = displayName(item.key);
     modalNameInput.value = displayName(item.key);
+    const parts = [];
+    if (item.duration != null) parts.push(fmtTime(item.duration));
+    if (item.size) parts.push((item.size / (1024*1024)).toFixed(1) + ' MB');
+    modalMeta.textContent = parts.join('  ·  ');
     renderModalTags();
   }
 
@@ -954,29 +1393,24 @@
       const chip = document.createElement('span');
       chip.className = 'modal-tag-chip';
       chip.innerHTML = '#' + escHtml(t) + ' <button aria-label="Remove tag">&times;</button>';
-      chip.querySelector('button').addEventListener('click', function () { updateTags(item.tags.filter(function (x) { return x !== t; })); });
+      chip.querySelector('button').addEventListener('click', function () { updateTagsForCurrent(item.tags.filter(function (x) { return x !== t; })); });
       modalTagListEl.appendChild(chip);
     }
-    // Add-tag input
     const input = document.createElement('input');
-    input.className = 'modal-tag-add';
-    input.type = 'text';
-    input.placeholder = '+ add tag';
-    input.autocomplete = 'off';
-    input.spellcheck = false;
+    input.className = 'modal-tag-add'; input.type = 'text';
+    input.placeholder = '+ add tag'; input.autocomplete = 'off'; input.spellcheck = false;
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        const t = normalizeTag(input.value);
-        if (!t) { input.value = ''; return; }
+        const t = normalizeTag(input.value); if (!t) { input.value = ''; return; }
         const existing = currentItem().tags || [];
         if (existing.includes(t)) { input.value = ''; return; }
-        updateTags(existing.concat([t]));
+        updateTagsForCurrent(existing.concat([t]));
       }
     });
     modalTagListEl.appendChild(input);
   }
 
-  async function updateTags(newTags) {
+  async function updateTagsForCurrent(newTags) {
     const item = currentItem();
     if (!item) return;
     try {
@@ -987,32 +1421,26 @@
       });
       if (!res.ok) throw new Error('tags ' + res.status);
       const data = await res.json();
-      // Update in both arrays
       const master = libraryItems.find(function (x) { return x.key === item.key; });
       if (master) master.tags = data.tags;
       item.tags = data.tags;
       renderModalTags();
-      // Update grid tile chips
-      const tile = libGrid.querySelector('.lib-item[data-key="' + CSS.escape(item.key) + '"]');
-      if (tile) {
-        let tagsEl = tile.querySelector('.lib-tags');
-        const tagsHtml = data.tags.map(function (t) { return '<span class="lib-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
-        if (tagsHtml) {
-          if (!tagsEl) { tagsEl = document.createElement('div'); tagsEl.className = 'lib-tags'; tile.appendChild(tagsEl); }
-          tagsEl.innerHTML = tagsHtml;
-        } else if (tagsEl) { tagsEl.remove(); }
-      }
-    } catch (err) {
-      console.error('Update tags failed:', err);
-      alert('Failed to update tags.');
-    }
+      updateTileTags(item);
+    } catch (err) { console.error('Update tags failed:', err); alert('Failed to update tags.'); }
   }
 
-  function enterRenameMode() {
-    modalNameWrap.classList.add('editing');
-    modalNameInput.focus();
-    modalNameInput.select();
+  function updateTileTags(item) {
+    const tile = libGrid.querySelector('.lib-item[data-key="' + CSS.escape(item.key) + '"]');
+    if (!tile) return;
+    let tagsEl = tile.querySelector('.lib-tags');
+    const tagsHtml = (item.tags || []).map(function (t) { return '<span class="lib-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
+    if (tagsHtml) {
+      if (!tagsEl) { tagsEl = document.createElement('div'); tagsEl.className = 'lib-tags'; tile.appendChild(tagsEl); }
+      tagsEl.innerHTML = tagsHtml;
+    } else if (tagsEl) { tagsEl.remove(); }
   }
+
+  function enterRenameMode() { modalNameWrap.classList.add('editing'); modalNameInput.focus(); modalNameInput.select(); }
   function exitRenameMode() { modalNameWrap.classList.remove('editing'); }
 
   async function commitRename() {
@@ -1029,42 +1457,35 @@
       if (res.status === 409) { alert('A video with that name already exists.'); return; }
       if (!res.ok) throw new Error('rename ' + res.status);
       const data = await res.json();
-      // Update key/url in-place in both arrays
       const master = libraryItems.find(function (x) { return x.key === item.key; });
       if (master) { master.key = data.key; master.url = data.url; }
-      item.key = data.key;
-      item.url = data.url;
+      item.key = data.key; item.url = data.url;
       exitRenameMode();
-      renderLibrary();       // regenerate grid with new key/url
-      renderModal();         // reload the modal video src too
-    } catch (err) {
-      console.error('Rename failed:', err);
-      alert('Failed to rename.');
-    }
+      renderLibrary();
+      renderModal();
+    } catch (err) { console.error('Rename failed:', err); alert('Failed to rename.'); }
   }
 
-  document.getElementById('modal-close').addEventListener('click', closeModal);
+  $('modal-close').addEventListener('click', closeModal);
   modalEl.addEventListener('click', function (e) { if (e.target === modalEl) closeModal(); });
-
-  document.getElementById('modal-prev').addEventListener('click', function () {
-    if (modalIdx > 0) { modalIdx--; renderModal(); }
-    else { modalIdx = libraryFiltered.length - 1; renderModal(); }
+  $('modal-prev').addEventListener('click', function () {
+    if (libraryFiltered.length === 0) return;
+    modalIdx = modalIdx > 0 ? modalIdx - 1 : libraryFiltered.length - 1;
+    exitEditMode(); renderModal();
   });
-  document.getElementById('modal-next').addEventListener('click', function () {
-    if (modalIdx < libraryFiltered.length - 1) { modalIdx++; renderModal(); }
-    else { modalIdx = 0; renderModal(); }
+  $('modal-next').addEventListener('click', function () {
+    if (libraryFiltered.length === 0) return;
+    modalIdx = modalIdx < libraryFiltered.length - 1 ? modalIdx + 1 : 0;
+    exitEditMode(); renderModal();
   });
-
-  document.getElementById('modal-rename').addEventListener('click', function () {
-    if (modalNameWrap.classList.contains('editing')) commitRename();
-    else enterRenameMode();
+  $('modal-rename').addEventListener('click', function () {
+    if (modalNameWrap.classList.contains('editing')) commitRename(); else enterRenameMode();
   });
   modalNameInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') commitRename();
     else if (e.key === 'Escape') exitRenameMode();
   });
-
-  document.getElementById('modal-delete').addEventListener('click', function () {
+  $('modal-delete').addEventListener('click', function () {
     const item = currentItem();
     if (!item) return;
     if (!confirm('Delete this video? This cannot be undone.')) return;
@@ -1077,43 +1498,362 @@
       })
       .catch(function (err) { console.error(err); alert('Failed to delete.'); });
   });
-
-  document.getElementById('modal-download').addEventListener('click', function () {
+  $('modal-download').addEventListener('click', function () {
     const item = currentItem();
     if (!item) return;
     const a = document.createElement('a');
     a.href = '/api/download?key=' + encodeURIComponent(item.key) + '&s=' + encodeURIComponent(secret);
     a.download = displayName(item.key);
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    document.body.appendChild(a); a.click(); a.remove();
   });
 
-  // Modal keyboard shortcuts
   document.addEventListener('keydown', function (e) {
     if (!modalEl.classList.contains('open')) return;
-    if (modalNameWrap.classList.contains('editing')) return; // don't hijack keys during rename
+    if (modalNameWrap.classList.contains('editing')) return;
+    if (editToolbar.classList.contains('active')) {
+      if (e.key === 'Escape') exitEditMode();
+      return;
+    }
     if (e.key === 'Escape')       closeModal();
-    else if (e.key === 'ArrowLeft')  document.getElementById('modal-prev').click();
-    else if (e.key === 'ArrowRight') document.getElementById('modal-next').click();
+    else if (e.key === 'ArrowLeft')  $('modal-prev').click();
+    else if (e.key === 'ArrowRight') $('modal-next').click();
   });
 
-  // Modal swipe (touch)
-  let mTouchX = 0, mTouchY = 0, mTouchT = 0;
-  modalVideo.addEventListener('touchstart', function (e) {
-    const t = e.changedTouches[0];
-    mTouchX = t.clientX; mTouchY = t.clientY; mTouchT = Date.now();
-  }, { passive: true });
-  modalVideo.addEventListener('touchend', function (e) {
-    const t = e.changedTouches[0];
-    const dx = t.clientX - mTouchX;
-    const dy = t.clientY - mTouchY;
-    const dt = Date.now() - mTouchT;
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4 && dt < 600) {
-      if (dx < 0) document.getElementById('modal-next').click();
-      else document.getElementById('modal-prev').click();
+  // ── Modal edit mode (wrench) ────────────────────────────────────
+
+  let editMode = null; // 'trim' | 'crop' | null
+  let editBlob = null; // downloaded blob for editing (from R2)
+  let editDuration = 0;
+  let editTrimStart = 0, editTrimEnd = 0;
+
+  $('modal-wrench').addEventListener('click', function () {
+    if (editToolbar.classList.contains('active')) exitEditMode();
+    else enterEditMode();
+  });
+  $('edit-cancel').addEventListener('click', exitEditMode);
+  $('edit-commit').addEventListener('click', commitEdit);
+  $('edit-trim-btn').addEventListener('click', function () { switchEditMode('trim'); });
+  $('edit-crop-btn').addEventListener('click', function () { switchEditMode('crop'); });
+
+  async function enterEditMode() {
+    const item = currentItem();
+    if (!item) return;
+    editToolbar.classList.add('active');
+    $('modal-wrench').classList.add('active');
+    // Preload the video bytes into an in-memory blob for fast processing
+    showProcessing('preparing video', 'downloading source for editing');
+    try {
+      const res = await authedFetch('/api/download?key=' + encodeURIComponent(item.key));
+      if (!res.ok) throw new Error('download ' + res.status);
+      const total = parseInt(res.headers.get('Content-Length') || '0', 10);
+      const reader = res.body.getReader();
+      const chunks = []; let received = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value); received += value.length;
+        if (total) updateProgress(received / total);
+      }
+      editBlob = new Blob(chunks, { type: 'video/mp4' });
+      hideProcessing();
+      switchEditMode('trim');
+    } catch (err) {
+      console.error('Prep failed:', err);
+      hideProcessing();
+      alert('Could not prepare video for editing.');
+      exitEditMode();
     }
-  }, { passive: true });
+  }
+
+  function exitEditMode() {
+    editToolbar.classList.remove('active');
+    editTrimPanel.classList.remove('active');
+    editCropPanel.classList.remove('active');
+    cropOverlay.classList.remove('active');
+    $('modal-wrench').classList.remove('active');
+    $('edit-trim-btn').classList.remove('selected');
+    $('edit-crop-btn').classList.remove('selected');
+    editMode = null;
+    editBlob = null;
+  }
+
+  function switchEditMode(mode) {
+    editMode = mode;
+    $('edit-trim-btn').classList.toggle('selected', mode === 'trim');
+    $('edit-crop-btn').classList.toggle('selected', mode === 'crop');
+    editTrimPanel.classList.toggle('active', mode === 'trim');
+    editCropPanel.classList.toggle('active', mode === 'crop');
+    cropOverlay.classList.toggle('active', mode === 'crop');
+    if (mode === 'trim') initEditTrimUI();
+    else if (mode === 'crop') initCropUI();
+  }
+
+  function initEditTrimUI() {
+    // Wait for modalVideo metadata to know duration
+    const setup = function () {
+      editDuration = modalVideo.duration;
+      editTrimStart = 0;
+      editTrimEnd = editDuration;
+      wireTrimTimeline({
+        video: modalVideo,
+        trackEl: $('edit-trim-track'),
+        selEl:   $('edit-trim-sel'),
+        phEl:    $('edit-trim-ph'),
+        hStart:  $('edit-trim-h-start'),
+        hEnd:    $('edit-trim-h-end'),
+        startLbl:$('edit-trim-start'),
+        endLbl:  $('edit-trim-end'),
+        durLbl:  $('edit-trim-dur'),
+        getStart: () => editTrimStart,
+        getEnd:   () => editTrimEnd,
+        setStart: s => { editTrimStart = s; },
+        setEnd:   e => { editTrimEnd   = e; },
+        getDuration: () => editDuration,
+      });
+    };
+    if (modalVideo.readyState >= 1) setup();
+    else modalVideo.addEventListener('loadedmetadata', setup, { once: true });
+  }
+
+  async function commitEdit() {
+    const item = currentItem();
+    if (!item || !editBlob) return;
+    if (!confirm('Save these edits? This replaces the file on the server and cannot be undone.')) return;
+
+    let processedBlob;
+    try {
+      if (editMode === 'trim') {
+        if (editTrimStart <= 0 && editTrimEnd >= editDuration - 0.05) { alert('Trim range covers the whole video — no change to save.'); return; }
+        showProcessing('trimming', 'stream-copy trim, usually fast');
+        processedBlob = await runTrim(editBlob, editTrimStart, editTrimEnd);
+      } else if (editMode === 'crop') {
+        if (!cropState || cropState.w <= 0 || cropState.h <= 0) { alert('Crop area invalid.'); return; }
+        showProcessing('cropping', 're-encoding video, may take a bit');
+        const vw = modalVideo.videoWidth;
+        const vh = modalVideo.videoHeight;
+        const px = (cropState.x / 100) * vw;
+        const py = (cropState.y / 100) * vh;
+        const pw = (cropState.w / 100) * vw;
+        const ph = (cropState.h / 100) * vh;
+        processedBlob = await runCrop(editBlob, px, py, pw, ph);
+      } else { return; }
+    } catch (err) {
+      console.error('Edit failed:', err); hideProcessing();
+      alert('Editing failed. Original file is unchanged.'); return;
+    }
+
+    // Upload the processed file as a new key, then delete the old
+    processingTitle.textContent = 'saving';
+    processingInfo.textContent = 'uploading edited version';
+    updateProgress(0);
+    try {
+      const uploadRes = await new Promise(function (resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/upload');
+        xhr.setRequestHeader('x-upload-secret', secret);
+        xhr.setRequestHeader('x-file-name', encodeURIComponent(displayName(item.key)));
+        xhr.setRequestHeader('x-file-type', 'video/mp4');
+        // Try to capture new duration
+        getDurationOfBlob(processedBlob).then(function (d) {
+          if (d != null) xhr.setRequestHeader('x-video-duration', String(d));
+          xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable) updateProgress(e.loaded / e.total);
+          });
+          xhr.addEventListener('load', function () { xhr.status < 300 ? resolve(xhr) : reject(new Error('upload ' + xhr.status)); });
+          xhr.addEventListener('error', function () { reject(new Error('network error')); });
+          xhr.send(processedBlob);
+        });
+      });
+      const uploadData = JSON.parse(uploadRes.responseText);
+
+      // Preserve tags on the new object
+      if (item.tags && item.tags.length) {
+        await authedFetch('/api/videos', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: uploadData.key, tags: item.tags }),
+        }).catch(function () {});
+      }
+
+      // Delete the original
+      await authedFetch('/api/videos?key=' + encodeURIComponent(item.key), { method: 'DELETE' }).catch(function () {});
+
+      hideProcessing();
+      exitEditMode();
+      await loadLibrary();
+      // Try to reopen at the newly-saved key
+      const newIdx = libraryFiltered.findIndex(function (x) { return x.key === uploadData.key; });
+      if (newIdx >= 0) openModalAt(newIdx); else closeModal();
+    } catch (err) { console.error('Save failed:', err); hideProcessing(); alert('Save failed. Original file is unchanged.'); }
+  }
+
+  // ── Trim UI wiring (shared between queue trim and modal trim) ───
+
+  function wireTrimTimeline(opts) {
+    // Initial handle positions
+    const draw = function () {
+      const dur = opts.getDuration();
+      if (!isFinite(dur) || dur <= 0) return;
+      const sPct = (opts.getStart() / dur) * 100;
+      const ePct = (opts.getEnd()   / dur) * 100;
+      opts.hStart.style.left = sPct + '%';
+      opts.hEnd.style.left   = ePct + '%';
+      opts.selEl.style.left  = sPct + '%';
+      opts.selEl.style.width = (ePct - sPct) + '%';
+      opts.startLbl.textContent = fmtTime(opts.getStart());
+      opts.endLbl.textContent   = fmtTime(opts.getEnd());
+      opts.durLbl.textContent   = fmtTime(opts.getEnd() - opts.getStart());
+    };
+
+    const onTime = function () {
+      const dur = opts.getDuration();
+      if (!isFinite(dur) || dur <= 0) return;
+      opts.phEl.style.left = ((opts.video.currentTime / dur) * 100) + '%';
+      // Loop playback within selection
+      if (opts.video.currentTime >= opts.getEnd() - 0.05) opts.video.currentTime = opts.getStart();
+    };
+    opts.video.removeEventListener && opts.video.removeEventListener('timeupdate', opts._prevTime);
+    opts._prevTime = onTime;
+    opts.video.addEventListener('timeupdate', onTime);
+
+    const beginDrag = function (which) {
+      return function (e) {
+        e.preventDefault();
+        const rect = opts.trackEl.getBoundingClientRect();
+        const move = function (ev) {
+          const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+          const pct = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+          const t = pct * opts.getDuration();
+          if (which === 'start') {
+            const ns = Math.min(t, opts.getEnd() - 0.5);
+            opts.setStart(Math.max(0, ns));
+            opts.video.currentTime = opts.getStart();
+          } else {
+            const ne = Math.max(t, opts.getStart() + 0.5);
+            opts.setEnd(Math.min(opts.getDuration(), ne));
+            opts.video.currentTime = opts.getEnd();
+          }
+          draw();
+        };
+        const stop = function () {
+          document.removeEventListener('pointermove', move);
+          document.removeEventListener('pointerup', stop);
+        };
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', stop);
+      };
+    };
+    opts.hStart.onpointerdown = beginDrag('start');
+    opts.hEnd.onpointerdown   = beginDrag('end');
+
+    draw();
+  }
+
+  // ── Crop UI ─────────────────────────────────────────────────────
+
+  let cropState = null;  // { x, y, w, h } in percentages of the video area
+
+  function initCropUI() {
+    cropState = { x: 10, y: 10, w: 80, h: 80 };
+    drawCrop();
+    wireCropDrag();
+  }
+
+  function drawCrop() {
+    if (!cropState) return;
+    cropRect.style.left   = cropState.x + '%';
+    cropRect.style.top    = cropState.y + '%';
+    cropRect.style.width  = cropState.w + '%';
+    cropRect.style.height = cropState.h + '%';
+  }
+
+  function wireCropDrag() {
+    // Wire once per initCropUI; we clear existing handlers by reassigning.
+    const startDrag = function (handle) {
+      return function (e) {
+        e.preventDefault(); e.stopPropagation();
+        const rect = cropOverlay.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const orig = Object.assign({}, cropState);
+        const move = function (ev) {
+          const dxPct = ((ev.clientX - startX) / rect.width) * 100;
+          const dyPct = ((ev.clientY - startY) / rect.height) * 100;
+          const s = Object.assign({}, orig);
+          if (handle === 'move') {
+            s.x = Math.max(0, Math.min(100 - s.w, orig.x + dxPct));
+            s.y = Math.max(0, Math.min(100 - s.h, orig.y + dyPct));
+          } else {
+            if (handle.indexOf('l') >= 0) { const nx = Math.max(0, Math.min(orig.x + orig.w - 5, orig.x + dxPct)); s.w = orig.w + (orig.x - nx); s.x = nx; }
+            if (handle.indexOf('r') >= 0) { s.w = Math.max(5, Math.min(100 - orig.x, orig.w + dxPct)); }
+            if (handle.indexOf('t') >= 0) { const ny = Math.max(0, Math.min(orig.y + orig.h - 5, orig.y + dyPct)); s.h = orig.h + (orig.y - ny); s.y = ny; }
+            if (handle.indexOf('b') >= 0) { s.h = Math.max(5, Math.min(100 - orig.y, orig.h + dyPct)); }
+          }
+          cropState = s; drawCrop();
+        };
+        const stop = function () {
+          document.removeEventListener('pointermove', move);
+          document.removeEventListener('pointerup', stop);
+        };
+        document.addEventListener('pointermove', move);
+        document.addEventListener('pointerup', stop);
+      };
+    };
+    cropRect.onpointerdown = startDrag('move');
+    const handles = cropRect.querySelectorAll('.crop-handle');
+    handles.forEach(function (h) { h.onpointerdown = startDrag(h.dataset.handle); });
+  }
+
+  // ── Standalone Trim modal (queue) ───────────────────────────────
+
+  let trimSource = null;  // { blob, onSave } current invocation
+  let trimStart = 0, trimEnd = 0, trimDur = 0;
+
+  function openTrimModal(opts) {
+    trimSource = opts;
+    const url = URL.createObjectURL(opts.source);
+    trimVideo.src = url;
+    trimVideo.load();
+    $('trim-title').textContent = opts.title || 'trim';
+    trimModal.classList.add('open');
+    trimVideo.addEventListener('loadedmetadata', function once() {
+      trimDur = trimVideo.duration;
+      trimStart = 0; trimEnd = trimDur;
+      wireTrimTimeline({
+        video: trimVideo,
+        trackEl: $('trim-track'),
+        selEl:   $('trim-sel'),
+        phEl:    $('trim-ph'),
+        hStart:  $('trim-h-start'),
+        hEnd:    $('trim-h-end'),
+        startLbl:$('trim-start-lbl'),
+        endLbl:  $('trim-end-lbl'),
+        durLbl:  $('trim-dur-lbl'),
+        getStart: () => trimStart,
+        getEnd:   () => trimEnd,
+        setStart: s => { trimStart = s; },
+        setEnd:   e => { trimEnd   = e; },
+        getDuration: () => trimDur,
+      });
+    }, { once: true });
+  }
+  function closeTrimModal() {
+    trimModal.classList.remove('open');
+    trimVideo.pause();
+    if (trimVideo.src) URL.revokeObjectURL(trimVideo.src);
+    trimVideo.removeAttribute('src');
+    trimVideo.load();
+    trimSource = null;
+  }
+  $('trim-close').addEventListener('click', closeTrimModal);
+  $('trim-cancel').addEventListener('click', closeTrimModal);
+  $('trim-commit').addEventListener('click', function () {
+    if (!trimSource) return;
+    const src = trimSource;
+    const s = trimStart, e = trimEnd;
+    closeTrimModal();
+    if (src.onSave) src.onSave(s, e);
+  });
 
 }());
 </script>
