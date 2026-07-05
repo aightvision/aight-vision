@@ -139,14 +139,42 @@
     .q-bar.error { background: #e57373; width: 100%; }
 
     .q-trim-btn {
-      background: transparent; border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.55); padding: 3px 8px; border-radius: 4px;
-      font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
       -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
     }
-    .q-trim-btn:hover { color: #fff; border-color: #fff; }
-    .q-trim-info { font-size: 10px; color: rgba(163,163,255,0.7); letter-spacing: 0.05em; }
+    .q-trim-btn:hover { background: rgba(255,255,255,0.18); border-color: #fff; }
+    .q-trim-info { font-size: 10px; color: rgba(163,163,255,0.85); letter-spacing: 0.05em; }
+
+    /* Start-upload button (manual trigger for the queue) */
+    #queue-actions { width: 100%; max-width: 560px; display: none; justify-content: center; padding: 4px 0 8px; }
+    #queue-actions.visible { display: flex; }
+    #start-upload {
+      background: rgba(90,200,130,0.85);
+      border: 1px solid rgba(90,200,130,1);
+      color: #000;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    #start-upload:hover { background: rgba(105,220,145,1); }
+    #start-upload:disabled { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.15); cursor: default; }
 
     #summary { font-size: 11px; color: rgba(255,255,255,0.25); letter-spacing: 0.1em; }
 
@@ -436,44 +464,72 @@
     .modal-btn.danger:hover { background: rgba(220,60,60,0.85); border-color: rgba(220,60,60,0.85); color: #fff; }
     .modal-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff; }
 
-    /* Edit mode toolbar (below normal actions when editing) */
+    /* Hide the normal action row while editing so save/cancel are the only choices */
+    .modal-inner.editing .modal-actions,
+    .modal-inner.editing .modal-name-wrap,
+    .modal-inner.editing .modal-slug-row,
+    .modal-inner.editing .modal-tag-list { display: none; }
+    .modal-inner.editing .modal-meta-row { opacity: 0.4; }
+
+    /* Edit mode toolbar */
     .edit-toolbar {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      margin-top: 0;
+      padding: 14px 0 8px;
+      border-top: 1px solid rgba(255,255,255,0.1);
       display: none;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .edit-toolbar.active { display: flex; }
 
     .edit-mode-picker { display: flex; gap: 8px; justify-content: center; }
     .edit-mode-picker button {
       background: transparent; border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.65); padding: 6px 14px; border-radius: 5px;
+      color: rgba(255,255,255,0.65); padding: 7px 18px; border-radius: 5px;
       font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
       cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
+      font-family: inherit;
     }
     .edit-mode-picker button:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
-    .edit-mode-picker button.selected { background: rgba(255,255,255,0.1); border-color: #fff; color: #fff; }
+    .edit-mode-picker button.selected { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; }
 
-    .edit-controls { padding: 8px 0; display: none; }
+    .edit-controls { padding: 4px 0; display: none; }
     .edit-controls.active { display: block; }
 
-    .edit-confirm-row { display: flex; gap: 8px; justify-content: center; padding-top: 8px; }
+    .edit-confirm-row {
+      display: flex;
+      gap: 10px;
+      justify-content: stretch;
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
     .edit-confirm-row button {
-      background: transparent; border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.7); padding: 8px 18px; border-radius: 5px;
-      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.85);
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
       cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .edit-confirm-row button.commit {
-      background: rgba(80,180,120,0.8); border-color: rgba(80,180,120,0.9); color: #fff;
-    }
-    .edit-confirm-row button.commit:hover { background: rgba(90,200,130,1); }
     .edit-confirm-row button:hover { color: #fff; border-color: #fff; }
+    .edit-confirm-row button.commit {
+      background: rgba(90,200,130,0.9);
+      border-color: rgba(90,200,130,1);
+      color: #000;
+      font-weight: 600;
+    }
+    .edit-confirm-row button.commit:hover { background: rgba(110,220,150,1); border-color: rgba(110,220,150,1); color: #000; }
 
-    .edit-warning { text-align: center; font-size: 10px; color: rgba(255,180,80,0.7); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0; }
+    .edit-warning { text-align: center; font-size: 10px; color: rgba(255,180,80,0.8); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0; }
 
     /* ── Trim UI (used both in edit-mode and in standalone trim modal) ── */
 
@@ -613,6 +669,9 @@
   </div>
 
   <div id="queue"></div>
+  <div id="queue-actions">
+    <button id="start-upload" type="button">upload <span id="pending-count"></span></button>
+  </div>
   <div id="summary"></div>
 
   <div id="library">
@@ -728,7 +787,7 @@
 
         <div class="edit-confirm-row">
           <button id="edit-cancel">cancel</button>
-          <button class="commit" id="edit-commit">save (irreversible)</button>
+          <button class="commit" id="edit-commit">commit edit</button>
         </div>
       </div>
     </div>
@@ -761,7 +820,7 @@
       </div>
       <div class="edit-confirm-row">
         <button id="trim-cancel">cancel</button>
-        <button class="commit" id="trim-commit">save trim</button>
+        <button class="commit" id="trim-commit">commit trim</button>
       </div>
     </div>
   </div>
@@ -1034,9 +1093,29 @@
       queue.push(item);
       renderQueueItem(item);
     }
-    processQueue();
+    // Uploads are manual now — user clicks the "upload" button to start
+    updateStartButton();
     updateQueueSummary();
   }
+
+  function updateStartButton() {
+    const pending = queue.filter(function (i) { return i.status === 'pending'; }).length;
+    const bar = $('queue-actions');
+    const btn = $('start-upload');
+    const count = $('pending-count');
+    if (pending > 0 && running === 0) {
+      bar.classList.add('visible');
+      count.textContent = '(' + pending + ')';
+      btn.disabled = false;
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+
+  $('start-upload').addEventListener('click', function () {
+    processQueue();
+    updateStartButton();
+  });
 
   dropZone.addEventListener('dragover',  function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
@@ -1071,6 +1150,7 @@
       running++;
       uploadItem(item);
     }
+    updateStartButton();
     if (running === 0 && queue.some(function (i) { return i.status === 'done'; })) {
       loadLibrary();
     }
@@ -1656,8 +1736,20 @@
     } catch (err) { console.error('Rename failed:', err); alert('Failed to rename.'); }
   }
 
-  $('modal-close').addEventListener('click', closeModal);
-  modalEl.addEventListener('click', function (e) { if (e.target === modalEl) closeModal(); });
+  $('modal-close').addEventListener('click', function () {
+    // If editing, force user to explicitly save or cancel first
+    if (editToolbar.classList.contains('active')) {
+      alert('Save or cancel your edit first.');
+      return;
+    }
+    closeModal();
+  });
+  modalEl.addEventListener('click', function (e) {
+    if (e.target !== modalEl) return;
+    // Backdrop click is inert during edit mode — prevents accidental data loss
+    if (editToolbar.classList.contains('active')) return;
+    closeModal();
+  });
   $('modal-prev').addEventListener('click', function () {
     if (libraryFiltered.length === 0) return;
     modalIdx = modalIdx > 0 ? modalIdx - 1 : libraryFiltered.length - 1;
@@ -1729,6 +1821,7 @@
     const item = currentItem();
     if (!item) return;
     editToolbar.classList.add('active');
+    document.querySelector('.modal-inner').classList.add('editing');
     $('modal-wrench').classList.add('active');
     // Preload the video bytes into an in-memory blob for fast processing
     showProcessing('preparing video', 'downloading source for editing');
@@ -1760,6 +1853,7 @@
     editTrimPanel.classList.remove('active');
     editCropPanel.classList.remove('active');
     cropOverlay.classList.remove('active');
+    document.querySelector('.modal-inner').classList.remove('editing');
     $('modal-wrench').classList.remove('active');
     $('edit-trim-btn').classList.remove('selected');
     $('edit-crop-btn').classList.remove('selected');
