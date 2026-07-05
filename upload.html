@@ -344,6 +344,71 @@
     .tag-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: center; }
     .tag-actions .aight-btn { font-size: 12px; padding: 8px 16px; }
 
+    /* Tag AND-group styling */
+    .tag-plus {
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 1;
+      background: transparent;
+      border: 1px solid var(--aight-yellow);
+      color: var(--aight-yellow);
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tag-plus::before { content: "{"; padding-right: 2px; }
+    .tag-plus::after  { content: "}"; padding-left: 2px; }
+    .tag-plus:hover { background: rgba(200,166,60,0.15); }
+
+    .tag-row.tag-nested {
+      padding: 6px 4px 6px 24px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .tag-nested-marker {
+      font-size: 10px;
+      color: var(--aight-yellow);
+      opacity: 0.75;
+      letter-spacing: 0.1em;
+      margin-right: 8px;
+      flex-shrink: 0;
+      width: 44px;
+    }
+    .tag-remove-nested {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; line-height: 1;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+    .tag-remove-nested:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .tag-and-dropdown {
+      background: rgba(200,166,60,0.06);
+      border-left: 2px solid var(--aight-yellow);
+      margin: 4px 0 8px;
+      padding: 4px 0;
+    }
+    .tag-and-dropdown .tag-row {
+      padding: 8px 4px 8px 24px;
+      color: rgba(255,255,255,0.75);
+    }
+    .tag-and-dropdown .tag-row:hover { color: #fff; background: rgba(200,166,60,0.08); }
+    .tag-and-empty {
+      padding: 10px 24px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      font-style: italic;
+    }
+
     /* ── Modal (video detail) ────────────────────────────────────── */
 
     #modal {
@@ -384,6 +449,15 @@
     }
     .modal-inner.editing .modal-close:hover { background: rgba(110,207,122,0.15); }
     .modal-inner.editing .modal-close .close-label::before { content: 'EXIT'; }
+
+    /* Auto-zoom preview during crop editing */
+    .modal-video-wrap { overflow: hidden; }
+    .modal-video-wrap.crop-zoomed video {
+      transform-origin: 0 0;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-video-wrap.crop-zoomed #crop-overlay { opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+    #crop-overlay { transition: opacity 0.25s; }
 
     /* Publish button bar sits above the video */
     .modal-publish-bar {
@@ -915,12 +989,17 @@
   let libraryFiltered = [];
   let modalIdx = -1;
 
-  // Filter state
-  const selectedTags = new Set();
+  // Filter state.
+  // tagGroups is an array where each element is a Set of tags AND'd together.
+  // The groups themselves OR together. Example:
+  //   tagGroups = [ new Set(['food','pizza']), new Set(['drinks']) ]
+  //   → (food AND pizza) OR drinks
+  let tagGroups = [];
   const selectedLengths = new Set();
   let selectNoTags = false;
   let selectAll = true;
   let showOnlyUnpublished = false;  // toggled by the {unpublished} button
+  let expandedGroupIdx = -1;        // which group is showing its {+} dropdown
 
   // ── DOM ─────────────────────────────────────────────────────────
 
@@ -1374,25 +1453,35 @@
     // Actual event wiring happens per-tile below.
   }
 
+  function allSelectedTags() {
+    const s = new Set();
+    for (const g of tagGroups) for (const t of g) s.add(t);
+    return s;
+  }
+
   function applyGridFilter() {
     let base = libraryItems.slice();
-    // Apply the {unpublished} toggle first — narrows the pool
     if (showOnlyUnpublished) base = base.filter(function (i) { return !i.published; });
 
-    // Reflect filter state on the {#} button
-    const anyFilter = selectNoTags || selectedTags.size > 0 || selectedLengths.size > 0;
+    const anyFilter = selectNoTags || tagGroups.length > 0 || selectedLengths.size > 0;
     $('lib-filter').classList.toggle('active', anyFilter);
 
     if (selectAll) { libraryFiltered = base; }
     else {
       libraryFiltered = base.filter(function (item) {
-        // Tag axis
-        if (selectNoTags || selectedTags.size > 0) {
+        // Tag axis: item passes if either selectNoTags matches, or ANY group AND-matches
+        if (selectNoTags || tagGroups.length > 0) {
           const empty = !item.tags || item.tags.length === 0;
           let tagOk = false;
           if (selectNoTags && empty) tagOk = true;
-          if (!tagOk && selectedTags.size > 0) {
-            for (const t of item.tags || []) if (selectedTags.has(t)) { tagOk = true; break; }
+          if (!tagOk) {
+            for (const group of tagGroups) {
+              let allMatch = true;
+              for (const t of group) {
+                if (!(item.tags || []).includes(t)) { allMatch = false; break; }
+              }
+              if (allMatch) { tagOk = true; break; }
+            }
           }
           if (!tagOk) return false;
         }
@@ -1496,7 +1585,7 @@
   $('lib-filter').addEventListener('click', function () { renderTagPanel(); tagPanel.classList.add('open'); });
   $('tag-panel-close').addEventListener('click', function () { tagPanel.classList.remove('open'); });
   $('tag-reset').addEventListener('click', function () {
-    selectedTags.clear(); selectedLengths.clear();
+    tagGroups = []; selectedLengths.clear(); expandedGroupIdx = -1;
     selectNoTags = false; selectAll = true;
     applyGridFilter(); renderTagPanel();
   });
@@ -1540,19 +1629,101 @@
     noneRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">no tags</span><span class="tag-count">' + agg.noTagCount + '</span>';
     noneRow.addEventListener('click', function () {
       selectNoTags = !selectNoTags; selectAll = false;
-      if (!selectNoTags && selectedTags.size === 0 && selectedLengths.size === 0) selectAll = true;
+      if (!selectNoTags && tagGroups.length === 0 && selectedLengths.size === 0) selectAll = true;
       applyGridFilter(); renderTagPanel();
     });
     tagListEl.appendChild(noneRow);
 
-    for (const [t, c] of agg.list) {
+    // Render selected groups. Each group is one AND clause.
+    const countMap = new Map(agg.list);
+    const selected = allSelectedTags();
+
+    for (let gi = 0; gi < tagGroups.length; gi++) {
+      const group = tagGroups[gi];
+      const groupTags = Array.from(group);
+      const mainTag = groupTags[0];
+      const nested = groupTags.slice(1);
+
+      // Main row
       const row = document.createElement('div');
-      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
+      row.className = 'tag-row tag-group-main selected';
+      row.innerHTML =
+        '<span class="tag-marker"></span>' +
+        '<span class="tag-name">' + escHtml(mainTag) + '</span>' +
+        '<span class="tag-count">' + (countMap.get(mainTag) || 0) + '</span>' +
+        '<button class="aight-btn tag-plus" data-gi="' + gi + '">+</button>';
+      // Click main row (not the +) removes the whole group
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.tag-plus')) {
+          expandedGroupIdx = (expandedGroupIdx === gi) ? -1 : gi;
+          renderTagPanel();
+          return;
+        }
+        tagGroups.splice(gi, 1);
+        expandedGroupIdx = -1;
+        selectAll = false;
+        if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        applyGridFilter(); renderTagPanel();
+      });
+      tagListEl.appendChild(row);
+
+      // Nested AND-clause tags
+      for (const nt of nested) {
+        const nrow = document.createElement('div');
+        nrow.className = 'tag-row tag-nested';
+        nrow.innerHTML =
+          '<span class="tag-nested-marker">↳ AND</span>' +
+          '<span class="tag-name">' + escHtml(nt) + '</span>' +
+          '<span class="tag-count">' + (countMap.get(nt) || 0) + '</span>' +
+          '<button class="tag-remove-nested" data-tag="' + escHtml(nt) + '">×</button>';
+        nrow.querySelector('.tag-remove-nested').addEventListener('click', function (e) {
+          e.stopPropagation();
+          tagGroups[gi].delete(nt);
+          if (tagGroups[gi].size === 0) tagGroups.splice(gi, 1);
+          if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+          applyGridFilter(); renderTagPanel();
+        });
+        tagListEl.appendChild(nrow);
+      }
+
+      // AND-picker dropdown if this group is expanded
+      if (expandedGroupIdx === gi) {
+        const dd = document.createElement('div');
+        dd.className = 'tag-and-dropdown';
+        let addedAny = false;
+        for (const [t, c] of agg.list) {
+          if (selected.has(t)) continue;
+          const opt = document.createElement('div');
+          opt.className = 'tag-row tag-and-option';
+          opt.innerHTML =
+            '<span class="tag-nested-marker">+ AND</span>' +
+            '<span class="tag-name">' + escHtml(t) + '</span>' +
+            '<span class="tag-count">' + c + '</span>';
+          opt.addEventListener('click', function () {
+            tagGroups[gi].add(t);
+            expandedGroupIdx = -1;
+            applyGridFilter(); renderTagPanel();
+          });
+          dd.appendChild(opt);
+          addedAny = true;
+        }
+        if (!addedAny) {
+          dd.innerHTML = '<div class="tag-and-empty">no more tags to combine</div>';
+        }
+        tagListEl.appendChild(dd);
+      }
+    }
+
+    // Unselected tags — click adds as a new group (OR clause)
+    for (const [t, c] of agg.list) {
+      if (selected.has(t)) continue;
+      const row = document.createElement('div');
+      row.className = 'tag-row';
       row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
       row.addEventListener('click', function () {
-        if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
+        tagGroups.push(new Set([t]));
+        expandedGroupIdx = -1;
         selectAll = false;
-        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
         applyGridFilter(); renderTagPanel();
       });
       tagListEl.appendChild(row);
@@ -1564,7 +1735,7 @@
     resetTags.innerHTML = '<button class="aight-btn" id="tag-reset-hash">reset #</button>';
     tagListEl.appendChild(resetTags);
     resetTags.querySelector('#tag-reset-hash').addEventListener('click', function () {
-      selectedTags.clear(); selectNoTags = false;
+      tagGroups = []; selectNoTags = false; expandedGroupIdx = -1;
       if (selectedLengths.size === 0) selectAll = true;
       applyGridFilter(); renderTagPanel();
     });
@@ -1583,7 +1754,7 @@
         if (selectedLengths.has(b[0])) selectedLengths.delete(b[0]);
         else selectedLengths.add(b[0]);
         selectAll = false;
-        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
         applyGridFilter(); renderTagPanel();
       });
       tagListEl.appendChild(row);
@@ -1596,7 +1767,7 @@
     tagListEl.appendChild(resetTime);
     resetTime.querySelector('#tag-reset-time').addEventListener('click', function () {
       selectedLengths.clear();
-      if (selectedTags.size === 0 && !selectNoTags) selectAll = true;
+      if (tagGroups.length === 0 && !selectNoTags) selectAll = true;
       applyGridFilter(); renderTagPanel();
     });
   }
@@ -2037,6 +2208,7 @@
     $('modal-wrench').classList.remove('active');
     $('edit-trim-btn').classList.remove('selected');
     $('edit-crop-btn').classList.remove('selected');
+    removeCropZoom();  // clean up any active zoom
     editMode = null;
     editBlob = null;
   }
@@ -2048,6 +2220,8 @@
     editTrimPanel.classList.toggle('active', mode === 'trim');
     editCropPanel.classList.toggle('active', mode === 'crop');
     cropOverlay.classList.toggle('active', mode === 'crop');
+    // Leaving crop mode should un-zoom
+    if (mode !== 'crop') removeCropZoom();
     if (mode === 'trim') initEditTrimUI();
     else if (mode === 'crop') initCropUI();
   }
@@ -2216,11 +2390,14 @@
   // ── Crop UI ─────────────────────────────────────────────────────
 
   let cropState = null;  // { x, y, w, h } in percentages of the video area
+  let cropZoomTimer = null;
+  const modalVideoWrap = document.querySelector('.modal-video-wrap');
 
   function initCropUI() {
     cropState = { x: 10, y: 10, w: 80, h: 80 };
     drawCrop();
     wireCropDrag();
+    scheduleZoom();  // start with a countdown to zoom into the default rect
   }
 
   function drawCrop() {
@@ -2231,11 +2408,33 @@
     cropRect.style.height = cropState.h + '%';
   }
 
+  function scheduleZoom() {
+    clearZoomTimer();
+    cropZoomTimer = setTimeout(applyCropZoom, 2000);
+  }
+  function clearZoomTimer() {
+    if (cropZoomTimer) { clearTimeout(cropZoomTimer); cropZoomTimer = null; }
+  }
+  function applyCropZoom() {
+    if (!cropState || editMode !== 'crop') return;
+    // Uniform scale so the crop rectangle fills the wrap. Whichever dimension
+    // is larger dictates the scale (letterbox for aspect mismatch).
+    const scale = 100 / Math.max(cropState.w, cropState.h);
+    modalVideo.style.transformOrigin = '0 0';
+    modalVideo.style.transform = 'scale(' + scale + ') translate(-' + cropState.x + '%, -' + cropState.y + '%)';
+    modalVideoWrap.classList.add('crop-zoomed');
+  }
+  function removeCropZoom() {
+    clearZoomTimer();
+    modalVideoWrap.classList.remove('crop-zoomed');
+    modalVideo.style.transform = '';
+  }
+
   function wireCropDrag() {
-    // Wire once per initCropUI; we clear existing handlers by reassigning.
     const startDrag = function (handle) {
       return function (e) {
         e.preventDefault(); e.stopPropagation();
+        removeCropZoom();  // any adjustment un-zooms and clears timer
         const rect = cropOverlay.getBoundingClientRect();
         const startX = e.clientX;
         const startY = e.clientY;
@@ -2258,6 +2457,7 @@
         const stop = function () {
           document.removeEventListener('pointermove', move);
           document.removeEventListener('pointerup', stop);
+          scheduleZoom();  // re-zoom 2s after release
         };
         document.addEventListener('pointermove', move);
         document.addEventListener('pointerup', stop);
@@ -2266,6 +2466,12 @@
     cropRect.onpointerdown = startDrag('move');
     const handles = cropRect.querySelectorAll('.crop-handle');
     handles.forEach(function (h) { h.onpointerdown = startDrag(h.dataset.handle); });
+
+    // Tap on the zoomed video → un-zoom for adjustment
+    modalVideo.addEventListener('pointerdown', function () {
+      if (editMode !== 'crop') return;
+      if (modalVideoWrap.classList.contains('crop-zoomed')) removeCropZoom();
+    }, { passive: true });
   }
 
   // ── Standalone Trim modal (queue) ───────────────────────────────
