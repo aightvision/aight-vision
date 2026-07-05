@@ -39,6 +39,10 @@ async function listVideos(env) {
     for (const obj of result.objects) {
       const durRaw = obj.customMetadata?.duration;
       const duration = durRaw && isFinite(parseFloat(durRaw)) ? parseFloat(durRaw) : null;
+      // Missing `published` field = legacy; treat as published for main stream
+      const pubRaw = obj.customMetadata?.published;
+      const published = pubRaw !== 'false';
+
       items.push({
         key: obj.key,
         url: `${base}/${encodeURIComponent(obj.key)}`,
@@ -48,6 +52,7 @@ async function listVideos(env) {
         tags: parseTags(obj.customMetadata?.tags),
         duration,
         slug: obj.customMetadata?.slug || null,
+        published,
       });
     }
     cursor = result.truncated ? result.cursor : null;
@@ -135,11 +140,18 @@ async function updateVideo(request, env) {
     }
   }
 
+  // Publish state — accept boolean or string. Preserve current value if absent.
+  let published = source.customMetadata?.published || 'true';
+  if (body.published !== undefined) {
+    published = (body.published === true || body.published === 'true') ? 'true' : 'false';
+  }
+
   const newCustomMetadata = {
     ...(source.customMetadata || {}),
     tags: tags.join(','),
     duration,
     slug,
+    published,
   };
 
   await env.VIDEOS.put(targetKey, source.body, {
@@ -171,5 +183,6 @@ async function updateVideo(request, env) {
     tags,
     duration: duration ? parseFloat(duration) : null,
     slug: slug || null,
+    published: published === 'true',
   });
 }

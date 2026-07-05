@@ -10,6 +10,11 @@ export async function onRequestGet({ env }) {
       include: ['customMetadata'],
     });
     for (const obj of result.objects) {
+      // Filter out unpublished videos from the main stream.
+      // Videos without a `published` field are legacy and treated as published.
+      const published = obj.customMetadata?.published;
+      if (published === 'false') continue;
+
       const tagStr = obj.customMetadata?.tags || '';
       const tags = tagStr ? tagStr.split(',').map(t => t.trim()).filter(Boolean) : [];
       items.push({

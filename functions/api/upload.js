@@ -21,7 +21,6 @@ export async function onRequestPost({ request, env }) {
   const rawDur = request.headers.get('x-video-duration');
   const duration = rawDur && isFinite(parseFloat(rawDur)) ? String(Math.round(parseFloat(rawDur) * 100) / 100) : '';
 
-  // Generate a random slug for this upload (skip gracefully if KV isn't bound)
   let slug = '';
   if (env.SLUGS) {
     try { slug = await generateUniqueSlug(env, 8); }
@@ -30,7 +29,9 @@ export async function onRequestPost({ request, env }) {
 
   await env.VIDEOS.put(key, request.body, {
     httpMetadata: { contentType },
-    customMetadata: { tags: '', duration, slug },
+    // New uploads default to unpublished. Existing videos with no `published`
+    // field are treated as published by the playlist filter.
+    customMetadata: { tags: '', duration, slug, published: 'false' },
   });
 
   if (slug && env.SLUGS) {
@@ -39,5 +40,5 @@ export async function onRequestPost({ request, env }) {
     } catch (e) { console.error('slug KV write failed:', e); }
   }
 
-  return Response.json({ success: true, key, slug: slug || null }, { status: 201 });
+  return Response.json({ success: true, key, slug: slug || null, published: false }, { status: 201 });
 }
