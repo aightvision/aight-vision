@@ -236,6 +236,89 @@
 
     .tag-reset:hover { color: #fff; border-color: #fff; }
 
+    /* Tag group styling — same visual language as the upload area */
+    .tag-section-title { font-size: 10px; letter-spacing: 0.22em; color: rgba(255,255,255,0.25); text-transform: uppercase; padding: 14px 4px 6px; }
+    .tag-section-reset { padding: 8px 0 6px; display: flex; justify-content: flex-end; }
+    .tag-scope-reset {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tag-scope-reset:hover { color: #fff; border-color: #fff; }
+
+    .tag-row.tag-length, .tag-row.tag-none { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
+
+    .tag-plus {
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 1;
+      background: transparent;
+      border: 1px solid rgba(200,166,60,0.7);
+      color: rgba(200,166,60,0.9);
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tag-plus::before { content: "{"; padding-right: 2px; }
+    .tag-plus::after  { content: "}"; padding-left: 2px; }
+    .tag-plus:hover { background: rgba(200,166,60,0.15); }
+
+    .tag-row.tag-nested {
+      padding: 8px 4px 8px 24px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .tag-nested-marker {
+      font-size: 10px;
+      color: rgba(200,166,60,0.85);
+      letter-spacing: 0.1em;
+      margin-right: 8px;
+      flex-shrink: 0;
+      width: 44px;
+    }
+    .tag-remove-nested {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; line-height: 1;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+    .tag-remove-nested:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .tag-and-dropdown {
+      background: rgba(200,166,60,0.06);
+      border-left: 2px solid rgba(200,166,60,0.9);
+      margin: 4px 0 8px;
+      padding: 4px 0;
+    }
+    .tag-and-dropdown .tag-row {
+      padding: 8px 4px 8px 24px;
+      color: rgba(255,255,255,0.75);
+    }
+    .tag-and-dropdown .tag-row:hover { color: #fff; background: rgba(200,166,60,0.08); }
+    .tag-and-empty {
+      padding: 10px 24px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      font-style: italic;
+    }
+
     /* ── Home overlay ─────────────────────────────────────────────── */
 
     #overlay {
@@ -314,7 +397,7 @@
     </div>
     <div class="tag-list" id="tag-list"></div>
     <div class="tag-actions">
-      <button class="tag-reset" id="tag-reset">reset</button>
+      <button class="tag-reset" id="tag-reset">reset all</button>
     </div>
   </div>
 </div>
@@ -340,10 +423,20 @@
   let hideTimer      = null;
   let prevPressAt    = 0;
 
-  // Filter state
-  const selectedTags = new Set();  // tag strings currently selected
-  let selectNoTags   = false;      // "no tags" filter chosen
-  let selectAll      = true;       // "all videos" — mutually exclusive with the two above
+  // Length buckets shared with upload area
+  const LENGTH_BUCKETS = [
+    ['0-10',  'under 10s', 0,    10],
+    ['10-30', '10 – 30s',  10,   30],
+    ['30-60', '30 – 60s',  30,   60],
+    ['60+',   'over 60s',  60,   Infinity],
+  ];
+
+  // Filter state — tagGroups is Array<Set>; each Set is AND'd, groups OR
+  let tagGroups = [];
+  const selectedLengths = new Set();
+  let selectNoTags   = false;
+  let selectAll      = true;
+  let expandedGroupIdx = -1;
 
   // Swipe tracking
   let touchStartX = 0, touchStartY = 0, touchStartT = 0;
@@ -368,16 +461,43 @@
 
   // ── Filtering ──────────────────────────────────────────────────────────────
 
+  function allSelectedTags() {
+    const s = new Set();
+    for (const g of tagGroups) for (const t of g) s.add(t);
+    return s;
+  }
+
   function computeFiltered() {
     if (selectAll) return masterPlaylist.slice();
     return masterPlaylist.filter(function (item) {
-      const isEmpty = !item.tags || item.tags.length === 0;
-      if (selectNoTags && isEmpty) return true;
-      if (selectedTags.size === 0) return false;
-      for (const t of item.tags) {
-        if (selectedTags.has(t)) return true; // OR semantics
+      // Tag axis
+      if (selectNoTags || tagGroups.length > 0) {
+        const empty = !item.tags || item.tags.length === 0;
+        let tagOk = false;
+        if (selectNoTags && empty) tagOk = true;
+        if (!tagOk) {
+          for (const group of tagGroups) {
+            let allMatch = true;
+            for (const t of group) {
+              if (!(item.tags || []).includes(t)) { allMatch = false; break; }
+            }
+            if (allMatch) { tagOk = true; break; }
+          }
+        }
+        if (!tagOk) return false;
       }
-      return false;
+      // Length axis
+      if (selectedLengths.size > 0) {
+        const d = item.duration || 0;
+        let lenOk = false;
+        for (const b of selectedLengths) {
+          const bucket = LENGTH_BUCKETS.find(function (x) { return x[0] === b; });
+          if (!bucket) continue;
+          if (d >= bucket[2] && d < bucket[3]) { lenOk = true; break; }
+        }
+        if (!lenOk) return false;
+      }
+      return true;
     });
   }
 
@@ -531,25 +651,28 @@
     return { list: list, noTagCount: noTagCount, total: masterPlaylist.length };
   }
 
+  function lengthCounts() {
+    const counts = {};
+    for (const b of LENGTH_BUCKETS) counts[b[0]] = 0;
+    for (const item of masterPlaylist) {
+      const d = item.duration != null ? item.duration : null;
+      if (d == null) continue;
+      for (const b of LENGTH_BUCKETS) if (d >= b[2] && d < b[3]) { counts[b[0]]++; break; }
+    }
+    return counts;
+  }
+
   function renderTagList() {
     const agg = aggregateTags();
+    const lc  = lengthCounts();
+    const selected = allSelectedTags();
     tagListEl.innerHTML = '';
 
-    // All videos
-    const allRow = document.createElement('div');
-    allRow.className = 'tag-row tag-all' + (selectAll ? ' selected' : '');
-    allRow.innerHTML =
-      '<span class="tag-marker"></span>' +
-      '<span class="tag-name">all videos</span>' +
-      '<span class="tag-count">' + agg.total + '</span>';
-    allRow.addEventListener('click', function () {
-      selectedTags.clear();
-      selectNoTags = false;
-      selectAll = true;
-      applyFilter();
-      renderTagList();
-    });
-    tagListEl.appendChild(allRow);
+    // Tags section header
+    const tagHead = document.createElement('div');
+    tagHead.className = 'tag-section-title';
+    tagHead.textContent = 'tags';
+    tagListEl.appendChild(tagHead);
 
     // No tags
     const noneRow = document.createElement('div');
@@ -561,32 +684,140 @@
     noneRow.addEventListener('click', function () {
       selectNoTags = !selectNoTags;
       selectAll = false;
-      if (!selectNoTags && selectedTags.size === 0) { selectAll = true; }
+      if (!selectNoTags && tagGroups.length === 0 && selectedLengths.size === 0) selectAll = true;
       applyFilter();
       renderTagList();
     });
     tagListEl.appendChild(noneRow);
 
-    // Individual tags
-    for (const pair of agg.list) {
-      const t = pair[0];
-      const c = pair[1];
+    // Selected groups
+    const countMap = new Map(agg.list);
+    for (let gi = 0; gi < tagGroups.length; gi++) {
+      const group = tagGroups[gi];
+      const gArr = Array.from(group);
+      const mainTag = gArr[0];
+      const nested = gArr.slice(1);
+
       const row = document.createElement('div');
-      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
+      row.className = 'tag-row tag-group-main selected';
       row.innerHTML =
         '<span class="tag-marker"></span>' +
-        '<span class="tag-name">' + escHtml(t) + '</span>' +
-        '<span class="tag-count">' + c + '</span>';
-      row.addEventListener('click', function () {
-        if (selectedTags.has(t)) selectedTags.delete(t);
-        else selectedTags.add(t);
+        '<span class="tag-name">' + escHtml(mainTag) + '</span>' +
+        '<span class="tag-count">' + (countMap.get(mainTag) || 0) + '</span>' +
+        '<button class="tag-plus" data-gi="' + gi + '">+</button>';
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.tag-plus')) {
+          expandedGroupIdx = expandedGroupIdx === gi ? -1 : gi;
+          renderTagList();
+          return;
+        }
+        tagGroups.splice(gi, 1);
+        expandedGroupIdx = -1;
         selectAll = false;
-        if (selectedTags.size === 0 && !selectNoTags) { selectAll = true; }
-        applyFilter();
-        renderTagList();
+        if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        applyFilter(); renderTagList();
+      });
+      tagListEl.appendChild(row);
+
+      for (const nt of nested) {
+        const nrow = document.createElement('div');
+        nrow.className = 'tag-row tag-nested';
+        nrow.innerHTML =
+          '<span class="tag-nested-marker">↳ AND</span>' +
+          '<span class="tag-name">' + escHtml(nt) + '</span>' +
+          '<span class="tag-count">' + (countMap.get(nt) || 0) + '</span>' +
+          '<button class="tag-remove-nested">×</button>';
+        nrow.querySelector('.tag-remove-nested').addEventListener('click', function (e) {
+          e.stopPropagation();
+          tagGroups[gi].delete(nt);
+          if (tagGroups[gi].size === 0) tagGroups.splice(gi, 1);
+          if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+          applyFilter(); renderTagList();
+        });
+        tagListEl.appendChild(nrow);
+      }
+
+      if (expandedGroupIdx === gi) {
+        const dd = document.createElement('div');
+        dd.className = 'tag-and-dropdown';
+        let addedAny = false;
+        for (const [t, c] of agg.list) {
+          if (selected.has(t)) continue;
+          const opt = document.createElement('div');
+          opt.className = 'tag-row tag-and-option';
+          opt.innerHTML =
+            '<span class="tag-nested-marker">+ AND</span>' +
+            '<span class="tag-name">' + escHtml(t) + '</span>' +
+            '<span class="tag-count">' + c + '</span>';
+          opt.addEventListener('click', function () {
+            tagGroups[gi].add(t);
+            expandedGroupIdx = -1;
+            applyFilter(); renderTagList();
+          });
+          dd.appendChild(opt);
+          addedAny = true;
+        }
+        if (!addedAny) dd.innerHTML = '<div class="tag-and-empty">no more tags to combine</div>';
+        tagListEl.appendChild(dd);
+      }
+    }
+
+    // Unselected tags
+    for (const [t, c] of agg.list) {
+      if (selected.has(t)) continue;
+      const row = document.createElement('div');
+      row.className = 'tag-row';
+      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
+      row.addEventListener('click', function () {
+        tagGroups.push(new Set([t]));
+        expandedGroupIdx = -1;
+        selectAll = false;
+        applyFilter(); renderTagList();
       });
       tagListEl.appendChild(row);
     }
+
+    // { reset # }
+    const resetTags = document.createElement('div');
+    resetTags.className = 'tag-section-reset';
+    resetTags.innerHTML = '<button class="tag-scope-reset" id="tag-reset-hash">reset #</button>';
+    tagListEl.appendChild(resetTags);
+    resetTags.querySelector('#tag-reset-hash').addEventListener('click', function () {
+      tagGroups = []; selectNoTags = false; expandedGroupIdx = -1;
+      if (selectedLengths.size === 0) selectAll = true;
+      applyFilter(); renderTagList();
+    });
+
+    // Length section
+    const lenHead = document.createElement('div');
+    lenHead.className = 'tag-section-title';
+    lenHead.textContent = 'length';
+    tagListEl.appendChild(lenHead);
+    for (const b of LENGTH_BUCKETS) {
+      const row = document.createElement('div');
+      const sel = selectedLengths.has(b[0]);
+      row.className = 'tag-row tag-length' + (sel ? ' selected' : '');
+      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + b[1] + '</span><span class="tag-count">' + (lc[b[0]] || 0) + '</span>';
+      row.addEventListener('click', function () {
+        if (selectedLengths.has(b[0])) selectedLengths.delete(b[0]);
+        else selectedLengths.add(b[0]);
+        selectAll = false;
+        if (tagGroups.length === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        applyFilter(); renderTagList();
+      });
+      tagListEl.appendChild(row);
+    }
+
+    // { reset time }
+    const resetTime = document.createElement('div');
+    resetTime.className = 'tag-section-reset';
+    resetTime.innerHTML = '<button class="tag-scope-reset" id="tag-reset-time">reset time</button>';
+    tagListEl.appendChild(resetTime);
+    resetTime.querySelector('#tag-reset-time').addEventListener('click', function () {
+      selectedLengths.clear();
+      if (tagGroups.length === 0 && !selectNoTags) selectAll = true;
+      applyFilter(); renderTagList();
+    });
   }
 
   function escHtml(str) {
@@ -635,7 +866,9 @@
 
   document.getElementById('tag-panel-close').addEventListener('click', closeTagPanel);
   document.getElementById('tag-reset').addEventListener('click', function () {
-    selectedTags.clear();
+    tagGroups = [];
+    selectedLengths.clear();
+    expandedGroupIdx = -1;
     selectNoTags = false;
     selectAll = true;
     applyFilter();

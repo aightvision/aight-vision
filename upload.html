@@ -451,13 +451,18 @@
     .modal-inner.editing .modal-close .close-label::before { content: 'EXIT'; }
 
     /* Auto-zoom preview during crop editing */
-    .modal-video-wrap { overflow: hidden; }
+    .modal-video-wrap { overflow: hidden; transition: background 0.25s; }
     .modal-video-wrap.crop-zoomed video {
       transform-origin: 0 0;
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .modal-video-wrap.crop-zoomed #crop-overlay { opacity: 0; pointer-events: none; transition: opacity 0.25s; }
     #crop-overlay { transition: opacity 0.25s; }
+
+    /* Preview mode: inverse colour so dark uncropped edges become visible */
+    .modal-video-wrap.previewing { background: #eeeeee; }
+    .modal-video-wrap.previewing #crop-overlay { opacity: 0; pointer-events: none; }
+    .modal-video-wrap.previewing video { transform-origin: 0 0; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
 
     /* Publish button bar sits above the video */
     .modal-publish-bar {
@@ -920,6 +925,7 @@
 
         <div class="edit-confirm-row">
           <button class="aight-btn reset-glyph" id="edit-reset" aria-label="Reset current tool"><span>&nbsp;←&nbsp;</span></button>
+          <button class="aight-btn" id="edit-preview" style="display:none" aria-label="Preview edit">preview</button>
           <button class="aight-btn important"   id="edit-commit" aria-label="Commit edit">aight</button>
         </div>
       </div>
@@ -2145,7 +2151,6 @@
       editTrimStart = 0;
       editTrimEnd = editDuration;
       try { modalVideo.currentTime = 0; } catch (e) {}
-      // Redraw handles
       wireTrimTimeline({
         video: modalVideo,
         trackEl: $('edit-trim-track'),
@@ -2163,9 +2168,11 @@
         getDuration: () => editDuration,
       });
     } else if (editMode === 'crop') {
-      cropState = { x: 10, y: 10, w: 80, h: 80 };
+      cropState = Object.assign({}, DEFAULT_CROP);
       drawCrop();
+      removeCropZoom();
     }
+    updatePreviewButton();
   }
 
   async function enterEditMode() {
@@ -2208,9 +2215,17 @@
     $('modal-wrench').classList.remove('active');
     $('edit-trim-btn').classList.remove('selected');
     $('edit-crop-btn').classList.remove('selected');
-    removeCropZoom();  // clean up any active zoom
+    removeCropZoom();
+    if (previewMode) exitPreview();
+    // Clear all edit-session state so the next {tools} entry is fresh
+    cropState = null;
+    editDuration = 0;
+    editTrimStart = 0;
+    editTrimEnd = 0;
     editMode = null;
     editBlob = null;
+    $('edit-preview').style.display = 'none';
+    $('edit-preview').classList.remove('active');
   }
 
   function switchEditMode(mode) {
@@ -2220,18 +2235,26 @@
     editTrimPanel.classList.toggle('active', mode === 'trim');
     editCropPanel.classList.toggle('active', mode === 'crop');
     cropOverlay.classList.toggle('active', mode === 'crop');
-    // Leaving crop mode should un-zoom
-    if (mode !== 'crop') removeCropZoom();
+    // Zoom + crop rectangle are visible only in crop mode, but cropState is
+    // preserved so switching back to crop restores everything.
     if (mode === 'trim') initEditTrimUI();
-    else if (mode === 'crop') initCropUI();
+    else if (mode === 'crop') {
+      initCropUI();
+      if (isCropModified()) applyCropZoom();
+    }
+    // Exiting preview if it was active
+    if (previewMode) exitPreview();
+    updatePreviewButton();
   }
 
   function initEditTrimUI() {
-    // Wait for modalVideo metadata to know duration
     const setup = function () {
-      editDuration = modalVideo.duration;
-      editTrimStart = 0;
-      editTrimEnd = editDuration;
+      // Preserve existing trim across mode switches; only initialize on first entry
+      if (!editDuration) {
+        editDuration = modalVideo.duration;
+        editTrimStart = 0;
+        editTrimEnd = editDuration;
+      }
       wireTrimTimeline({
         video: modalVideo,
         trackEl: $('edit-trim-track'),
@@ -2244,10 +2267,11 @@
         durLbl:  $('edit-trim-dur'),
         getStart: () => editTrimStart,
         getEnd:   () => editTrimEnd,
-        setStart: s => { editTrimStart = s; },
-        setEnd:   e => { editTrimEnd   = e; },
+        setStart: s => { editTrimStart = s; updatePreviewButton(); },
+        setEnd:   e => { editTrimEnd   = e; updatePreviewButton(); },
         getDuration: () => editDuration,
       });
+      updatePreviewButton();
     };
     if (modalVideo.readyState >= 1) setup();
     else modalVideo.addEventListener('loadedmetadata', setup, { once: true });
@@ -2389,15 +2413,19 @@
 
   // ── Crop UI ─────────────────────────────────────────────────────
 
-  let cropState = null;  // { x, y, w, h } in percentages of the video area
+  const DEFAULT_CROP = { x: 10, y: 10, w: 80, h: 80 };
+  let cropState = null;       // { x, y, w, h } percentages
   let cropZoomTimer = null;
+  let previewMode = false;
   const modalVideoWrap = document.querySelector('.modal-video-wrap');
 
   function initCropUI() {
-    cropState = { x: 10, y: 10, w: 80, h: 80 };
+    // Preserve any existing cropState from a prior session in the same edit
+    if (!cropState) cropState = Object.assign({}, DEFAULT_CROP);
     drawCrop();
     wireCropDrag();
-    scheduleZoom();  // start with a countdown to zoom into the default rect
+    scheduleZoom();
+    updatePreviewButton();
   }
 
   function drawCrop() {
@@ -2408,17 +2436,15 @@
     cropRect.style.height = cropState.h + '%';
   }
 
-  function scheduleZoom() {
+  function scheduleZoom(delay) {
     clearZoomTimer();
-    cropZoomTimer = setTimeout(applyCropZoom, 2000);
+    cropZoomTimer = setTimeout(applyCropZoom, delay == null ? 2000 : delay);
   }
   function clearZoomTimer() {
     if (cropZoomTimer) { clearTimeout(cropZoomTimer); cropZoomTimer = null; }
   }
   function applyCropZoom() {
-    if (!cropState || editMode !== 'crop') return;
-    // Uniform scale so the crop rectangle fills the wrap. Whichever dimension
-    // is larger dictates the scale (letterbox for aspect mismatch).
+    if (!cropState) return;
     const scale = 100 / Math.max(cropState.w, cropState.h);
     modalVideo.style.transformOrigin = '0 0';
     modalVideo.style.transform = 'scale(' + scale + ') translate(-' + cropState.x + '%, -' + cropState.y + '%)';
@@ -2430,16 +2456,75 @@
     modalVideo.style.transform = '';
   }
 
+  function isCropModified() {
+    if (!cropState) return false;
+    return cropState.x !== DEFAULT_CROP.x || cropState.y !== DEFAULT_CROP.y
+        || cropState.w !== DEFAULT_CROP.w || cropState.h !== DEFAULT_CROP.h;
+  }
+  function isTrimModified() {
+    if (!editDuration) return false;
+    return editTrimStart > 0.05 || editTrimEnd < editDuration - 0.05;
+  }
+  function hasAnyEdit() { return isCropModified() || isTrimModified(); }
+
+  function updatePreviewButton() {
+    $('edit-preview').style.display = hasAnyEdit() ? '' : 'none';
+    $('edit-preview').classList.toggle('active', previewMode);
+  }
+
+  // ── Preview mode ────────────────────────────────────────────────
+
+  function enterPreview() {
+    if (!hasAnyEdit()) return;
+    previewMode = true;
+    modalVideoWrap.classList.add('previewing');
+    // Apply crop zoom (regardless of tool mode)
+    if (isCropModified()) applyCropZoom();
+    else removeCropZoom();
+    // Jump into trim range and loop
+    if (isTrimModified()) {
+      try { modalVideo.currentTime = editTrimStart; } catch (e) {}
+    }
+    modalVideo.play().catch(function () {});
+    updatePreviewButton();
+  }
+  function exitPreview() {
+    previewMode = false;
+    modalVideoWrap.classList.remove('previewing');
+    if (editMode !== 'crop') removeCropZoom();
+    updatePreviewButton();
+  }
+  function togglePreview() { previewMode ? exitPreview() : enterPreview(); }
+
+  $('edit-preview').addEventListener('click', togglePreview);
+
+  // Loop the video within the trim range whenever there's a trim (used in
+  // both preview mode and normal trim edit mode — the wireTrimTimeline
+  // already installs a timeupdate handler for that, but keep this as a
+  // safety net when the video plays outside the trim UI).
+  modalVideo.addEventListener('timeupdate', function () {
+    if (!editMode && !previewMode) return;
+    if (!isTrimModified()) return;
+    if (modalVideo.currentTime >= editTrimEnd - 0.05) {
+      try { modalVideo.currentTime = editTrimStart; } catch (e) {}
+    }
+  });
+
   function wireCropDrag() {
     const startDrag = function (handle) {
       return function (e) {
         e.preventDefault(); e.stopPropagation();
-        removeCropZoom();  // any adjustment un-zooms and clears timer
+        removeCropZoom();
+        // Start the "held-still 2s" countdown — will fire even if the finger
+        // never moves after the initial press.
+        scheduleZoom(2000);
         const rect = cropOverlay.getBoundingClientRect();
         const startX = e.clientX;
         const startY = e.clientY;
         const orig = Object.assign({}, cropState);
         const move = function (ev) {
+          // Any movement resets the still-held timer
+          scheduleZoom(2000);
           const dxPct = ((ev.clientX - startX) / rect.width) * 100;
           const dyPct = ((ev.clientY - startY) / rect.height) * 100;
           const s = Object.assign({}, orig);
@@ -2453,11 +2538,15 @@
             if (handle.indexOf('b') >= 0) { s.h = Math.max(5, Math.min(100 - orig.y, orig.h + dyPct)); }
           }
           cropState = s; drawCrop();
+          updatePreviewButton();
         };
         const stop = function () {
           document.removeEventListener('pointermove', move);
           document.removeEventListener('pointerup', stop);
-          scheduleZoom();  // re-zoom 2s after release
+          // On release: apply zoom immediately (no additional delay)
+          clearZoomTimer();
+          applyCropZoom();
+          updatePreviewButton();
         };
         document.addEventListener('pointermove', move);
         document.addEventListener('pointerup', stop);
@@ -2467,9 +2556,9 @@
     const handles = cropRect.querySelectorAll('.crop-handle');
     handles.forEach(function (h) { h.onpointerdown = startDrag(h.dataset.handle); });
 
-    // Tap on the zoomed video → un-zoom for adjustment
+    // Tap on the video during crop mode un-zooms so you can adjust
     modalVideo.addEventListener('pointerdown', function () {
-      if (editMode !== 'crop') return;
+      if (editMode !== 'crop' || previewMode) return;
       if (modalVideoWrap.classList.contains('crop-zoomed')) removeCropZoom();
     }, { passive: true });
   }

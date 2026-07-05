@@ -17,9 +17,12 @@ export async function onRequestGet({ env }) {
 
       const tagStr = obj.customMetadata?.tags || '';
       const tags = tagStr ? tagStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const durRaw = obj.customMetadata?.duration;
+      const duration = durRaw && isFinite(parseFloat(durRaw)) ? parseFloat(durRaw) : null;
       items.push({
         url: `${base}/${encodeURIComponent(obj.key)}`,
         tags,
+        duration,
       });
     }
     cursor = result.truncated ? result.cursor : null;
