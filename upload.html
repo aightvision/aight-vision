@@ -264,17 +264,13 @@
 
     .lib-item { position: relative; background: #141414; border: 1px solid #222; border-radius: 7px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color 0.15s; }
     .lib-item:hover { border-color: #333; }
-    /* Draft indicator: thin yellow underline along the bottom of the tile */
-    .lib-item.unpublished { border-bottom-width: 2px; border-bottom-color: var(--aight-yellow); }
-    /* Live-on-vision indicator: small circular home-image avatar */
+    /* Publish state is indicated ONLY by presence/absence of the circle avatar */
     .lib-avatar {
       position: absolute;
       bottom: 6px; right: 6px;
-      width: 22px; height: 22px;
+      width: 24px; height: 24px;
       border-radius: 50%;
       background: url('homeimage.jpg') center/cover, #000;
-      border: 1.5px solid rgba(0,0,0,0.55);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.7);
       z-index: 2;
       image-rendering: pixelated;
       image-rendering: -moz-crisp-edges;
@@ -344,9 +340,9 @@
     .tag-row .tag-count { color: rgba(255,255,255,0.35); font-size: 12px; margin-left: 8px; }
     .tag-row.tag-all, .tag-row.tag-none, .tag-row.tag-length { color: rgba(255,255,255,0.55); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
 
-    .tag-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .tag-reset { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); padding: 8px 14px; border-radius: 6px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: color 0.15s, border-color 0.15s; }
-    .tag-reset:hover { color: #fff; border-color: #fff; }
+    .tag-section-reset { padding: 8px 0 6px; display: flex; justify-content: flex-end; }
+    .tag-actions { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: center; }
+    .tag-actions .aight-btn { font-size: 12px; padding: 8px 16px; }
 
     /* ── Modal (video detail) ────────────────────────────────────── */
 
@@ -373,18 +369,21 @@
       position: relative;
     }
 
+    /* Close button uses the same {} convention. In edit mode it swaps
+       label + color to green {EXIT} (see .modal-inner.editing rule). */
     .modal-close {
       position: absolute; top: 12px; right: 12px;
-      width: 32px; height: 32px; border-radius: 50%;
-      background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.85); cursor: pointer;
       z-index: 4;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s, border-color 0.15s;
+      font-size: 12px;
+      padding: 6px 10px;
     }
-    .modal-close svg { width: 16px; height: 16px; }
-    .modal-close:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
+    .modal-close .close-label::before { content: '×'; }
+    .modal-inner.editing .modal-close {
+      color: #6ecf7a;
+      border-color: #6ecf7a;
+    }
+    .modal-inner.editing .modal-close:hover { background: rgba(110,207,122,0.15); }
+    .modal-inner.editing .modal-close .close-label::before { content: 'EXIT'; }
 
     /* Publish button bar sits above the video */
     .modal-publish-bar {
@@ -536,21 +535,14 @@
     }
     .modal-tag-add:focus { border-color: rgba(255,255,255,0.4); }
 
-    .modal-actions { display: flex; justify-content: center; gap: 10px; padding-top: 4px; flex-wrap: wrap; }
-    .modal-btn {
-      width: 40px; height: 40px; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.03);
-      color: rgba(255,255,255,0.85);
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding-top: 4px;
+      flex-wrap: wrap;
     }
-    .modal-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-    .modal-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .modal-btn.danger:hover { background: rgba(220,60,60,0.85); border-color: rgba(220,60,60,0.85); color: #fff; }
-    .modal-btn.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); color: #fff; }
+    .modal-actions .aight-btn { font-size: 11px; padding: 7px 10px; }
 
     /* Hide the normal action row and publish bar while editing so save/cancel are the only choices */
     .modal-inner.editing .modal-actions,
@@ -572,51 +564,22 @@
     .edit-toolbar.active { display: flex; }
 
     .edit-mode-picker { display: flex; gap: 8px; justify-content: center; }
-    .edit-mode-picker button {
-      background: transparent; border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.65); padding: 7px 18px; border-radius: 5px;
-      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-      cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
-      font-family: inherit;
-    }
-    .edit-mode-picker button:hover { color: #fff; border-color: rgba(255,255,255,0.5); }
-    .edit-mode-picker button.selected { background: rgba(255,255,255,0.12); border-color: #fff; color: #fff; }
+    .edit-mode-picker .aight-btn.selected { background: var(--aight-yellow); color: #000; font-weight: 700; }
 
     .edit-controls { padding: 4px 0; display: none; }
     .edit-controls.active { display: block; }
 
+    /* {←} reset (left) and {aight} commit (right) span the bottom of the edit toolbar */
     .edit-confirm-row {
       display: flex;
-      gap: 10px;
-      justify-content: stretch;
-      padding-top: 10px;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
       margin-top: 6px;
       border-top: 1px solid rgba(255,255,255,0.06);
     }
-    .edit-confirm-row button {
-      flex: 1;
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.25);
-      color: rgba(255,255,255,0.85);
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .edit-confirm-row button:hover { color: #fff; border-color: #fff; }
-    .edit-confirm-row button.commit {
-      background: rgba(90,200,130,0.9);
-      border-color: rgba(90,200,130,1);
-      color: #000;
-      font-weight: 600;
-    }
-    .edit-confirm-row button.commit:hover { background: rgba(110,220,150,1); border-color: rgba(110,220,150,1); color: #000; }
+    .edit-confirm-row .aight-btn { font-size: 13px; padding: 10px 18px; }
+    .edit-confirm-row .reset-glyph { font-size: 16px; padding: 8px 14px; }
 
     .edit-warning { text-align: center; font-size: 10px; color: rgba(255,180,80,0.8); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 0; }
 
@@ -793,7 +756,7 @@
     </div>
     <div class="tag-list" id="tag-list"></div>
     <div class="tag-actions">
-      <button class="tag-reset" id="tag-reset">reset</button>
+      <button class="aight-btn" id="tag-reset">reset all</button>
     </div>
   </div>
 </div>
@@ -801,12 +764,12 @@
 <!-- Video detail modal -->
 <div id="modal" aria-hidden="true">
   <div class="modal-inner">
-    <button class="modal-close" id="modal-close" aria-label="Close">
-      <svg><use href="#icon-x"/></svg>
+    <button class="modal-close aight-btn" id="modal-close" aria-label="Close">
+      <span class="close-label"></span>
     </button>
 
     <div class="modal-publish-bar">
-      <button class="aight-btn important" id="modal-publish"><span id="modal-publish-text">+ TO VISION</span></button>
+      <button class="aight-btn important" id="modal-publish"><span id="modal-publish-text">+ to vision</span></button>
     </div>
 
     <div class="modal-video-wrap">
@@ -845,18 +808,18 @@
       <div class="modal-tag-list" id="modal-tag-list"></div>
 
       <div class="modal-actions">
-        <button class="modal-btn" id="modal-prev"     aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
-        <button class="modal-btn" id="modal-rename"   aria-label="Rename"><svg><use href="#icon-pencil"/></svg></button>
-        <button class="modal-btn" id="modal-wrench"   aria-label="Edit"><svg><use href="#icon-wrench"/></svg></button>
-        <button class="modal-btn" id="modal-download" aria-label="Download"><svg><use href="#icon-download"/></svg></button>
-        <button class="modal-btn danger" id="modal-delete" aria-label="Delete"><svg><use href="#icon-trash"/></svg></button>
-        <button class="modal-btn" id="modal-next"     aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+        <button class="aight-btn" id="modal-prev"     aria-label="Previous"><span>&nbsp;←&nbsp;</span></button>
+        <button class="aight-btn" id="modal-rename"   aria-label="Rename">rename</button>
+        <button class="aight-btn" id="modal-wrench"   aria-label="Tools">tools</button>
+        <button class="aight-btn" id="modal-download" aria-label="Download"><span>&nbsp;dl&nbsp;</span></button>
+        <button class="aight-btn" id="modal-delete"   aria-label="Delete">delete</button>
+        <button class="aight-btn" id="modal-next"     aria-label="Next"><span>&nbsp;→&nbsp;</span></button>
       </div>
 
       <div class="edit-toolbar" id="edit-toolbar">
         <div class="edit-mode-picker">
-          <button data-mode="trim" id="edit-trim-btn">trim</button>
-          <button data-mode="crop" id="edit-crop-btn">crop</button>
+          <button class="aight-btn" data-mode="trim" id="edit-trim-btn">trim</button>
+          <button class="aight-btn" data-mode="crop" id="edit-crop-btn">crop</button>
         </div>
 
         <div class="edit-controls" id="edit-trim-panel">
@@ -882,8 +845,8 @@
         </div>
 
         <div class="edit-confirm-row">
-          <button id="edit-cancel">cancel</button>
-          <button class="commit" id="edit-commit">commit edit</button>
+          <button class="aight-btn reset-glyph" id="edit-reset" aria-label="Reset current tool"><span>&nbsp;←&nbsp;</span></button>
+          <button class="aight-btn important"   id="edit-commit" aria-label="Commit edit">aight</button>
         </div>
       </div>
     </div>
@@ -893,8 +856,8 @@
 <!-- Standalone Trim modal (used for queue items) -->
 <div id="trim-modal" aria-hidden="true">
   <div class="trim-inner">
-    <button class="modal-close" id="trim-close" aria-label="Close">
-      <svg><use href="#icon-x"/></svg>
+    <button class="modal-close aight-btn" id="trim-close" aria-label="Close">
+      <span>×</span>
     </button>
     <video id="trim-video" controls playsinline preload="metadata"></video>
     <div class="trim-body">
@@ -915,8 +878,8 @@
         </div>
       </div>
       <div class="edit-confirm-row">
-        <button id="trim-cancel">cancel</button>
-        <button class="commit" id="trim-commit">commit trim</button>
+        <button class="aight-btn reset-glyph" id="trim-reset" aria-label="Reset trim"><span>&nbsp;←&nbsp;</span></button>
+        <button class="aight-btn important"   id="trim-commit" aria-label="Commit trim">aight</button>
       </div>
     </div>
   </div>
@@ -1416,6 +1379,10 @@
     // Apply the {unpublished} toggle first — narrows the pool
     if (showOnlyUnpublished) base = base.filter(function (i) { return !i.published; });
 
+    // Reflect filter state on the {#} button
+    const anyFilter = selectNoTags || selectedTags.size > 0 || selectedLengths.size > 0;
+    $('lib-filter').classList.toggle('active', anyFilter);
+
     if (selectAll) { libraryFiltered = base; }
     else {
       libraryFiltered = base.filter(function (item) {
@@ -1562,14 +1529,11 @@
     const lc  = lengthCounts();
     tagListEl.innerHTML = '';
 
-    const allRow = document.createElement('div');
-    allRow.className = 'tag-row tag-all' + (selectAll ? ' selected' : '');
-    allRow.innerHTML = '<span class="tag-marker"></span><span class="tag-name">all videos</span><span class="tag-count">' + agg.total + '</span>';
-    allRow.addEventListener('click', function () {
-      selectedTags.clear(); selectedLengths.clear(); selectNoTags = false; selectAll = true;
-      applyGridFilter(); renderTagPanel();
-    });
-    tagListEl.appendChild(allRow);
+    // Tags section (with 'no tags' as first row)
+    const tagHead = document.createElement('div');
+    tagHead.className = 'tag-section-title';
+    tagHead.textContent = 'tags';
+    tagListEl.appendChild(tagHead);
 
     const noneRow = document.createElement('div');
     noneRow.className = 'tag-row tag-none' + (selectNoTags ? ' selected' : '');
@@ -1580,6 +1544,30 @@
       applyGridFilter(); renderTagPanel();
     });
     tagListEl.appendChild(noneRow);
+
+    for (const [t, c] of agg.list) {
+      const row = document.createElement('div');
+      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
+      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
+      row.addEventListener('click', function () {
+        if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
+        selectAll = false;
+        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
+        applyGridFilter(); renderTagPanel();
+      });
+      tagListEl.appendChild(row);
+    }
+
+    // { reset # } — under tags section
+    const resetTags = document.createElement('div');
+    resetTags.className = 'tag-section-reset';
+    resetTags.innerHTML = '<button class="aight-btn" id="tag-reset-hash">reset #</button>';
+    tagListEl.appendChild(resetTags);
+    resetTags.querySelector('#tag-reset-hash').addEventListener('click', function () {
+      selectedTags.clear(); selectNoTags = false;
+      if (selectedLengths.size === 0) selectAll = true;
+      applyGridFilter(); renderTagPanel();
+    });
 
     // Length section
     const lenHead = document.createElement('div');
@@ -1601,25 +1589,16 @@
       tagListEl.appendChild(row);
     }
 
-    // Tags section
-    if (agg.list.length) {
-      const tagHead = document.createElement('div');
-      tagHead.className = 'tag-section-title';
-      tagHead.textContent = 'tags';
-      tagListEl.appendChild(tagHead);
-    }
-    for (const [t, c] of agg.list) {
-      const row = document.createElement('div');
-      row.className = 'tag-row' + (selectedTags.has(t) ? ' selected' : '');
-      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
-      row.addEventListener('click', function () {
-        if (selectedTags.has(t)) selectedTags.delete(t); else selectedTags.add(t);
-        selectAll = false;
-        if (selectedTags.size === 0 && !selectNoTags && selectedLengths.size === 0) selectAll = true;
-        applyGridFilter(); renderTagPanel();
-      });
-      tagListEl.appendChild(row);
-    }
+    // { reset time } — under length section
+    const resetTime = document.createElement('div');
+    resetTime.className = 'tag-section-reset';
+    resetTime.innerHTML = '<button class="aight-btn" id="tag-reset-time">reset time</button>';
+    tagListEl.appendChild(resetTime);
+    resetTime.querySelector('#tag-reset-time').addEventListener('click', function () {
+      selectedLengths.clear();
+      if (selectedTags.size === 0 && !selectNoTags) selectAll = true;
+      applyGridFilter(); renderTagPanel();
+    });
   }
 
   // ── Modal ───────────────────────────────────────────────────────
@@ -1663,10 +1642,10 @@
     const btn = $('modal-publish');
     const txt = $('modal-publish-text');
     if (item.published) {
-      txt.textContent = '- FROM VISION';
+      txt.textContent = '- from vision';
       btn.setAttribute('data-state', 'published');
     } else {
-      txt.textContent = '+ TO VISION';
+      txt.textContent = '+ to vision';
       btn.setAttribute('data-state', 'unpublished');
     }
   }
@@ -1907,9 +1886,9 @@
   }
 
   $('modal-close').addEventListener('click', function () {
-    // If editing, force user to explicitly save or cancel first
+    // In edit mode this button is {EXIT} — silently discards edit and returns to view
     if (editToolbar.classList.contains('active')) {
-      alert('Save or cancel your edit first.');
+      exitEditMode();
       return;
     }
     closeModal();
@@ -1982,10 +1961,41 @@
     if (editToolbar.classList.contains('active')) exitEditMode();
     else enterEditMode();
   });
-  $('edit-cancel').addEventListener('click', exitEditMode);
+  $('edit-reset').addEventListener('click', resetCurrentTool);
   $('edit-commit').addEventListener('click', commitEdit);
   $('edit-trim-btn').addEventListener('click', function () { switchEditMode('trim'); });
   $('edit-crop-btn').addEventListener('click', function () { switchEditMode('crop'); });
+
+  // Reset only the parameters of the currently active tool. Video stays loaded,
+  // no re-download needed. Switching tools and hitting reset again is required
+  // to reset the other one.
+  function resetCurrentTool() {
+    if (editMode === 'trim') {
+      editTrimStart = 0;
+      editTrimEnd = editDuration;
+      try { modalVideo.currentTime = 0; } catch (e) {}
+      // Redraw handles
+      wireTrimTimeline({
+        video: modalVideo,
+        trackEl: $('edit-trim-track'),
+        selEl:   $('edit-trim-sel'),
+        phEl:    $('edit-trim-ph'),
+        hStart:  $('edit-trim-h-start'),
+        hEnd:    $('edit-trim-h-end'),
+        startLbl:$('edit-trim-start'),
+        endLbl:  $('edit-trim-end'),
+        durLbl:  $('edit-trim-dur'),
+        getStart: () => editTrimStart,
+        getEnd:   () => editTrimEnd,
+        setStart: s => { editTrimStart = s; },
+        setEnd:   e => { editTrimEnd   = e; },
+        getDuration: () => editDuration,
+      });
+    } else if (editMode === 'crop') {
+      cropState = { x: 10, y: 10, w: 80, h: 80 };
+      drawCrop();
+    }
+  }
 
   async function enterEditMode() {
     const item = currentItem();
@@ -2300,7 +2310,26 @@
     trimSource = null;
   }
   $('trim-close').addEventListener('click', closeTrimModal);
-  $('trim-cancel').addEventListener('click', closeTrimModal);
+  $('trim-reset').addEventListener('click', function () {
+    trimStart = 0; trimEnd = trimDur;
+    try { trimVideo.currentTime = 0; } catch (e) {}
+    wireTrimTimeline({
+      video: trimVideo,
+      trackEl: $('trim-track'),
+      selEl:   $('trim-sel'),
+      phEl:    $('trim-ph'),
+      hStart:  $('trim-h-start'),
+      hEnd:    $('trim-h-end'),
+      startLbl:$('trim-start-lbl'),
+      endLbl:  $('trim-end-lbl'),
+      durLbl:  $('trim-dur-lbl'),
+      getStart: () => trimStart,
+      getEnd:   () => trimEnd,
+      setStart: s => { trimStart = s; },
+      setEnd:   e => { trimEnd   = e; },
+      getDuration: () => trimDur,
+    });
+  });
   $('trim-commit').addEventListener('click', function () {
     if (!trimSource) return;
     const src = trimSource;
