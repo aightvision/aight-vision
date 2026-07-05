@@ -1,4 +1,5 @@
 import { authorize } from '../_auth.js';
+import { normalizeSlug, isValidSlug } from '../_slug.js';
 
 export async function onRequest({ request, env }) {
   const auth = authorize(request, env);
@@ -18,8 +19,7 @@ function parseTags(str) {
 
 function normalizeTag(raw) {
   return String(raw || '')
-    .trim()
-    .toLowerCase()
+    .trim().toLowerCase()
     .replace(/[^a-z0-9-]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
@@ -47,6 +47,7 @@ async function listVideos(env) {
         contentType: obj.httpMetadata?.contentType || 'video/mp4',
         tags: parseTags(obj.customMetadata?.tags),
         duration,
+        slug: obj.customMetadata?.slug || null,
       });
     }
     cursor = result.truncated ? result.cursor : null;
@@ -61,11 +62,20 @@ async function deleteVideo(request, env) {
   const key = url.searchParams.get('key');
   if (!key) return new Response('Missing key parameter', { status: 400 });
 
+  // Remove associated slug from KV first (if any) so the link dies immediately
+  if (env.SLUGS) {
+    try {
+      const head = await env.VIDEOS.head(key);
+      const slug = head?.customMetadata?.slug;
+      if (slug) await env.SLUGS.delete('slug:' + slug);
+    } catch (e) { console.error('slug cleanup on delete failed:', e); }
+  }
+
   await env.VIDEOS.delete(key);
   return Response.json({ success: true });
 }
 
-// PATCH accepts: { key, newKey?, tags?, duration? }
+// PATCH accepts: { key, newKey?, tags?, duration?, slug? }
 async function updateVideo(request, env) {
   let body;
   try { body = await request.json(); }
@@ -74,7 +84,7 @@ async function updateVideo(request, env) {
   const key = body.key;
   if (!key) return new Response('Missing key', { status: 400 });
 
-  // Figure out target key first — collision check before opening a stream.
+  // Rename target
   let targetKey = key;
   if (typeof body.newKey === 'string' && body.newKey && body.newKey !== key) {
     const origExt = (key.match(/\.[^.]+$/) || [''])[0];
@@ -100,10 +110,36 @@ async function updateVideo(request, env) {
     duration = String(Math.round(parseFloat(body.duration) * 100) / 100);
   }
 
+  // Slug handling. body.slug is a *desired* new slug (user-supplied or ''=clear).
+  const oldSlug = source.customMetadata?.slug || '';
+  let slug = oldSlug;
+
+  if (body.slug !== undefined) {
+    const desiredSlug = normalizeSlug(body.slug);
+    if (desiredSlug === '') {
+      slug = ''; // user wants to remove the slug
+    } else if (!isValidSlug(desiredSlug)) {
+      return new Response('Invalid slug (must be 3-64 chars, alphanumeric + hyphens)', { status: 400 });
+    } else if (desiredSlug !== oldSlug) {
+      // check availability
+      if (env.SLUGS) {
+        const existing = await env.SLUGS.get('slug:' + desiredSlug);
+        if (existing) {
+          const data = JSON.parse(existing);
+          if (data.r2Key !== key && data.r2Key !== targetKey) {
+            return new Response('Slug already taken', { status: 409 });
+          }
+        }
+      }
+      slug = desiredSlug;
+    }
+  }
+
   const newCustomMetadata = {
     ...(source.customMetadata || {}),
     tags: tags.join(','),
     duration,
+    slug,
   };
 
   await env.VIDEOS.put(targetKey, source.body, {
@@ -113,6 +149,20 @@ async function updateVideo(request, env) {
 
   if (targetKey !== key) await env.VIDEOS.delete(key);
 
+  // Sync KV: remove old slug entry if slug changed / cleared / key changed;
+  // add new one if slug is set.
+  if (env.SLUGS) {
+    try {
+      if (oldSlug && (oldSlug !== slug || targetKey !== key)) {
+        await env.SLUGS.delete('slug:' + oldSlug);
+      }
+      if (slug) {
+        const contentType = source.httpMetadata?.contentType || 'video/mp4';
+        await env.SLUGS.put('slug:' + slug, JSON.stringify({ r2Key: targetKey, contentType }));
+      }
+    } catch (e) { console.error('slug KV sync failed:', e); }
+  }
+
   const base = (env.VIDEO_BASE_URL || '').replace(/\/$/, '');
   return Response.json({
     success: true,
@@ -120,5 +170,6 @@ async function updateVideo(request, env) {
     url: `${base}/${encodeURIComponent(targetKey)}`,
     tags,
     duration: duration ? parseFloat(duration) : null,
+    slug: slug || null,
   });
 }

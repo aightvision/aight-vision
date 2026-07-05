@@ -332,6 +332,73 @@
 
     .modal-meta-row { display: flex; gap: 12px; margin-bottom: 12px; font-size: 11px; color: rgba(255,255,255,0.4); }
 
+    /* Slug row */
+    .modal-slug-row {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 5px;
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+    .modal-slug-row.visible { display: flex; }
+    .modal-slug-label {
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-size: 9px;
+      flex-shrink: 0;
+    }
+    .modal-slug-url {
+      flex: 1;
+      min-width: 0;
+      color: rgba(255,255,255,0.85);
+      font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: text;
+      padding: 3px 0;
+      user-select: all;
+    }
+    .modal-slug-input {
+      flex: 1;
+      min-width: 0;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 11px;
+      outline: none;
+      display: none;
+    }
+    .modal-slug-input:focus { border-color: rgba(255,255,255,0.4); }
+    .modal-slug-row.editing .modal-slug-url { display: none; }
+    .modal-slug-row.editing .modal-slug-input { display: block; }
+    .slug-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.6);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .slug-btn:hover { color: #fff; border-color: #fff; }
+    .slug-btn.copied { color: #4caf50; border-color: #4caf50; }
+
     .modal-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
     .modal-tag-chip {
       display: inline-flex; align-items: center; gap: 4px;
@@ -611,6 +678,15 @@
 
       <div class="modal-meta-row" id="modal-meta"></div>
 
+      <div class="modal-slug-row" id="modal-slug-row">
+        <span class="modal-slug-label">link</span>
+        <span class="modal-slug-url" id="modal-slug-url"></span>
+        <input class="modal-slug-input" id="modal-slug-input" spellcheck="false" autocomplete="off" placeholder="custom-slug">
+        <button class="slug-btn" id="modal-slug-copy" type="button">copy</button>
+        <button class="slug-btn" id="modal-slug-copy-ext" type="button">copy .ext</button>
+        <button class="slug-btn" id="modal-slug-edit" type="button">edit</button>
+      </div>
+
       <div class="modal-tag-list" id="modal-tag-list"></div>
 
       <div class="modal-actions">
@@ -761,6 +837,11 @@
   const ffmpegStatus   = $('ffmpeg-status');
   const cropOverlay    = $('crop-overlay');
   const cropRect       = $('crop-rect');
+  const slugRow        = $('modal-slug-row');
+  const slugUrlEl      = $('modal-slug-url');
+  const slugInputEl    = $('modal-slug-input');
+
+  let currentSlugUrls  = { url: '', extUrl: '' };
 
   // ── Utils ───────────────────────────────────────────────────────
 
@@ -1383,7 +1464,116 @@
     if (item.size) parts.push((item.size / (1024*1024)).toFixed(1) + ' MB');
     modalMeta.textContent = parts.join('  ·  ');
     renderModalTags();
+    renderSlugRow();
   }
+
+  function keyExt(key) {
+    const m = String(key || '').match(/\.([^.]+)$/);
+    return m ? m[1].toLowerCase() : '';
+  }
+
+  function renderSlugRow() {
+    const item = currentItem();
+    if (!item) {
+      slugRow.classList.remove('visible', 'editing');
+      return;
+    }
+    slugRow.classList.add('visible');
+    slugRow.classList.remove('editing');
+    const copyBtn    = $('modal-slug-copy');
+    const copyExtBtn = $('modal-slug-copy-ext');
+    const editBtn    = $('modal-slug-edit');
+
+    if (item.slug) {
+      const base = window.location.origin + '/f/';
+      const shortUrl = base + item.slug;
+      const ext = keyExt(item.key);
+      const extUrl = ext ? shortUrl + '.' + ext : shortUrl;
+      slugUrlEl.textContent = shortUrl.replace(/^https?:\/\//, '');
+      slugUrlEl.style.color = '';
+      slugInputEl.value = item.slug;
+      currentSlugUrls = { url: shortUrl, extUrl };
+      copyBtn.style.display = '';
+      if (ext) { copyExtBtn.style.display = ''; copyExtBtn.textContent = 'copy .' + ext; }
+      else copyExtBtn.style.display = 'none';
+      editBtn.textContent = 'edit';
+    } else {
+      slugUrlEl.textContent = '(no shareable link yet)';
+      slugUrlEl.style.color = 'rgba(255,255,255,0.35)';
+      slugInputEl.value = '';
+      currentSlugUrls = { url: '', extUrl: '' };
+      copyBtn.style.display = 'none';
+      copyExtBtn.style.display = 'none';
+      editBtn.textContent = 'add';
+    }
+  }
+
+  function clientRandomSlug(len) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    len = len || 8;
+    const buf = new Uint8Array(len);
+    crypto.getRandomValues(buf);
+    let s = '';
+    for (let i = 0; i < len; i++) s += chars[buf[i] % chars.length];
+    return s;
+  }
+
+  function copyToClipboard(text, btn) {
+    const flash = function () {
+      const orig = btn.textContent;
+      btn.classList.add('copied');
+      btn.textContent = 'copied';
+      setTimeout(function () { btn.classList.remove('copied'); btn.textContent = orig; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash).catch(function () { legacyCopy(text, flash); });
+    } else { legacyCopy(text, flash); }
+  }
+  function legacyCopy(text, onOk) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); onOk(); }
+    catch (e) { alert('Copy failed: ' + text); }
+    ta.remove();
+  }
+
+  async function commitSlugEdit() {
+    const item = currentItem();
+    if (!item) { slugRow.classList.remove('editing'); return; }
+    let raw = slugInputEl.value.trim();
+    // Empty input on a video without a slug → auto-generate a random one
+    if (!raw && !item.slug) raw = clientRandomSlug(8);
+    if (raw === (item.slug || '')) { slugRow.classList.remove('editing'); return; }
+    try {
+      const res = await authedFetch('/api/videos', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: item.key, slug: raw }),
+      });
+      if (res.status === 409) { alert('That slug is already in use.'); return; }
+      if (res.status === 400) { alert('Invalid slug — use 3-64 characters, letters/numbers/hyphens only.'); return; }
+      if (!res.ok) throw new Error('slug ' + res.status);
+      const data = await res.json();
+      const master = libraryItems.find(function (x) { return x.key === item.key; });
+      if (master) master.slug = data.slug;
+      item.slug = data.slug;
+      renderSlugRow();
+    } catch (err) { console.error('Slug update failed:', err); alert('Failed to update slug.'); }
+  }
+
+  $('modal-slug-copy').addEventListener('click', function () { copyToClipboard(currentSlugUrls.url, this); });
+  $('modal-slug-copy-ext').addEventListener('click', function () { copyToClipboard(currentSlugUrls.extUrl, this); });
+  $('modal-slug-edit').addEventListener('click', function () {
+    if (slugRow.classList.contains('editing')) commitSlugEdit();
+    else { slugRow.classList.add('editing'); slugInputEl.focus(); slugInputEl.select(); }
+  });
+  slugInputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') commitSlugEdit();
+    else if (e.key === 'Escape') { slugInputEl.value = (currentItem() || {}).slug || ''; slugRow.classList.remove('editing'); }
+  });
 
   function renderModalTags() {
     const item = currentItem();

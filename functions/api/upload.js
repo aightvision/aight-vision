@@ -1,4 +1,5 @@
 import { authorize } from '../_auth.js';
+import { generateUniqueSlug } from '../_slug.js';
 
 export async function onRequestPost({ request, env }) {
   const auth = authorize(request, env);
@@ -17,14 +18,26 @@ export async function onRequestPost({ request, env }) {
   const key = `${Date.now()}_${safeName}`;
   const contentType = request.headers.get('x-file-type') || 'video/mp4';
 
-  // Optional client-supplied duration (seconds)
   const rawDur = request.headers.get('x-video-duration');
   const duration = rawDur && isFinite(parseFloat(rawDur)) ? String(Math.round(parseFloat(rawDur) * 100) / 100) : '';
 
+  // Generate a random slug for this upload (skip gracefully if KV isn't bound)
+  let slug = '';
+  if (env.SLUGS) {
+    try { slug = await generateUniqueSlug(env, 8); }
+    catch (e) { console.error('slug generation failed:', e); slug = ''; }
+  }
+
   await env.VIDEOS.put(key, request.body, {
     httpMetadata: { contentType },
-    customMetadata: { tags: '', duration },
+    customMetadata: { tags: '', duration, slug },
   });
 
-  return Response.json({ success: true, key }, { status: 201 });
+  if (slug && env.SLUGS) {
+    try {
+      await env.SLUGS.put('slug:' + slug, JSON.stringify({ r2Key: key, contentType }));
+    } catch (e) { console.error('slug KV write failed:', e); }
+  }
+
+  return Response.json({ success: true, key, slug: slug || null }, { status: 201 });
 }
