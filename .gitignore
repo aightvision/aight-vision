@@ -30,3 +30,6 @@ aightvision videos/
 *.mkv
 *.avi
 *.m4v
+
+.dev.vars*
+!.dev.vars.example
