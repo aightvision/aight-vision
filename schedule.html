@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIGHT.SCHEDULE</title>
+  <style>
+    :root {
+      --aight-yellow: #C8A63C;
+      --aight-yellow-hover: #d8b345;
+      --dim: rgba(200,166,60,0.45);
+      --red: #c84a3c;
+      --green: #4cc84c;
+      --orange: #e07b28;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #000;
+      color: var(--aight-yellow);
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100%;
+    }
+    body { padding: 20px 18px 80px; }
+
+    .aight-btn {
+      background: #000;
+      color: var(--aight-yellow);
+      border: 1px solid var(--aight-yellow);
+      padding: 6px 10px;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+      line-height: 1.15;
+      user-select: none;
+    }
+    .aight-btn::before { content: "{"; opacity: 0.9; padding-right: 3px; }
+    .aight-btn::after  { content: "}"; opacity: 0.9; padding-left: 3px; }
+    .aight-btn:hover { background: rgba(200,166,60,0.15); }
+    .aight-btn.important,
+    .aight-btn.active {
+      background: var(--aight-yellow);
+      color: #000;
+      font-weight: 700;
+    }
+    .aight-btn.important:hover,
+    .aight-btn.active:hover { background: var(--aight-yellow-hover); }
+
+    header {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      margin-bottom: 26px;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      font-size: 15px;
+      letter-spacing: 0.35em;
+      font-weight: 700;
+    }
+    header a { text-decoration: none; }
+
+    section { margin-bottom: 24px; }
+    .sec-label {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      opacity: 0.6;
+      margin-bottom: 10px;
+    }
+
+    input[type="date"], input[type="number"], input[type="text"] {
+      background: #000;
+      color: var(--aight-yellow);
+      border: 1px solid var(--dim);
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 5px 6px;
+      outline: none;
+    }
+    input:focus { border-color: var(--aight-yellow); }
+    input[type="number"] { width: 44px; text-align: center; }
+    input[type="date"] { color-scheme: dark; }
+
+    .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* staff rules */
+    .emp {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(200,166,60,0.15);
+    }
+    .emp input.name {
+      width: 110px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .daytog { display: flex; gap: 3px; }
+    .daytog button {
+      width: 26px; height: 24px;
+      background: #000;
+      border: 1px solid var(--dim);
+      border-radius: 3px;
+      color: var(--dim);
+      font-family: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .daytog button.on {
+      background: var(--aight-yellow);
+      border-color: var(--aight-yellow);
+      color: #000;
+      font-weight: 700;
+    }
+    .daytog button.must {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #000;
+      font-weight: 700;
+    }
+    .minmax { display: flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.9; }
+    #univ .row { padding: 5px 0; font-size: 11px; letter-spacing: 0.05em; gap: 7px; }
+    .rules-hint { font-size: 10px; opacity: 0.45; letter-spacing: 0.05em; }
+
+    /* pto editor under a staff row */
+    .ptoedit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 6px 0 8px 18px;
+      border-bottom: 1px solid rgba(200,166,60,0.15);
+      font-size: 11px;
+    }
+    .ptoedit .pending { color: var(--green); letter-spacing: 0.05em; }
+    .ptochip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--green);
+      color: var(--green);
+      border-radius: 3px;
+      padding: 3px 7px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+    .ptochip button {
+      background: none; border: none; color: var(--green);
+      cursor: pointer; font-size: 11px; padding: 0; font-family: inherit;
+    }
+
+    /* rule cards + builder */
+    .rulecard {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(200,166,60,0.15);
+    }
+    #rulebuilder { border: 1px solid var(--dim); border-radius: 4px; padding: 10px; margin-top: 10px; }
+    #rulebuilder .brow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 5px 0; font-size: 11px; }
+    #rulebuilder .blabel { font-size: 10px; letter-spacing: 0.2em; opacity: 0.6; min-width: 44px; }
+    #rulebuilder .err { color: var(--red); font-size: 10px; letter-spacing: 0.05em; }
+
+    /* need row */
+    .need { display: flex; gap: 8px; flex-wrap: wrap; }
+    .need .cell { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; opacity: 0.9; }
+
+    /* grid */
+    .grid-wrap { overflow-x: auto; border: 1px solid rgba(200,166,60,0.25); border-radius: 4px; }
+    table { border-collapse: collapse; font-size: 10px; }
+    th, td { border: 1px solid rgba(200,166,60,0.14); text-align: center; }
+    th { padding: 3px 0 4px; font-weight: 400; min-width: 26px; }
+    th .m { font-size: 8px; opacity: 0.5; height: 10px; display: block; letter-spacing: 0.1em; }
+    th .wd { opacity: 0.65; display: block; }
+    th .dn { display: block; font-size: 11px; }
+    th.wkend, td.wkend { background: rgba(200,166,60,0.05); }
+    th.today .dn { color: #fff; }
+    td.namecell, th.namecell {
+      position: sticky; left: 0;
+      background: #000;
+      min-width: 96px;
+      text-align: left;
+      padding: 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+    td.day {
+      width: 26px; height: 26px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    td.day:hover { outline: 1px solid var(--aight-yellow); outline-offset: -1px; }
+    td.day.work    { background: rgba(200,166,60,0.35); }
+    td.day.lockWork{ background: var(--aight-yellow); }
+    td.day.lockOff { color: rgba(255,255,255,0.35); }
+    td.day.pto     { background: rgba(76,200,76,0.45); }
+    td.day.viol { outline: 1px solid var(--red); outline-offset: -1px; }
+    td.day.unavail { background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255,255,255,0.05) 3px 4px); }
+    tr.covrow td { padding: 3px 0; font-size: 9px; opacity: 0.85; border-top: 1px solid rgba(200,166,60,0.4); }
+    tr.covrow td.short { color: var(--red); opacity: 1; font-weight: 700; }
+    td.total { padding: 0 8px; font-size: 10px; opacity: 0.7; }
+
+    /* calendar view */
+    #calview { border: 1px solid rgba(200,166,60,0.25); border-radius: 4px; overflow-x: auto; }
+    #calview table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 10px; }
+    #calview th { padding: 4px; font-weight: 400; opacity: 0.65; letter-spacing: 0.15em; border: 1px solid rgba(200,166,60,0.14); }
+    #calview td { border: 1px solid rgba(200,166,60,0.14); vertical-align: top; width: 14.28%; height: 76px; padding: 4px 6px; }
+    #calview td.blank { background: rgba(255,255,255,0.02); }
+    #calview td.wkend { background: rgba(200,166,60,0.05); }
+    #calview .dnum { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
+    #calview .dnum .mo { font-size: 8px; opacity: 0.6; letter-spacing: 0.1em; margin-right: 4px; }
+    #calview .who { letter-spacing: 0.06em; line-height: 1.5; }
+    #calview .who div { white-space: nowrap; }
+    #calview .ptoname { color: var(--green); opacity: 0.85; }
+
+    .legend { font-size: 10px; opacity: 0.45; letter-spacing: 0.05em; margin-top: 8px; line-height: 1.7; }
+    .legend b { color: var(--aight-yellow); font-weight: 400; }
+    .legend b.g { color: var(--green); }
+    .legend b.o { color: var(--orange); }
+
+    /* violations + fixes */
+    #viol { font-size: 11px; line-height: 1.8; letter-spacing: 0.05em; }
+    #viol .bad { color: var(--red); }
+    #viol .ok { color: var(--green); }
+    #solvemsg { font-size: 11px; color: var(--red); margin-top: 8px; letter-spacing: 0.05em; }
+    #fixmenu { margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AIGHT.SCHEDULE</h1>
+  <a class="aight-btn" href="/">&nbsp;&larr; vision&nbsp;</a>
+</header>
+
+<section>
+  <div class="sec-label">PERIOD</div>
+  <div class="row">
+    <input type="date" id="pstart">
+    <span style="opacity:0.5">&rarr;</span>
+    <input type="date" id="pend">
+    <button class="aight-btn" id="thismonth">this month</button>
+    <button class="aight-btn" id="nextmonth">next month</button>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">STAFF</div>
+  <div id="staff"></div>
+  <div style="margin-top:10px" class="row">
+    <button class="aight-btn" id="addemp">+ staff</button>
+    <span class="rules-hint">day toggles: black = can't work &middot; yellow = available &middot; orange = must work &middot; min&ndash;max days per week &middot; 2-off = needs two days off in a row</span>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">UNIVERSAL RULES &mdash; APPLY TO ALL STAFF</div>
+  <div id="univ"></div>
+  <div class="rules-hint" style="margin-top:8px">chips on a staff row exempt that one person &middot; lit chip = rule applies to them</div>
+</section>
+
+<section>
+  <div class="sec-label">RULES</div>
+  <div id="rules"></div>
+  <div id="rulebuilder" style="display:none"></div>
+  <div style="margin-top:10px" class="row">
+    <button class="aight-btn" id="addrule">+ rule</button>
+    <span class="rules-hint">who &middot; what &middot; when &mdash; e.g. john gets every other monday off, or mica gets one 4-day week per period</span>
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">NEED &mdash; MIN ON DUTY PER DAY</div>
+  <div class="need" id="need"></div>
+</section>
+
+<section>
+  <div class="row">
+    <button class="aight-btn important" id="generate">generate</button>
+    <button class="aight-btn" id="clearfills">clear fills</button>
+    <button class="aight-btn" id="clearall">clear all</button>
+    <button class="aight-btn" id="ptomode">PTO</button>
+    <button class="aight-btn" id="csv">csv</button>
+    <button class="aight-btn" id="calbtn">calendar</button>
+  </div>
+  <div id="solvemsg"></div>
+  <div id="fixmenu" class="row"></div>
+</section>
+
+<section>
+  <div class="grid-wrap" id="gridwrap"><table id="grid"></table></div>
+  <div id="calview" style="display:none"></div>
+  <div class="legend" id="legend">
+    click a cell: <b>lock work</b> &rarr; <b>&times; lock off</b> &rarr; clear &middot;
+    dim yellow = generated fill &middot; solid yellow = locked &middot;
+    <b class="g">green = pto</b> (paint via {PTO} mode or a staff row's {pto} editor; locked against normal clicks) &middot;
+    hatched = can't work that day &middot;
+    week rules apply to full mon&ndash;sun weeks inside the period
+  </div>
+</section>
+
+<section>
+  <div class="sec-label">VIOLATIONS</div>
+  <div id="viol"></div>
+</section>
+
+<script>
+'use strict';
+
+const LS_KEY = 'aight-schedule-v1';
+const WD = ['M','TU','W','TH','F','SA','SU'];
+const WD_LONG = ['mon','tue','wed','thu','fri','sat','sun'];
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+// transient (not saved)
+let ptoMode = false;
+let activeTweaks = [];    // one-time fixes currently applied
+let availableFixes = [];  // fixes found by diagnosis
+let ruleDraft = null;     // rule builder work-in-progress
+const ptoOpen = new Set();     // staff rows with pto editor open
+const ptoPending = {};         // empId -> pending range-start iso
+
+let state = load();
+
+function defaultState() {
+  const now = new Date();
+  return {
+    periodStart: iso(new Date(now.getFullYear(), now.getMonth(), 1)),
+    periodEnd: iso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+    employees: [],
+    coverage: [0,0,0,0,0,0,0],
+    universal: {
+      maxConsec: { on: true, days: 5 },
+      maxHours:  { on: true, hours: 40 },
+      hoursPerDay: 8
+    },
+    rules: [],   // {id, who: 'all'|[empIds], what: {...}, when: {...}}
+    grid: {}     // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
+  };
+}
+function normalizeState(s) {
+  s.universal = Object.assign(defaultState().universal, s.universal || {});
+  if (!s.rules) s.rules = [];
+  s.employees.forEach(e => {
+    if (!e.exempt) e.exempt = {};
+    if (!e.pto) e.pto = [];
+    // migrate boolean availability -> 0 off / 1 available / 2 must work
+    e.days = e.days.map(d => d === true ? 1 : (d === false ? 0 : d));
+  });
+  return s;
+}
+function load() {
+  let s = defaultState();
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) s = Object.assign(s, JSON.parse(raw));
+  } catch (e) {}
+  return normalizeState(s);
+}
+function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+/* ── dates ─────────────────────────────────────────────────────── */
+
+function iso(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function fromIso(s) {
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function wdIdx(d) { return (d.getDay() + 6) % 7; }  // Mon=0 .. Sun=6
+function nextIso(s) { const d = fromIso(s); d.setDate(d.getDate() + 1); return iso(d); }
+function fmtDate(s) { const d = fromIso(s); return MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getDate(); }
+function mondayOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wdIdx(d)); }
+
+function periodDates() {
+  const out = [];
+  const end = fromIso(state.periodEnd);
+  for (let d = fromIso(state.periodStart); d <= end; d.setDate(d.getDate()+1)) {
+    out.push({ iso: iso(d), wd: wdIdx(d), dayNum: d.getDate(), month: d.getMonth() });
+  }
+  return out;
+}
+
+// group into Mon-Sun weeks; a week is "full" when all 7 days fall inside the period
+function groupWeeks(dates) {
+  const weeks = [];
+  let cur = null;
+  for (const d of dates) {
+    if (!cur || d.wd === 0) { cur = { dates: [] }; weeks.push(cur); }
+    cur.dates.push(d);
+  }
+  for (const w of weeks) w.full = (w.dates.length === 7);
+  return weeks;
+}
+
+// calendar-anchored parity for "every other week" (stable across period changes)
+function weekParityOf(week) {
+  const m = mondayOf(fromIso(week.dates[0].iso));
+  const days = Math.round(m.getTime() / 86400000);
+  return ((Math.floor((days - 4) / 7)) % 2 + 2) % 2;
+}
+
+function key(empId, dayIso) { return empId + '|' + dayIso; }
+function empById(id) { return state.employees.find(e => e.id === id); }
+function empName(emp, i) {
+  if (i === undefined) i = state.employees.indexOf(emp);
+  return (emp.name || 'EMP ' + (i+1)).toUpperCase();
+}
+
+/* ── universal rule helpers ────────────────────────────────────── */
+
+function ruleOn(emp, id) { return state.universal[id].on && !emp.exempt[id]; }
+
+/* ── constraint resolver ───────────────────────────────────────────
+   Merges every rule source (base availability, custom rules, PTO,
+   universal rules, one-time fixes) into a single per-person-per-week
+   sheet. The solver and validator read ONLY these sheets.
+   ctx = { active: {ruleId: Set(weekStartIso)},   nPerPeriod picks
+           tweaks: [...],                          one-time fixes
+           suspended: Set(ruleId) }                                  */
+
+function makeCtx(active) {
+  return {
+    active: active || {},
+    tweaks: activeTweaks,
+    suspended: new Set(activeTweaks.filter(t => t.type === 'suspendRule').map(t => t.ruleId))
+  };
+}
+
+function ruleTargets(r, emp) { return r.who === 'all' || r.who.includes(emp.id); }
+
+function ruleAppliesToWeek(r, week, ctx) {
+  const w = r.when;
+  if (w.type === 'always') return true;
+  if (w.type === 'altWeeks') return weekParityOf(week) === w.parity;
+  if (w.type === 'nPerPeriod') return !!(ctx.active[r.id] && ctx.active[r.id].has(week.dates[0].iso));
+  if (w.type === 'dates') return week.dates.some(d => d.iso >= w.start && d.iso <= w.end);
+  return false;
+}
+
+function resolveWeek(emp, week, ctx) {
+  const can = [], must = [], pto = [];
+  week.dates.forEach(d => {
+    const p = emp.pto.includes(d.iso);
+    pto.push(p);
+    can.push(!p && emp.days[d.wd] >= 1);
+    must.push(!p && emp.days[d.wd] === 2);
+  });
+  let mn = emp.minDays, mx = emp.maxDays;
+
+  for (const r of state.rules) {
+    if (ctx.suspended.has(r.id)) continue;
+    if (!ruleTargets(r, emp) || !ruleAppliesToWeek(r, week, ctx)) continue;
+    const w = r.what;
+    if (w.type === 'dayOff' || w.type === 'dayOn') {
+      week.dates.forEach((d, i) => {
+        if (d.wd !== w.wd) return;
+        if (r.when.type === 'dates' && (d.iso < r.when.start || d.iso > r.when.end)) return;
+        if (pto[i]) return;                       // pto trumps rules
+        if (w.type === 'dayOff') { can[i] = false; must[i] = false; }
+        else { can[i] = true; must[i] = true; }
+      });
+    } else if (w.type === 'extraOff') {
+      mn = Math.max(0, mn - w.n); mx = Math.max(0, mx - w.n);
+    } else if (w.type === 'minmax') {
+      if (w.min != null) mn = w.min;
+      if (w.max != null) mx = w.max;
+    }
+  }
+
+  let consecOff = emp.consecOff;
+  for (const t of ctx.tweaks) {
+    if (t.empId !== emp.id) continue;
+    if (t.type === 'allowWd') week.dates.forEach((d, i) => { if (d.wd === t.wd && !pto[i]) can[i] = true; });
+    if (t.type === 'minRelax') mn = Math.max(0, mn - 1);
+    if (t.type === 'maxRelax') mx = mx + 1;
+    if (t.type === 'noConsecOff') consecOff = false;
+  }
+
+  // pto counts toward the weekly minimum and the hours cap
+  const ptoCount = pto.filter(Boolean).length;
+  mn = Math.max(0, mn - ptoCount);
+  mx = Math.max(0, mx - ptoCount);
+  if (ruleOn(emp, 'maxHours')) {
+    const capDays = Math.floor(state.universal.maxHours.hours / Math.max(1, state.universal.hoursPerDay)) - ptoCount;
+    mx = Math.min(mx, Math.max(0, capDays));
+  }
+  const maxRun = ruleOn(emp, 'maxConsec') ? state.universal.maxConsec.days : Infinity;
+  return { can, must, pto, min: mn, max: mx, maxRun, consecOff, ptoCount };
+}
+
+// lenient envelope for validation: a week is judged against the base sheet OR
+// any nPerPeriod rule variant (the satisfaction count is checked separately)
+function envelopeSheet(emp, week, ctx) {
+  const base = resolveWeek(emp, week, ctx);
+  let mn = base.min, mx = base.max;
+  const can = base.can.slice(), must = base.must.slice();
+  for (const r of state.rules) {
+    if (r.when.type !== 'nPerPeriod' || !ruleTargets(r, emp) || ctx.suspended.has(r.id)) continue;
+    const alt = resolveWeek(emp, week, Object.assign({}, ctx, { active: { [r.id]: new Set([week.dates[0].iso]) } }));
+    mn = Math.min(mn, alt.min); mx = Math.max(mx, alt.max);
+    alt.can.forEach((c, i) => { if (c) can[i] = true; });
+    alt.must.forEach((m, i) => { if (!m) must[i] = false; });
+  }
+  return Object.assign({}, base, { min: mn, max: mx, can, must });
+}
+
+function needFor(wd, ctx) {
+  let c = state.coverage[wd];
+  for (const t of ctx.tweaks) if (t.type === 'need' && t.wd === wd) c = Math.max(0, c - 1);
+  return c;
+}
+
+/* ── staff ─────────────────────────────────────────────────────── */
+
+function addEmployee() {
+  state.employees.push({
+    id: 'e' + Math.random().toString(36).slice(2, 8),
+    name: '',
+    days: [0,0,0,0,0,0,0],      // default: all black (can't work) until set
+    minDays: 4,
+    maxDays: 5,
+    consecOff: false,
+    exempt: {},
+    pto: []
+  });
+  save(); renderAll();
+}
+
+function removeEmployee(id) {
+  state.employees = state.employees.filter(e => e.id !== id);
+  for (const k in state.grid) if (k.startsWith(id + '|')) delete state.grid[k];
+  ptoOpen.delete(id);
+  save(); renderAll();
+}
+
+function clamp(v) { return Math.max(0, Math.min(7, parseInt(v, 10) || 0)); }
+
+function univChips() {
+  const u = state.universal;
+  return [
+    ['maxConsec', '≤' + u.maxConsec.days + ' row'],
+    ['maxHours', '≤' + u.maxHours.hours + 'h']
+  ].filter(([id]) => u[id].on);
+}
+
+function renderStaff() {
+  const box = document.getElementById('staff');
+  box.innerHTML = '';
+  state.employees.forEach((emp, i) => {
+    const row = document.createElement('div');
+    row.className = 'emp';
+
+    const name = document.createElement('input');
+    name.type = 'text'; name.className = 'name';
+    name.placeholder = 'name'; name.value = emp.name;
+    name.oninput = () => { emp.name = name.value; save(); renderGrid(); };
+    row.appendChild(name);
+
+    const tog = document.createElement('div');
+    tog.className = 'daytog';
+    WD.forEach((lbl, wd) => {
+      const b = document.createElement('button');
+      b.textContent = lbl;
+      b.className = emp.days[wd] === 1 ? 'on' : (emp.days[wd] === 2 ? 'must' : '');
+      b.title = WD_LONG[wd] + ': ' + ['can\'t work','available','must work'][emp.days[wd]];
+      b.onclick = () => { emp.days[wd] = (emp.days[wd] + 1) % 3; save(); renderAll(); };
+      tog.appendChild(b);
+    });
+    row.appendChild(tog);
+
+    const mm = document.createElement('span');
+    mm.className = 'minmax';
+    const mn = document.createElement('input');
+    mn.type = 'number'; mn.min = 0; mn.max = 7; mn.value = emp.minDays;
+    mn.oninput = () => { emp.minDays = clamp(mn.value); save(); renderAll(); };
+    const mx = document.createElement('input');
+    mx.type = 'number'; mx.min = 0; mx.max = 7; mx.value = emp.maxDays;
+    mx.oninput = () => { emp.maxDays = clamp(mx.value); save(); renderAll(); };
+    mm.append(mn, '–', mx, ' d/wk');
+    row.appendChild(mm);
+
+    const co = document.createElement('button');
+    co.className = 'aight-btn' + (emp.consecOff ? ' active' : '');
+    co.textContent = '2 off';
+    co.onclick = () => { emp.consecOff = !emp.consecOff; save(); renderAll(); };
+    row.appendChild(co);
+
+    const chips = univChips();
+    chips.forEach(([id, label]) => {
+      const c = document.createElement('button');
+      c.className = 'aight-btn' + (emp.exempt[id] ? '' : ' active');
+      c.textContent = label;
+      c.title = 'universal rule — lit = applies to this person';
+      c.onclick = () => { emp.exempt[id] = !emp.exempt[id]; save(); renderAll(); };
+      row.appendChild(c);
+    });
+    if (chips.length > 1) {
+      const allOn = chips.every(([id]) => !emp.exempt[id]);
+      const a = document.createElement('button');
+      a.className = 'aight-btn' + (allOn ? ' active' : '');
+      a.textContent = 'all';
+      a.title = 'toggle every universal rule for this person';
+      a.onclick = () => { chips.forEach(([id]) => emp.exempt[id] = allOn); save(); renderAll(); };
+      row.appendChild(a);
+    }
+
+    const pb = document.createElement('button');
+    pb.className = 'aight-btn' + (ptoOpen.has(emp.id) ? ' active' : '');
+    pb.textContent = 'pto';
+    pb.onclick = () => {
+      if (ptoOpen.has(emp.id)) ptoOpen.delete(emp.id); else ptoOpen.add(emp.id);
+      renderStaff();
+    };
+    row.appendChild(pb);
+
+    const del = document.createElement('button');
+    del.className = 'aight-btn';
+    del.innerHTML = '&nbsp;&times;&nbsp;';
+    del.onclick = () => removeEmployee(emp.id);
+    row.appendChild(del);
+
+    box.appendChild(row);
+    if (ptoOpen.has(emp.id)) box.appendChild(buildPtoEditor(emp));
+  });
+}
+
+/* ── pto ───────────────────────────────────────────────────────── */
+
+function addPtoDay(emp, dayIso) {
+  if (!emp.pto.includes(dayIso)) {
+    emp.pto.push(dayIso);
+    emp.pto.sort();
+    delete state.grid[key(emp.id, dayIso)];   // a scheduled day painted pto becomes a day off
+  }
+}
+function addPtoRange(emp, a, b) {
+  if (a > b) { const t = a; a = b; b = t; }
+  for (let s = a; s <= b; s = nextIso(s)) addPtoDay(emp, s);
+}
+function removePtoRange(emp, a, b) {
+  emp.pto = emp.pto.filter(x => x < a || x > b);
+}
+function ptoRanges(emp) {   // collapse consecutive days for display
+  const out = [];
+  let start = null, prev = null;
+  for (const s of emp.pto) {
+    if (start === null) { start = prev = s; continue; }
+    if (s === nextIso(prev)) { prev = s; continue; }
+    out.push([start, prev]); start = prev = s;
+  }
+  if (start !== null) out.push([start, prev]);
+  return out;
+}
+
+function buildPtoEditor(emp) {
+  const ed = document.createElement('div');
+  ed.className = 'ptoedit';
+
+  const inp = document.createElement('input');
+  inp.type = 'date';
+  ed.appendChild(inp);
+
+  const and = document.createElement('button');
+  and.className = 'aight-btn';
+  and.textContent = 'AND';
+  and.title = 'add this date (closes a pending TO range)';
+  and.onclick = () => {
+    if (!inp.value) return;
+    if (ptoPending[emp.id]) { addPtoRange(emp, ptoPending[emp.id], inp.value); delete ptoPending[emp.id]; }
+    else addPtoDay(emp, inp.value);
+    inp.value = '';
+    save(); renderAll();
+  };
+  ed.appendChild(and);
+
+  const to = document.createElement('button');
+  to.className = 'aight-btn';
+  to.textContent = 'TO';
+  to.title = 'start a range at this date, then enter the end date and press AND';
+  to.onclick = () => {
+    if (!inp.value) return;
+    ptoPending[emp.id] = inp.value;
+    inp.value = '';
+    renderStaff();
+  };
+  ed.appendChild(to);
+
+  if (ptoPending[emp.id]) {
+    const p = document.createElement('span');
+    p.className = 'pending';
+    p.textContent = fmtDate(ptoPending[emp.id]) + ' →';
+    ed.appendChild(p);
+  }
+
+  ptoRanges(emp).forEach(([a, b]) => {
+    const chip = document.createElement('span');
+    chip.className = 'ptochip';
+    chip.append(a === b ? fmtDate(a) : fmtDate(a) + '–' + fmtDate(b));
+    const x = document.createElement('button');
+    x.textContent = '×';
+    x.onclick = () => { removePtoRange(emp, a, b); save(); renderAll(); };
+    chip.appendChild(x);
+    ed.appendChild(chip);
+  });
+
+  return ed;
+}
+
+/* ── universal rules ───────────────────────────────────────────── */
+
+function span(txt) {
+  const s = document.createElement('span');
+  s.textContent = txt;
+  return s;
+}
+function numInput(val, min, max, onset) {
+  const i = document.createElement('input');
+  i.type = 'number'; i.min = min; i.max = max; i.value = val;
+  i.onchange = () => {
+    onset(Math.max(min, Math.min(max, parseInt(i.value, 10) || min)));
+    save(); renderAll();
+  };
+  return i;
+}
+function univToggle(rule) {
+  const b = document.createElement('button');
+  b.className = 'aight-btn' + (rule.on ? ' active' : '');
+  b.textContent = rule.on ? 'on' : 'off';
+  b.onclick = () => { rule.on = !rule.on; save(); renderAll(); };
+  return b;
+}
+
+function renderUniv() {
+  const box = document.getElementById('univ');
+  box.innerHTML = '';
+  const u = state.universal;
+
+  const r1 = document.createElement('div');
+  r1.className = 'row';
+  r1.append(univToggle(u.maxConsec), span('no more than'),
+    numInput(u.maxConsec.days, 1, 14, v => u.maxConsec.days = v),
+    span('work days in a row'));
+  box.appendChild(r1);
+
+  const r2 = document.createElement('div');
+  r2.className = 'row';
+  r2.append(univToggle(u.maxHours), span('no more than'),
+    numInput(u.maxHours.hours, 1, 80, v => u.maxHours.hours = v),
+    span('hours per week — a work day ='),
+    numInput(u.hoursPerDay, 1, 24, v => u.hoursPerDay = v),
+    span('h'));
+  box.appendChild(r2);
+}
+
+/* ── custom rules: cards + builder ─────────────────────────────── */
+
+function ruleText(r) {
+  const who = r.who === 'all' ? 'ALL'
+    : r.who.map(id => { const e = empById(id); return e ? empName(e) : '?'; }).join(' + ');
+  const w = r.what;
+  const whatTxt =
+    w.type === 'dayOff' ? WD_LONG[w.wd] + ' off' :
+    w.type === 'dayOn' ? 'must work ' + WD_LONG[w.wd] :
+    w.type === 'extraOff' ? '+' + w.n + ' day' + (w.n > 1 ? 's' : '') + ' off' :
+    'min ' + (w.min == null ? '—' : w.min) + ' / max ' + (w.max == null ? '—' : w.max);
+  const wh = r.when;
+  let whenTxt = 'every wk';
+  if (wh.type === 'altWeeks') {
+    const list = groupWeeks(periodDates()).filter(wk => weekParityOf(wk) === wh.parity).map(wk => fmtDate(wk.dates[0].iso));
+    whenTxt = 'every other wk (' + (list.length ? 'wks of ' + list.join(', ') : 'none in period') + ')';
+  }
+  if (wh.type === 'nPerPeriod') whenTxt = wh.n + ' wk' + (wh.n > 1 ? 's' : '') + ' per period, solver picks';
+  if (wh.type === 'dates') whenTxt = fmtDate(wh.start) + (wh.end !== wh.start ? '–' + fmtDate(wh.end) : '');
+  return who + ' — ' + whatTxt + ' — ' + whenTxt;
+}
+
+function renderRules() {
+  const box = document.getElementById('rules');
+  box.innerHTML = '';
+  state.rules.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'rulecard';
+    card.appendChild(span(ruleText(r)));
+    const x = document.createElement('button');
+    x.className = 'aight-btn';
+    x.innerHTML = '&nbsp;&times;&nbsp;';
+    x.onclick = () => { state.rules = state.rules.filter(q => q.id !== r.id); save(); renderAll(); };
+    card.appendChild(x);
+    box.appendChild(card);
+  });
+}
+
+function chipBtn(label, on, cb) {
+  const b = document.createElement('button');
+  b.className = 'aight-btn' + (on ? ' active' : '');
+  b.textContent = label;
+  b.onclick = cb;
+  return b;
+}
+
+function renderRuleBuilder() {
+  const box = document.getElementById('rulebuilder');
+  if (!ruleDraft) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  box.innerHTML = '';
+  const d = ruleDraft;
+
+  const who = document.createElement('div');
+  who.className = 'brow';
+  who.appendChild(Object.assign(document.createElement('span'), { className: 'blabel', textContent: 'WHO' }));
+  who.appendChild(chipBtn('all', d.all, () => { d.all = !d.all; if (d.all) d.who.clear(); renderRuleBuilder(); }));
+  state.employees.forEach(e => {
+    who.appendChild(chipBtn(empName(e).toLowerCase(), !d.all && d.who.has(e.id), () => {
+      d.all = false;
+      if (d.who.has(e.id)) d.who.delete(e.id); else d.who.add(e.id);
+      renderRuleBuilder();
+    }));
+  });
+  box.appendChild(who);
+
+  const what = document.createElement('div');
+  what.className = 'brow';
+  what.appendChild(Object.assign(document.createElement('span'), { className: 'blabel', textContent: 'WHAT' }));
+  [['dayOff','day off'], ['dayOn','must work day'], ['extraOff','extra day off'], ['minmax','set min–max']].forEach(([t, lbl]) => {
+    what.appendChild(chipBtn(lbl, d.whatType === t, () => { d.whatType = t; renderRuleBuilder(); }));
+  });
+  box.appendChild(what);
+
+  const wparams = document.createElement('div');
+  wparams.className = 'brow';
+  if (d.whatType === 'dayOff' || d.whatType === 'dayOn') {
+    wparams.appendChild(Object.assign(document.createElement('span'), { className: 'blabel', textContent: '' }));
+    WD.forEach((lbl, wd) => wparams.appendChild(chipBtn(lbl, d.wd === wd, () => { d.wd = wd; renderRuleBuilder(); })));
+  } else if (d.whatType === 'extraOff') {
+    const n = document.createElement('input');
+    n.type = 'number'; n.min = 1; n.max = 6; n.value = d.n;
+    n.onchange = () => { d.n = Math.max(1, Math.min(6, parseInt(n.value, 10) || 1)); };
+    wparams.append(span('days:'), n);
+  } else if (d.whatType === 'minmax') {
+    const mn = document.createElement('input');
+    mn.type = 'number'; mn.min = 0; mn.max = 7; mn.value = d.min == null ? '' : d.min;
+    mn.onchange = () => { d.min = mn.value === '' ? null : clamp(mn.value); };
+    const mx = document.createElement('input');
+    mx.type = 'number'; mx.min = 0; mx.max = 7; mx.value = d.max == null ? '' : d.max;
+    mx.onchange = () => { d.max = mx.value === '' ? null : clamp(mx.value); };
+    wparams.append(span('min:'), mn, span('max:'), mx, span('(blank = unchanged)'));
+  }
+  if (wparams.childNodes.length) box.appendChild(wparams);
+
+  const when = document.createElement('div');
+  when.className = 'brow';
+  when.appendChild(Object.assign(document.createElement('span'), { className: 'blabel', textContent: 'WHEN' }));
+  [['always','every wk'], ['altWeeks','every other wk'], ['nPerPeriod','n wks per period'], ['dates','date range']].forEach(([t, lbl]) => {
+    when.appendChild(chipBtn(lbl, d.whenType === t, () => { d.whenType = t; renderRuleBuilder(); }));
+  });
+  box.appendChild(when);
+
+  const hparams = document.createElement('div');
+  hparams.className = 'brow';
+  if (d.whenType === 'altWeeks') {
+    [0, 1].forEach(p => {
+      const list = groupWeeks(periodDates()).filter(wk => weekParityOf(wk) === p).map(wk => fmtDate(wk.dates[0].iso));
+      hparams.appendChild(chipBtn('wks of ' + (list.join(', ') || 'none'), d.parity === p, () => { d.parity = p; renderRuleBuilder(); }));
+    });
+  } else if (d.whenType === 'nPerPeriod') {
+    const n = document.createElement('input');
+    n.type = 'number'; n.min = 1; n.max = 6; n.value = d.npp;
+    n.onchange = () => { d.npp = Math.max(1, Math.min(6, parseInt(n.value, 10) || 1)); };
+    hparams.append(span('weeks:'), n, span('(solver decides which)'));
+  } else if (d.whenType === 'dates') {
+    const a = document.createElement('input'); a.type = 'date'; a.value = d.start || '';
+    a.onchange = () => { d.start = a.value; };
+    const b = document.createElement('input'); b.type = 'date'; b.value = d.end || '';
+    b.onchange = () => { d.end = b.value; };
+    hparams.append(a, span('→'), b);
+  }
+  if (hparams.childNodes.length) box.appendChild(hparams);
+
+  const actions = document.createElement('div');
+  actions.className = 'brow';
+  const add = document.createElement('button');
+  add.className = 'aight-btn important';
+  add.textContent = 'add rule';
+  add.onclick = commitRule;
+  const cancel = document.createElement('button');
+  cancel.className = 'aight-btn';
+  cancel.textContent = 'cancel';
+  cancel.onclick = () => { ruleDraft = null; renderRuleBuilder(); };
+  const err = document.createElement('span');
+  err.className = 'err';
+  err.id = 'rerr';
+  actions.append(add, cancel, err);
+  box.appendChild(actions);
+}
+
+function commitRule() {
+  const d = ruleDraft;
+  const err = m => { const e = document.getElementById('rerr'); if (e) e.textContent = m; };
+  if (!d.all && d.who.size === 0) return err('pick who');
+  if (!d.whatType) return err('pick what');
+  if ((d.whatType === 'dayOff' || d.whatType === 'dayOn') && d.wd == null) return err('pick a day');
+  if (d.whatType === 'minmax' && d.min == null && d.max == null) return err('set min or max');
+  if (!d.whenType) return err('pick when');
+  if (d.whenType === 'dates' && (!d.start || !d.end)) return err('set both dates');
+
+  const what =
+    d.whatType === 'dayOff' ? { type: 'dayOff', wd: d.wd } :
+    d.whatType === 'dayOn' ? { type: 'dayOn', wd: d.wd } :
+    d.whatType === 'extraOff' ? { type: 'extraOff', n: d.n } :
+    { type: 'minmax', min: d.min, max: d.max };
+  const when =
+    d.whenType === 'always' ? { type: 'always' } :
+    d.whenType === 'altWeeks' ? { type: 'altWeeks', parity: d.parity } :
+    d.whenType === 'nPerPeriod' ? { type: 'nPerPeriod', n: d.npp } :
+    { type: 'dates', start: d.start <= d.end ? d.start : d.end, end: d.start <= d.end ? d.end : d.start };
+
+  state.rules.push({
+    id: 'r' + Math.random().toString(36).slice(2, 8),
+    who: d.all ? 'all' : Array.from(d.who),
+    what, when
+  });
+  ruleDraft = null;
+  save(); renderAll();
+}
+
+function openRuleBuilder() {
+  ruleDraft = { all: false, who: new Set(), whatType: null, wd: null, n: 1, min: null, max: null, whenType: 'always', parity: 0, npp: 1, start: '', end: '' };
+  renderRuleBuilder();
+}
+
+/* ── need ──────────────────────────────────────────────────────── */
+
+function renderNeed() {
+  const box = document.getElementById('need');
+  box.innerHTML = '';
+  WD_LONG.forEach((lbl, wd) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.min = 0; inp.max = 10;
+    inp.value = state.coverage[wd];
+    inp.oninput = () => {
+      state.coverage[wd] = Math.max(0, Math.min(10, parseInt(inp.value, 10) || 0));
+      save(); renderGrid();
+    };
+    const l = document.createElement('span');
+    l.textContent = lbl;
+    cell.append(l, inp);
+    box.appendChild(cell);
+  });
+}
+
+/* ── grid ──────────────────────────────────────────────────────── */
+
+function cellClick(emp, dayIso) {
+  if (ptoMode) {
+    if (emp.pto.includes(dayIso)) emp.pto = emp.pto.filter(x => x !== dayIso);
+    else addPtoDay(emp, dayIso);
+    save(); renderAll();
+    return;
+  }
+  if (emp.pto.includes(dayIso)) return;   // green is locked outside pto mode
+  const k = key(emp.id, dayIso);
+  const cur = state.grid[k];
+  if (cur === 'lockWork') state.grid[k] = 'lockOff';
+  else if (cur === 'lockOff') delete state.grid[k];
+  else state.grid[k] = 'lockWork';
+  save(); renderGrid();
+}
+
+function onDuty(dayIso) {
+  let n = 0;
+  for (const emp of state.employees) {
+    const st = state.grid[key(emp.id, dayIso)];
+    if (st === 'work' || st === 'lockWork') n++;
+  }
+  return n;
+}
+
+function renderGrid() {
+  const dates = periodDates();
+  const weeks = groupWeeks(dates);
+  const ctx = makeCtx({});
+  const v = validate(dates, weeks);
+  const table = document.getElementById('grid');
+  table.innerHTML = '';
+  const todayIso = iso(new Date());
+
+  // per-cell availability map (rules + tweaks included) for hatching
+  const canMap = {};
+  weeks.forEach(w => state.employees.forEach(e => {
+    const sh = envelopeSheet(e, w, ctx);
+    w.dates.forEach((d, i) => { canMap[key(e.id, d.iso)] = sh.can[i]; });
+  }));
+
+  const thead = document.createElement('tr');
+  const corner = document.createElement('th');
+  corner.className = 'namecell';
+  thead.appendChild(corner);
+  dates.forEach((d, i) => {
+    const th = document.createElement('th');
+    if (d.wd >= 5) th.classList.add('wkend');
+    if (d.iso === todayIso) th.classList.add('today');
+    const showMonth = (i === 0 || d.dayNum === 1) ? MONTHS[d.month] : '';
+    th.innerHTML = '<span class="m">' + showMonth + '</span><span class="wd">' + WD[d.wd] + '</span><span class="dn">' + d.dayNum + '</span>';
+    thead.appendChild(th);
+  });
+  const totalH = document.createElement('th');
+  totalH.innerHTML = '<span class="m"></span><span class="wd">&Sigma;</span><span class="dn"></span>';
+  thead.appendChild(totalH);
+  table.appendChild(thead);
+
+  state.employees.forEach((emp, ei) => {
+    const tr = document.createElement('tr');
+    const nc = document.createElement('td');
+    nc.className = 'namecell';
+    nc.textContent = empName(emp, ei);
+    tr.appendChild(nc);
+    let total = 0;
+    dates.forEach(d => {
+      const td = document.createElement('td');
+      td.className = 'day';
+      if (d.wd >= 5) td.classList.add('wkend');
+      const k = key(emp.id, d.iso);
+      const st = state.grid[k];
+      if (emp.pto.includes(d.iso)) td.classList.add('pto');
+      else {
+        if (st) td.classList.add(st);
+        if (st === 'lockOff') td.textContent = '×';
+        if (st === 'work' || st === 'lockWork') total++;
+        if (!canMap[k]) td.classList.add('unavail');
+      }
+      if (v.cellViol.has(k)) td.classList.add('viol');
+      td.onclick = () => cellClick(emp, d.iso);
+      tr.appendChild(td);
+    });
+    const tt = document.createElement('td');
+    tt.className = 'total';
+    tt.textContent = total;
+    tr.appendChild(tt);
+    table.appendChild(tr);
+  });
+
+  if (state.employees.length) {
+    const tr = document.createElement('tr');
+    tr.className = 'covrow';
+    const nc = document.createElement('td');
+    nc.className = 'namecell';
+    nc.textContent = 'ON / NEED';
+    tr.appendChild(nc);
+    dates.forEach(d => {
+      const td = document.createElement('td');
+      const on = onDuty(d.iso);
+      const need = needFor(d.wd, ctx);
+      td.textContent = on + '/' + need;
+      if (v.touchedWeeks.size && on < need) {
+        const wk = weeks.find(w => w.dates.includes(d));
+        if (wk && v.touchedWeeks.has(wk.dates[0].iso)) td.classList.add('short');
+      }
+      tr.appendChild(td);
+    });
+    tr.appendChild(document.createElement('td'));
+    table.appendChild(tr);
+  }
+
+  renderViolations(v);
+  if (viewMode === 'cal') renderCal();
+}
+
+/* ── validation ────────────────────────────────────────────────── */
+
+function validate(dates, weeks) {
+  const cellViol = new Set();
+  const msgs = [];
+  const touchedWeeks = new Set();
+  const ctx = makeCtx({});
+
+  for (const w of weeks) {
+    const touched = state.employees.some(e => w.dates.some(d => {
+      const st = state.grid[key(e.id, d.iso)];
+      return st === 'work' || st === 'lockWork';
+    }));
+    if (touched) touchedWeeks.add(w.dates[0].iso);
+  }
+
+  state.employees.forEach((emp, ei) => {
+    const nm = empName(emp, ei);
+    if (emp.minDays > emp.maxDays) msgs.push(nm + ' — min days > max days');
+
+    const conflictSeen = new Set();
+    for (const w of weeks) {
+      const sh = envelopeSheet(emp, w, ctx);
+      const wk = 'wk of ' + w.dates[0].iso;
+
+      // setup conflicts — shown even before generating
+      if (w.full) {
+        const canCount = sh.can.filter(Boolean).length + sh.ptoCount;
+        if (sh.can.filter(Boolean).length < sh.min && !conflictSeen.has('avail')) {
+          msgs.push(nm + ' — ' + wk + ': only ' + sh.can.filter(Boolean).length + ' available days but needs ' + sh.min + (sh.ptoCount ? ' (after pto credit)' : ''));
+          conflictSeen.add('avail');
+        }
+        const mustCount = sh.must.filter(Boolean).length;
+        if (mustCount > sh.max && !conflictSeen.has('must')) {
+          msgs.push(nm + ' — ' + wk + ': ' + mustCount + ' must-work days exceed max ' + sh.max);
+          conflictSeen.add('must');
+        }
+        if (sh.min > sh.max && !conflictSeen.has('minmax')) {
+          msgs.push(nm + ' — ' + wk + ': effective min ' + sh.min + ' > max ' + sh.max);
+          conflictSeen.add('minmax');
+        }
+      }
+
+      if (!touchedWeeks.has(w.dates[0].iso)) continue;
+      let count = 0;
+      const working = [];
+      w.dates.forEach((d, i) => {
+        const st = state.grid[key(emp.id, d.iso)];
+        const on = st === 'work' || st === 'lockWork';
+        working.push(on);
+        if (on) {
+          count++;
+          if (!sh.can[i]) {
+            cellViol.add(key(emp.id, d.iso));
+            msgs.push(nm + ' — ' + d.iso + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
+          }
+        } else if (sh.must[i] && st !== 'lockOff') {
+          cellViol.add(key(emp.id, d.iso));
+          msgs.push(nm + ' — ' + d.iso + ': must work ' + WD_LONG[d.wd] + ' but not scheduled');
+        }
+      });
+      if (w.full) {
+        if (count < sh.min) msgs.push(nm + ' — ' + wk + ': ' + count + ' days (min ' + sh.min + (sh.ptoCount ? ' after pto' : '') + ')');
+        if (sh.consecOff) {
+          let ok = false;
+          for (let i = 0; i < 6; i++) if (!working[i] && !working[i+1]) { ok = true; break; }
+          if (!ok) msgs.push(nm + ' — ' + wk + ': no two days off in a row');
+        }
+      }
+      if (count > sh.max) msgs.push(nm + ' — ' + wk + ': ' + count + ' days (max ' + sh.max + (sh.ptoCount ? ' after pto' : '') + ')');
+      if (ruleOn(emp, 'maxHours')) {
+        const u = state.universal;
+        // pto credit maxes out at the cap itself — a full pto week is a full week, not overtime
+        const ptoHrs = Math.min(sh.ptoCount, Math.floor(u.maxHours.hours / Math.max(1, u.hoursPerDay)));
+        const hrs = (count + ptoHrs) * u.hoursPerDay;
+        if (hrs > u.maxHours.hours)
+          msgs.push(nm + ' — ' + wk + ': ' + hrs + 'h' + (sh.ptoCount ? ' incl pto' : '') + ' (max ' + u.maxHours.hours + 'h)');
+      }
+    }
+
+    // days in a row across the whole period (pto breaks a run)
+    if (ruleOn(emp, 'maxConsec')) {
+      const lim = state.universal.maxConsec.days;
+      let run = 0, runStart = null;
+      for (const d of dates) {
+        const st = state.grid[key(emp.id, d.iso)];
+        if (st === 'work' || st === 'lockWork') {
+          if (!run) runStart = d.iso;
+          run++;
+          if (run > lim) {
+            cellViol.add(key(emp.id, d.iso));
+            if (run === lim + 1)
+              msgs.push(nm + ' — ' + runStart + ' onward: more than ' + lim + ' days in a row');
+          }
+        } else run = 0;
+      }
+    }
+  });
+
+  // n-weeks-per-period rules: is each satisfied often enough?
+  const fullWeeks = weeks.filter(w => w.full);
+  if (touchedWeeks.size) for (const r of state.rules) {
+    if (r.when.type !== 'nPerPeriod' || ctx.suspended.has(r.id)) continue;
+    const targets = r.who === 'all' ? state.employees : state.employees.filter(e => r.who.includes(e.id));
+    targets.forEach(emp => {
+      let sat = 0;
+      for (const w of fullWeeks) {
+        const shR = resolveWeek(emp, w, Object.assign({}, ctx, { active: { [r.id]: new Set([w.dates[0].iso]) } }));
+        let count = 0, okDays = true;
+        w.dates.forEach((d, i) => {
+          const st = state.grid[key(emp.id, d.iso)];
+          const on = st === 'work' || st === 'lockWork';
+          if (on) { count++; if (!shR.can[i]) okDays = false; }
+          else if (shR.must[i] && st !== 'lockOff') okDays = false;
+        });
+        if (okDays && count >= shR.min && count <= shR.max) sat++;
+      }
+      if (sat < r.when.n)
+        msgs.push(empName(emp) + ' — rule "' + ruleText(r) + '" met in ' + sat + '/' + r.when.n + ' wks');
+    });
+  }
+
+  for (const w of weeks) {
+    if (!touchedWeeks.has(w.dates[0].iso)) continue;
+    for (const d of w.dates) {
+      const on = onDuty(d.iso);
+      const need = needFor(d.wd, ctx);
+      if (on < need) msgs.push(WD_LONG[d.wd] + ' ' + d.iso + ': ' + on + ' on duty (need ' + need + ')');
+    }
+  }
+
+  return { cellViol, msgs, touchedWeeks };
+}
+
+function renderViolations(v) {
+  const box = document.getElementById('viol');
+  if (!v.msgs.length) {
+    box.innerHTML = v.touchedWeeks.size
+      ? '<span class="ok">aight — no violations</span>'
+      : '<span style="opacity:0.4">nothing scheduled yet</span>';
+    return;
+  }
+  box.innerHTML = v.msgs.map(m => '<span class="bad">' + m + '</span>').join('<br>');
+}
+
+/* ── solver ────────────────────────────────────────────────────── */
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function candidatesFor(emp, week, carryIn, sheet) {
+  const n = week.dates.length;
+  const out = [];
+  for (let mask = 0; mask < (1 << n); mask++) {
+    let count = 0, ok = true, run = carryIn;
+    for (let i = 0; i < n; i++) {
+      const lock = state.grid[key(emp.id, week.dates[i].iso)];
+      if (mask >> i & 1) {
+        count++; run++;
+        if (run > sheet.maxRun || !sheet.can[i] || lock === 'lockOff') { ok = false; break; }
+      } else {
+        run = 0;
+        if (lock === 'lockWork' || (sheet.must[i] && lock !== 'lockOff')) { ok = false; break; }
+      }
+    }
+    if (!ok || count > sheet.max) continue;
+    if (week.full) {
+      if (count < sheet.min) continue;
+      if (sheet.consecOff) {
+        let found = false;
+        for (let i = 0; i < 6; i++) if (!(mask >> i & 1) && !(mask >> (i+1) & 1)) { found = true; break; }
+        if (!found) continue;
+      }
+    }
+    out.push(mask);
+  }
+  return shuffle(out);
+}
+
+function solveWeek(week, carry, ctx) {
+  const emps = state.employees;
+  const n = week.dates.length;
+  const sheets = emps.map(e => resolveWeek(e, week, ctx));
+  const cands = emps.map((e, i) => candidatesFor(e, week, carry[e.id] || 0, sheets[i]));
+  const need = week.dates.map(d => needFor(d.wd, ctx));
+  const poss = emps.map((e, i) => week.dates.map((d, j) =>
+    (sheets[i].can[j] && state.grid[key(e.id, d.iso)] !== 'lockOff') ? 1 : 0));
+  const counts = new Array(n).fill(0);
+  const chosen = new Array(emps.length).fill(0);
+  let nodes = 0;
+
+  function bt(i) {
+    if (++nodes > 300000) return false;
+    if (i === emps.length) return counts.every((c, j) => c >= need[j]);
+    for (let j = 0; j < n; j++) {
+      let ub = counts[j];
+      for (let k = i; k < emps.length; k++) ub += poss[k][j];
+      if (ub < need[j]) return false;
+    }
+    for (const mask of cands[i]) {
+      for (let j = 0; j < n; j++) if (mask >> j & 1) counts[j]++;
+      chosen[i] = mask;
+      if (bt(i + 1)) return true;
+      for (let j = 0; j < n; j++) if (mask >> j & 1) counts[j]--;
+    }
+    return false;
+  }
+
+  if (!bt(0)) return false;
+  emps.forEach((emp, i) => {
+    week.dates.forEach((d, j) => {
+      if (chosen[i] >> j & 1) {
+        const k = key(emp.id, d.iso);
+        if (state.grid[k] !== 'lockWork') state.grid[k] = 'work';
+      }
+    });
+    let t = 0;
+    for (let j = n - 1; j >= 0 && (chosen[i] >> j & 1); j--) t++;
+    carry[emp.id] = (t === n) ? (carry[emp.id] || 0) + n : t;
+  });
+  return true;
+}
+
+function clearWorkCells() {
+  for (const k in state.grid) if (state.grid[k] === 'work') delete state.grid[k];
+}
+
+// random picks for "n weeks per period" rules — reshuffled every attempt
+function pickActive() {
+  const fullWeeks = groupWeeks(periodDates()).filter(w => w.full);
+  const active = {};
+  for (const r of state.rules) {
+    if (r.when.type !== 'nPerPeriod') continue;
+    active[r.id] = new Set(shuffle(fullWeeks.slice()).slice(0, r.when.n).map(w => w.dates[0].iso));
+  }
+  return active;
+}
+
+function runSolve(attempts) {
+  const weeks = groupWeeks(periodDates());
+  let failedAt = null;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    clearWorkCells();
+    const ctx = makeCtx(pickActive());
+    const carry = {};
+    failedAt = null;
+    for (const w of weeks) {
+      if (!solveWeek(w, carry, ctx)) { failedAt = w.dates[0].iso; break; }
+    }
+    if (!failedAt) break;
+  }
+  return failedAt;
+}
+
+function generate() {
+  const failedAt = runSolve(25);
+  save(); renderGrid();
+  const msgEl = document.getElementById('solvemsg');
+  if (failedAt) {
+    msgEl.textContent = 'could not fill wk of ' + failedAt + ' — looking for fixes…';
+    diagnose();
+  } else {
+    msgEl.textContent = activeTweaks.length ? 'generated with ' + activeTweaks.length + ' fix(es) applied — one-time, not saved' : '';
+  }
+}
+
+/* ── conflict fix menu ─────────────────────────────────────────────
+   When generate fails, try small one-time parameter changes and list
+   every one that unlocks a solution. Nothing applies until selected,
+   and a re-generate runs the full rule pipeline again.              */
+
+function sameTweak(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+
+function candidateTweaks() {
+  const out = [];
+  for (let wd = 0; wd < 7; wd++) if (state.coverage[wd] > 0) out.push({ type: 'need', wd });
+  state.employees.forEach(e => {
+    for (let wd = 0; wd < 7; wd++) if (e.days[wd] === 0) out.push({ type: 'allowWd', empId: e.id, wd });
+  });
+  state.rules.forEach(r => out.push({ type: 'suspendRule', ruleId: r.id }));
+  state.employees.forEach(e => {
+    if (e.consecOff) out.push({ type: 'noConsecOff', empId: e.id });
+    out.push({ type: 'minRelax', empId: e.id });
+    out.push({ type: 'maxRelax', empId: e.id });
+  });
+  return out.filter(t => !activeTweaks.some(a => sameTweak(a, t)));
+}
+
+function tweakLabel(t) {
+  if (t.type === 'need') return WD_LONG[t.wd] + ' need ' + state.coverage[t.wd] + '→' + Math.max(0, state.coverage[t.wd] - 1);
+  if (t.type === 'allowWd') return empName(empById(t.empId)) + ' can work ' + WD_LONG[t.wd];
+  if (t.type === 'suspendRule') { const r = state.rules.find(x => x.id === t.ruleId); return 'skip: ' + (r ? ruleText(r) : '?'); }
+  if (t.type === 'minRelax') return empName(empById(t.empId)) + ' min −1';
+  if (t.type === 'maxRelax') return empName(empById(t.empId)) + ' max +1';
+  if (t.type === 'noConsecOff') return empName(empById(t.empId)) + ' 2-off waived';
+  return '?';
+}
+
+function diagnose() {
+  const found = [];
+  for (const t of candidateTweaks()) {
+    if (found.length >= 10) break;
+    activeTweaks.push(t);
+    const failed = runSolve(6);
+    activeTweaks.pop();
+    if (!failed) found.push(t);
+  }
+  clearWorkCells();
+  save(); renderGrid();
+  availableFixes = found;
+  renderFixes();
+  document.getElementById('solvemsg').textContent = found.length
+    ? 'could not fill — pick one or more fixes below, then {generate}'
+    : 'could not fill — no single-change fix found; adjust rules, availability, or need';
+}
+
+function renderFixes() {
+  const box = document.getElementById('fixmenu');
+  box.innerHTML = '';
+  const shown = availableFixes.slice();
+  activeTweaks.forEach(t => { if (!shown.some(s => sameTweak(s, t))) shown.push(t); });
+  if (!shown.length) return;
+  shown.forEach(t => {
+    const on = activeTweaks.some(a => sameTweak(a, t));
+    const b = document.createElement('button');
+    b.className = 'aight-btn' + (on ? ' active' : '');
+    b.textContent = tweakLabel(t);
+    b.title = 'one-time fix for this generate — rules themselves stay unchanged';
+    b.onclick = () => {
+      if (on) activeTweaks = activeTweaks.filter(a => !sameTweak(a, t));
+      else activeTweaks.push(t);
+      renderFixes(); renderGrid();
+    };
+    box.appendChild(b);
+  });
+  const c = document.createElement('button');
+  c.className = 'aight-btn';
+  c.textContent = 'clear fixes';
+  c.onclick = () => { activeTweaks = []; availableFixes = []; renderFixes(); renderGrid(); };
+  box.appendChild(c);
+}
+
+function clearFills() {
+  clearWorkCells();
+  document.getElementById('solvemsg').textContent = '';
+  save(); renderGrid();
+}
+
+function clearAll() {   // clears schedule marks; pto is kept (remove via editors)
+  state.grid = {};
+  document.getElementById('solvemsg').textContent = '';
+  save(); renderGrid();
+}
+
+/* ── calendar view (read-only) ─────────────────────────────────── */
+
+let viewMode = 'grid';
+
+function renderCal() {
+  const box = document.getElementById('calview');
+  const weeks = groupWeeks(periodDates());
+  const t = document.createElement('table');
+  const hr = document.createElement('tr');
+  WD.forEach(l => {
+    const th = document.createElement('th');
+    th.textContent = l;
+    hr.appendChild(th);
+  });
+  t.appendChild(hr);
+  weeks.forEach(w => {
+    const tr = document.createElement('tr');
+    for (let wd = 0; wd < 7; wd++) {
+      const d = w.dates.find(x => x.wd === wd);
+      const td = document.createElement('td');
+      if (wd >= 5) td.classList.add('wkend');
+      if (!d) { td.classList.add('blank'); tr.appendChild(td); continue; }
+      const dn = document.createElement('div');
+      dn.className = 'dnum';
+      dn.innerHTML = (d.dayNum === 1 || d.iso === state.periodStart
+        ? '<span class="mo">' + MONTHS[d.month] + '</span>' : '') + d.dayNum;
+      td.appendChild(dn);
+      const who = document.createElement('div');
+      who.className = 'who';
+      state.employees.forEach((emp, i) => {
+        const st = state.grid[key(emp.id, d.iso)];
+        if (st === 'work' || st === 'lockWork') {
+          const l = document.createElement('div');
+          l.textContent = empName(emp, i);
+          who.appendChild(l);
+        } else if (emp.pto.includes(d.iso)) {
+          const l = document.createElement('div');
+          l.className = 'ptoname';
+          l.textContent = empName(emp, i) + ' pto';
+          who.appendChild(l);
+        }
+      });
+      td.appendChild(who);
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  });
+  box.innerHTML = '';
+  box.appendChild(t);
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('gridwrap').style.display = mode === 'grid' ? '' : 'none';
+  document.getElementById('legend').style.display = mode === 'grid' ? '' : 'none';
+  document.getElementById('calview').style.display = mode === 'cal' ? '' : 'none';
+  document.getElementById('calbtn').className = 'aight-btn' + (mode === 'cal' ? ' active' : '');
+  if (mode === 'cal') renderCal();
+}
+
+/* ── csv export — calendar layout: week bands, names stacked per day ── */
+
+function csvContent() {
+  const dates = periodDates();
+  const weeks = groupWeeks(dates);
+  const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const rows = [];
+  rows.push([esc('AIGHT.SCHEDULE'), esc(state.periodStart + ' to ' + state.periodEnd)].join(','));
+  rows.push(WD.map(esc).join(','));
+  rows.push('');
+  for (const w of weeks) {
+    const dateRow = new Array(7).fill('');
+    const names = [[],[],[],[],[],[],[]];
+    w.dates.forEach(d => {
+      dateRow[d.wd] = MONTHS[d.month] + ' ' + d.dayNum;
+      state.employees.forEach((emp, i) => {
+        const st = state.grid[key(emp.id, d.iso)];
+        if (st === 'work' || st === 'lockWork') names[d.wd].push(empName(emp, i));
+      });
+    });
+    rows.push(dateRow.map(esc).join(','));
+    const depth = Math.max(0, ...names.map(a => a.length));
+    for (let r = 0; r < depth; r++)
+      rows.push(names.map(a => esc(a[r] || '')).join(','));
+    rows.push('');
+  }
+  return rows.join('\r\n');
+}
+
+function exportCsv() {
+  const blob = new Blob([csvContent()], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'schedule-' + state.periodStart + '_' + state.periodEnd + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ── period ────────────────────────────────────────────────────── */
+
+function setMonth(offset) {
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const last = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+  state.periodStart = iso(first);
+  state.periodEnd = iso(last);
+  save(); renderAll();
+}
+
+function bindPeriod() {
+  const s = document.getElementById('pstart');
+  const e = document.getElementById('pend');
+  s.value = state.periodStart;
+  e.value = state.periodEnd;
+  s.onchange = () => {
+    if (!s.value) return;
+    state.periodStart = s.value;
+    if (state.periodEnd < state.periodStart) { state.periodEnd = state.periodStart; e.value = state.periodEnd; }
+    save(); renderAll();
+  };
+  e.onchange = () => {
+    if (!e.value) return;
+    state.periodEnd = e.value;
+    if (state.periodEnd < state.periodStart) { state.periodStart = state.periodEnd; s.value = state.periodStart; }
+    save(); renderAll();
+  };
+}
+
+/* ── boot ──────────────────────────────────────────────────────── */
+
+function renderAll() {
+  document.getElementById('pstart').value = state.periodStart;
+  document.getElementById('pend').value = state.periodEnd;
+  renderUniv();
+  renderStaff();
+  renderRules();
+  renderRuleBuilder();
+  renderFixes();
+  renderGrid();
+}
+
+document.getElementById('addemp').onclick = addEmployee;
+document.getElementById('addrule').onclick = () => { if (ruleDraft) { ruleDraft = null; renderRuleBuilder(); } else openRuleBuilder(); };
+document.getElementById('generate').onclick = generate;
+document.getElementById('clearfills').onclick = clearFills;
+document.getElementById('clearall').onclick = clearAll;
+document.getElementById('csv').onclick = exportCsv;
+document.getElementById('calbtn').onclick = () => setView(viewMode === 'cal' ? 'grid' : 'cal');
+document.getElementById('ptomode').onclick = () => {
+  ptoMode = !ptoMode;
+  document.getElementById('ptomode').className = 'aight-btn' + (ptoMode ? ' active' : '');
+};
+document.getElementById('thismonth').onclick = () => setMonth(0);
+document.getElementById('nextmonth').onclick = () => setMonth(1);
+bindPeriod();
+renderNeed();
+renderAll();
+</script>
+</body>
+</html>
