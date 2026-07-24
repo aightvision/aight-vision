@@ -110,6 +110,30 @@
       transition: border-color 0.2s, color 0.2s; white-space: nowrap;
     }
     #auth-btn:hover { border-color: #555; color: #fff; }
+    #auth-btn:disabled { color: #555; border-color: #333; cursor: default; }
+
+    /* Auth error message under the input */
+    #auth-error {
+      display: none;
+      color: #e57373;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: -18px;
+      margin-bottom: 8px;
+    }
+    #auth-error.show { display: block; }
+
+    /* Logout button — hidden until you're authed */
+    #logout-btn {
+      position: fixed;
+      top: 12px; right: 12px;
+      z-index: 6;
+      font-size: 10px;
+      padding: 5px 10px;
+      display: none;
+    }
+    body.authed #logout-btn { display: inline-flex; }
 
     /* ── ffmpeg status pill (bottom-right after auth) ───────────── */
 
@@ -787,6 +811,9 @@
   <input type="password" id="secret-input" placeholder="access key" autocomplete="off">
   <button id="auth-btn">enter</button>
 </div>
+<div id="auth-error" role="alert"></div>
+
+<button class="aight-btn" id="logout-btn" aria-label="Logout">logout</button>
 
 <div id="upload-area">
   <div id="drop-zone">
@@ -1084,27 +1111,99 @@
 
   // ── Auth + ffmpeg preload ───────────────────────────────────────
 
-  function unlock(key) {
-    secret = key;
-    sessionStorage.setItem('uploadSecret', key);
+  // Verify a code against the server. Returns { ok, role } or null on failure.
+  async function verifyCode(candidate) {
+    try {
+      const res = await fetch('/api/verify', {
+        headers: { 'x-upload-secret': candidate },
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.error('verify failed:', e);
+      return null;
+    }
+  }
+
+  function showAuthError(msg) {
+    secretIn.classList.add('error');
+    const errEl = $('auth-error');
+    if (errEl) { errEl.textContent = msg || 'invalid code'; errEl.classList.add('show'); }
+  }
+  function clearAuthError() {
+    secretIn.classList.remove('error');
+    const errEl = $('auth-error');
+    if (errEl) errEl.classList.remove('show');
+  }
+
+  function reveal() {
     authEl.classList.add('hidden');
     uploadArea.classList.add('visible');
     libEl.classList.add('visible');
+    document.body.classList.add('authed');
     loadLibrary();
     startFFmpegPreload();
   }
-  if (secret) unlock(secret);
+
+  async function unlock(key) {
+    const result = await verifyCode(key);
+    if (!result || !result.ok) {
+      sessionStorage.removeItem('uploadSecret');
+      secret = '';
+      showAuthError('invalid code');
+      // Make sure the UI is hidden if this was a stale stored code
+      authEl.classList.remove('hidden');
+      uploadArea.classList.remove('visible');
+      libEl.classList.remove('visible');
+      document.body.classList.remove('authed');
+      return false;
+    }
+    secret = key;
+    sessionStorage.setItem('uploadSecret', key);
+    clearAuthError();
+    reveal();
+    return true;
+  }
+
+  function logout() {
+    secret = '';
+    sessionStorage.removeItem('uploadSecret');
+    document.body.classList.remove('authed');
+    authEl.classList.remove('hidden');
+    uploadArea.classList.remove('visible');
+    libEl.classList.remove('visible');
+    secretIn.value = '';
+    clearAuthError();
+    // Also collapse the library so nothing lingers
+    libraryItems = [];
+    libraryFiltered = [];
+    if (libGrid) libGrid.innerHTML = '';
+  }
+
+  // Verify any stored code on page load — silently clear it if the server
+  // says it's no longer valid, rather than trusting stale sessionStorage.
+  if (secret) {
+    unlock(secret).catch(function () {});
+  }
 
   authBtn.addEventListener('click', function () {
     const val = secretIn.value.trim();
-    if (!val) { secretIn.classList.add('error'); return; }
-    secretIn.classList.remove('error');
-    unlock(val);
+    if (!val) { showAuthError('enter your code'); return; }
+    clearAuthError();
+    authBtn.disabled = true;
+    authBtn.textContent = 'verifying…';
+    unlock(val).finally(function () {
+      authBtn.disabled = false;
+      authBtn.textContent = 'enter';
+    });
   });
   secretIn.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') authBtn.click();
-    secretIn.classList.remove('error');
+    if (e.key !== 'Enter') clearAuthError();
   });
+
+  const logoutBtn = $('logout-btn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
   // ── ffmpeg.wasm loader (~30MB WASM lazy-loaded from CDN) ────────
 
@@ -1318,7 +1417,7 @@
     xhr.addEventListener('load', function () {
       running--;
       if (xhr.status === 200 || xhr.status === 201) { item.status = 'done'; }
-      else if (xhr.status === 401) { item.status = 'error'; item.error = 'invalid key'; sessionStorage.removeItem('uploadSecret'); }
+      else if (xhr.status === 401) { item.status = 'error'; item.error = 'invalid key'; logout(); showAuthError('session expired'); }
       else { item.status = 'error'; item.error = 'failed (' + xhr.status + ')'; }
       updateQueueItem(item); updateQueueSummary(); processQueue();
     });
@@ -1432,8 +1531,9 @@
     try {
       const res = await authedFetch('/api/videos');
       if (res.status === 401) {
-        sessionStorage.removeItem('uploadSecret');
-        libGrid.innerHTML = '<div class="lib-empty">invalid key</div>'; return;
+        logout();
+        showAuthError('session expired');
+        return;
       }
       if (!res.ok) throw new Error('list ' + res.status);
       const data = await res.json();
