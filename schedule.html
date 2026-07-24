@@ -313,7 +313,7 @@
     dim yellow = generated fill &middot; solid yellow = locked &middot;
     <b class="g">green = pto</b> (paint via {PTO} mode or a staff row's {pto} editor; locked against normal clicks) &middot;
     hatched = can't work that day &middot;
-    week rules apply to full mon&ndash;sun weeks inside the period
+    week rules apply to full sun&ndash;sat weeks inside the period
   </div>
 </section>
 
@@ -326,8 +326,8 @@
 'use strict';
 
 const LS_KEY = 'aight-schedule-v1';
-const WD = ['M','TU','W','TH','F','SA','SU'];
-const WD_LONG = ['mon','tue','wed','thu','fri','sat','sun'];
+const WD = ['SU','M','TU','W','TH','F','SA'];
+const WD_LONG = ['sun','mon','tue','wed','thu','fri','sat'];
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 // transient (not saved)
@@ -353,8 +353,17 @@ function defaultState() {
       hoursPerDay: 8
     },
     rules: [],   // {id, who: 'all'|[empIds], what: {...}, when: {...}}
+    weekStart: 'sun',
     grid: {}     // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
   };
+}
+// pre-sunday-start saves stored days/coverage monday-first — rotate once
+function migrateToSundayWeeks(p) {
+  const rot = a => (a && a.length === 7) ? [a[6], a[0], a[1], a[2], a[3], a[4], a[5]] : a;
+  if (p.coverage) p.coverage = rot(p.coverage);
+  (p.employees || []).forEach(e => { e.days = rot(e.days); });
+  (p.rules || []).forEach(r => { if (r.what && r.what.wd != null) r.what.wd = (r.what.wd + 1) % 7; });
+  p.weekStart = 'sun';
 }
 function normalizeState(s) {
   s.universal = Object.assign(defaultState().universal, s.universal || {});
@@ -371,7 +380,11 @@ function load() {
   let s = defaultState();
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) s = Object.assign(s, JSON.parse(raw));
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p.weekStart !== 'sun') migrateToSundayWeeks(p);
+      s = Object.assign(s, p);
+    }
   } catch (e) {}
   return normalizeState(s);
 }
@@ -386,10 +399,10 @@ function fromIso(s) {
   const [y,m,d] = s.split('-').map(Number);
   return new Date(y, m-1, d);
 }
-function wdIdx(d) { return (d.getDay() + 6) % 7; }  // Mon=0 .. Sun=6
+function wdIdx(d) { return d.getDay(); }  // Sun=0 .. Sat=6
 function nextIso(s) { const d = fromIso(s); d.setDate(d.getDate() + 1); return iso(d); }
 function fmtDate(s) { const d = fromIso(s); return MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getDate(); }
-function mondayOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wdIdx(d)); }
+function weekStartOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wdIdx(d)); }
 
 function periodDates() {
   const out = [];
@@ -400,7 +413,7 @@ function periodDates() {
   return out;
 }
 
-// group into Mon-Sun weeks; a week is "full" when all 7 days fall inside the period
+// group into Sun-Sat weeks; a week is "full" when all 7 days fall inside the period
 function groupWeeks(dates) {
   const weeks = [];
   let cur = null;
@@ -414,9 +427,9 @@ function groupWeeks(dates) {
 
 // calendar-anchored parity for "every other week" (stable across period changes)
 function weekParityOf(week) {
-  const m = mondayOf(fromIso(week.dates[0].iso));
-  const days = Math.round(m.getTime() / 86400000);
-  return ((Math.floor((days - 4) / 7)) % 2 + 2) % 2;
+  const m = weekStartOf(fromIso(week.dates[0].iso));
+  const days = Math.round(m.getTime() / 86400000);   // 1970-01-04 was a Sunday (day 3)
+  return ((Math.floor((days - 3) / 7)) % 2 + 2) % 2;
 }
 
 function key(empId, dayIso) { return empId + '|' + dayIso; }
@@ -1019,7 +1032,7 @@ function renderGrid() {
   thead.appendChild(corner);
   dates.forEach((d, i) => {
     const th = document.createElement('th');
-    if (d.wd >= 5) th.classList.add('wkend');
+    if (d.wd === 0 || d.wd === 6) th.classList.add('wkend');
     if (d.iso === todayIso) th.classList.add('today');
     const showMonth = (i === 0 || d.dayNum === 1) ? MONTHS[d.month] : '';
     th.innerHTML = '<span class="m">' + showMonth + '</span><span class="wd">' + WD[d.wd] + '</span><span class="dn">' + d.dayNum + '</span>';
@@ -1040,7 +1053,7 @@ function renderGrid() {
     dates.forEach(d => {
       const td = document.createElement('td');
       td.className = 'day';
-      if (d.wd >= 5) td.classList.add('wkend');
+      if (d.wd === 0 || d.wd === 6) td.classList.add('wkend');
       const k = key(emp.id, d.iso);
       const st = state.grid[k];
       if (emp.pto.includes(d.iso)) td.classList.add('pto');
@@ -1466,7 +1479,7 @@ function renderCal() {
     for (let wd = 0; wd < 7; wd++) {
       const d = w.dates.find(x => x.wd === wd);
       const td = document.createElement('td');
-      if (wd >= 5) td.classList.add('wkend');
+      if (wd === 0 || wd === 6) td.classList.add('wkend');
       if (!d) { td.classList.add('blank'); tr.appendChild(td); continue; }
       const dn = document.createElement('div');
       dn.className = 'dnum';
