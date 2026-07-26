@@ -53,28 +53,17 @@
     }
     .aight-btn.important:hover,
     .aight-btn.active:hover { background: var(--aight-yellow-hover); }
+    .aight-btn.ideal {
+      border-style: dashed;
+      background: rgba(200,166,60,0.12);
+    }
 
-    header {
-      display: flex;
-      align-items: baseline;
-      gap: 18px;
-      margin-bottom: 26px;
-      flex-wrap: wrap;
-    }
-    header h1 {
-      font-size: 15px;
-      letter-spacing: 0.35em;
-      font-weight: 700;
-    }
+    header { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; }
+    header h1 { font-size: 15px; letter-spacing: 0.35em; font-weight: 700; }
     header a { text-decoration: none; }
 
     section { margin-bottom: 24px; }
-    .sec-label {
-      font-size: 10px;
-      letter-spacing: 0.3em;
-      opacity: 0.6;
-      margin-bottom: 10px;
-    }
+    .sec-label { font-size: 10px; letter-spacing: 0.3em; opacity: 0.6; margin-bottom: 10px; }
 
     input[type="date"], input[type="number"], input[type="text"] {
       background: #000;
@@ -89,24 +78,16 @@
     input:focus { border-color: var(--aight-yellow); }
     input[type="number"] { width: 44px; text-align: center; }
     input[type="date"] { color-scheme: dark; }
+    input.hrs { width: 44px; text-align: center; }
 
     .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-    /* staff rules */
     .emp {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
       padding: 8px 0;
       border-bottom: 1px solid rgba(200,166,60,0.15);
     }
-    .emp input.name {
-      width: 110px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+    .emp input.name { width: 110px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
     .daytog { display: flex; gap: 3px; }
     .daytog button {
       width: 26px; height: 24px;
@@ -119,57 +100,29 @@
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
-    .daytog button.on {
-      background: var(--aight-yellow);
-      border-color: var(--aight-yellow);
-      color: #000;
-      font-weight: 700;
-    }
-    .daytog button.must {
-      background: var(--orange);
-      border-color: var(--orange);
-      color: #000;
-      font-weight: 700;
-    }
+    .daytog button.on   { background: var(--aight-yellow); border-color: var(--aight-yellow); color: #000; font-weight: 700; }
+    .daytog button.must { background: var(--orange); border-color: var(--orange); color: #000; font-weight: 700; }
     .minmax { display: flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.9; }
-    #univ .row { padding: 5px 0; font-size: 11px; letter-spacing: 0.05em; gap: 7px; }
+    #univ .row, #bizbox .row { padding: 5px 0; font-size: 11px; letter-spacing: 0.05em; gap: 7px; }
     .rules-hint { font-size: 10px; opacity: 0.45; letter-spacing: 0.05em; }
 
-    /* pto editor under a staff row */
     .ptoedit {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       padding: 6px 0 8px 18px;
       border-bottom: 1px solid rgba(200,166,60,0.15);
       font-size: 11px;
     }
     .ptoedit .pending { color: var(--green); letter-spacing: 0.05em; }
     .ptochip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border: 1px solid var(--green);
-      color: var(--green);
-      border-radius: 3px;
-      padding: 3px 7px;
-      font-size: 10px;
-      letter-spacing: 0.08em;
+      display: inline-flex; align-items: center; gap: 5px;
+      border: 1px solid var(--green); color: var(--green);
+      border-radius: 3px; padding: 3px 7px; font-size: 10px; letter-spacing: 0.08em;
     }
-    .ptochip button {
-      background: none; border: none; color: var(--green);
-      cursor: pointer; font-size: 11px; padding: 0; font-family: inherit;
-    }
+    .ptochip button { background: none; border: none; color: var(--green); cursor: pointer; font-size: 11px; padding: 0; font-family: inherit; }
 
-    /* rule cards + builder */
     .rulecard {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 0;
-      font-size: 11px;
-      letter-spacing: 0.05em;
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 0; font-size: 11px; letter-spacing: 0.05em;
       border-bottom: 1px solid rgba(200,166,60,0.15);
     }
     #rulebuilder { border: 1px solid var(--dim); border-radius: 4px; padding: 10px; margin-top: 10px; }
@@ -177,11 +130,9 @@
     #rulebuilder .blabel { font-size: 10px; letter-spacing: 0.2em; opacity: 0.6; min-width: 44px; }
     #rulebuilder .err { color: var(--red); font-size: 10px; letter-spacing: 0.05em; }
 
-    /* need row */
     .need { display: flex; gap: 8px; flex-wrap: wrap; }
     .need .cell { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; opacity: 0.9; }
 
-    /* grid */
     .grid-wrap { overflow-x: auto; border: 1px solid rgba(200,166,60,0.25); border-radius: 4px; }
     table { border-collapse: collapse; font-size: 10px; }
     th, td { border: 1px solid rgba(200,166,60,0.14); text-align: center; }
@@ -191,6 +142,7 @@
     th .dn { display: block; font-size: 11px; }
     th.wkend, td.wkend { background: rgba(200,166,60,0.05); }
     th.today .dn { color: #fff; }
+    th.outside, td.day.outside { opacity: 0.4; }
     td.namecell, th.namecell {
       position: sticky; left: 0;
       background: #000;
@@ -202,11 +154,7 @@
       text-transform: uppercase;
       z-index: 2;
     }
-    td.day {
-      width: 26px; height: 26px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
+    td.day { width: 26px; height: 26px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     td.day:hover { outline: 1px solid var(--aight-yellow); outline-offset: -1px; }
     td.day.work    { background: rgba(200,166,60,0.35); }
     td.day.lockWork{ background: var(--aight-yellow); }
@@ -216,32 +164,60 @@
     td.day.unavail { background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255,255,255,0.05) 3px 4px); }
     tr.covrow td { padding: 3px 0; font-size: 9px; opacity: 0.85; border-top: 1px solid rgba(200,166,60,0.4); }
     tr.covrow td.short { color: var(--red); opacity: 1; font-weight: 700; }
+    tr.covrow td.past { opacity: 0.4; }
     td.total { padding: 0 8px; font-size: 10px; opacity: 0.7; }
 
     /* calendar view */
     #calview { border: 1px solid rgba(200,166,60,0.25); border-radius: 4px; overflow-x: auto; }
-    #calview table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 10px; }
+    #calview table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 10px; }
     #calview th { padding: 4px; font-weight: 400; opacity: 0.65; letter-spacing: 0.15em; border: 1px solid rgba(200,166,60,0.14); }
-    #calview td { border: 1px solid rgba(200,166,60,0.14); vertical-align: top; width: 14.28%; height: 76px; padding: 4px 6px; }
+    #calview td { border: 1px solid rgba(200,166,60,0.14); vertical-align: top; width: 14.28%; min-height: 80px; height: 84px; padding: 4px 6px; }
     #calview td.blank { background: rgba(255,255,255,0.02); }
     #calview td.wkend { background: rgba(200,166,60,0.05); }
+    #calview td.outside { opacity: 0.5; }
     #calview .dnum { font-size: 11px; opacity: 0.7; margin-bottom: 3px; }
     #calview .dnum .mo { font-size: 8px; opacity: 0.6; letter-spacing: 0.1em; margin-right: 4px; }
-    #calview .who { letter-spacing: 0.06em; line-height: 1.5; }
+    #calview .who { letter-spacing: 0.06em; line-height: 1.6; }
     #calview .who div { white-space: nowrap; }
     #calview .ptoname { color: var(--green); opacity: 0.85; }
+    #calview .xbtn {
+      color: var(--dim); cursor: pointer; padding: 0 3px; font-size: 10px;
+      background: none; border: none; font-family: inherit;
+    }
+    #calview .xbtn:hover { color: var(--red); }
+    #calview select {
+      background: #000; color: var(--dim);
+      border: 1px dashed var(--dim); border-radius: 3px;
+      font-family: inherit; font-size: 9px; padding: 1px 2px;
+      margin-top: 2px; display: block; max-width: 100%;
+    }
 
     .legend { font-size: 10px; opacity: 0.45; letter-spacing: 0.05em; margin-top: 8px; line-height: 1.7; }
     .legend b { color: var(--aight-yellow); font-weight: 400; }
     .legend b.g { color: var(--green); }
-    .legend b.o { color: var(--orange); }
 
-    /* violations + fixes */
     #viol { font-size: 11px; line-height: 1.8; letter-spacing: 0.05em; }
     #viol .bad { color: var(--red); }
+    #viol .bent { color: var(--aight-yellow); opacity: 0.7; }
     #viol .ok { color: var(--green); }
-    #solvemsg { font-size: 11px; color: var(--red); margin-top: 8px; letter-spacing: 0.05em; }
+    #solvemsg { font-size: 11px; margin-top: 8px; letter-spacing: 0.05em; line-height: 1.7; }
+    #solvemsg .bad { color: var(--red); }
+    #solvemsg .bent { color: var(--aight-yellow); opacity: 0.8; }
     #fixmenu { margin-top: 8px; }
+    #memrow { margin-top: 10px; }
+    #memrow .fin { font-size: 10px; opacity: 0.6; letter-spacing: 0.08em; }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; padding: 8px; }
+      header, .noprint, #gridwrap, .legend { display: none !important; }
+      #calview { display: block !important; border-color: #999; }
+      #calview table { min-width: 0; font-size: 9px; }
+      #calview th, #calview td { border-color: #aaa !important; background: #fff !important; color: #000 !important; opacity: 1 !important; }
+      #calview td.wkend { background: #f4f4f4 !important; }
+      #calview .dnum, #calview .who div { color: #000 !important; opacity: 1 !important; }
+      #calview .ptoname { color: #777 !important; font-style: italic; }
+      #calview select, #calview .xbtn { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -251,7 +227,7 @@
   <a class="aight-btn" href="/">&nbsp;&larr; vision&nbsp;</a>
 </header>
 
-<section>
+<section class="noprint">
   <div class="sec-label">PERIOD</div>
   <div class="row">
     <input type="date" id="pstart">
@@ -259,40 +235,46 @@
     <input type="date" id="pend">
     <button class="aight-btn" id="thismonth">this month</button>
     <button class="aight-btn" id="nextmonth">next month</button>
+    <span class="rules-hint">grid always shows full sun&ndash;sat weeks; dimmed days belong to the prior/next month</span>
   </div>
 </section>
 
-<section>
+<section class="noprint">
   <div class="sec-label">STAFF</div>
   <div id="staff"></div>
   <div style="margin-top:10px" class="row">
     <button class="aight-btn" id="addemp">+ staff</button>
-    <span class="rules-hint">day toggles: black = can't work &middot; yellow = available &middot; orange = must work &middot; min&ndash;max days per week &middot; 2-off = needs two days off in a row</span>
+    <span class="rules-hint">day toggles: black = can't work &middot; yellow = available &middot; orange = must work &middot; 2 off cycles must &rarr; ideal &rarr; off</span>
   </div>
 </section>
 
-<section>
+<section class="noprint">
   <div class="sec-label">UNIVERSAL RULES &mdash; APPLY TO ALL STAFF</div>
   <div id="univ"></div>
-  <div class="rules-hint" style="margin-top:8px">chips on a staff row exempt that one person &middot; lit chip = rule applies to them</div>
+  <div class="rules-hint" style="margin-top:8px">on / ideal / off &mdash; ideal rules bend automatically when a month can't solve, and the bend is reported &middot; chips on a staff row exempt that person</div>
 </section>
 
-<section>
+<section class="noprint">
   <div class="sec-label">RULES</div>
   <div id="rules"></div>
   <div id="rulebuilder" style="display:none"></div>
   <div style="margin-top:10px" class="row">
     <button class="aight-btn" id="addrule">+ rule</button>
-    <span class="rules-hint">who &middot; what &middot; when &mdash; e.g. john gets every other monday off, or mica gets one 4-day week per period</span>
+    <span class="rules-hint">who &middot; what &middot; when &mdash; each rule card cycles must / ideal / off</span>
   </div>
 </section>
 
-<section>
+<section class="noprint">
+  <div class="sec-label">BIZ HOURS</div>
+  <div id="bizbox"></div>
+</section>
+
+<section class="noprint">
   <div class="sec-label">NEED &mdash; MIN ON DUTY PER DAY</div>
   <div class="need" id="need"></div>
 </section>
 
-<section>
+<section class="noprint">
   <div class="row">
     <button class="aight-btn important" id="generate">generate</button>
     <button class="aight-btn" id="clearfills">clear fills</button>
@@ -300,6 +282,14 @@
     <button class="aight-btn" id="ptomode">PTO</button>
     <button class="aight-btn" id="csv">csv</button>
     <button class="aight-btn" id="calbtn">calendar</button>
+  </div>
+  <div class="row" id="memrow">
+    <button class="aight-btn" id="finalize">finalize</button>
+    <button class="aight-btn" id="download">download</button>
+    <button class="aight-btn" id="restore">restore</button>
+    <button class="aight-btn" id="printbtn" style="display:none">print</button>
+    <span class="fin" id="fintxt"></span>
+    <input type="file" id="restorefile" accept=".json,application/json" style="display:none">
   </div>
   <div id="solvemsg"></div>
   <div id="fixmenu" class="row"></div>
@@ -310,14 +300,14 @@
   <div id="calview" style="display:none"></div>
   <div class="legend" id="legend">
     click a cell: <b>lock work</b> &rarr; <b>&times; lock off</b> &rarr; clear &middot;
-    dim yellow = generated fill &middot; solid yellow = locked &middot;
-    <b class="g">green = pto</b> (paint via {PTO} mode or a staff row's {pto} editor; locked against normal clicks) &middot;
-    hatched = can't work that day &middot;
-    week rules apply to full sun&ndash;sat weeks inside the period
+    dim yellow = generated &middot; solid yellow = locked &middot;
+    <b class="g">green = pto</b> &middot;
+    hatched = can't work &middot; dimmed columns = neighboring month (history in front, carry-over behind) &middot;
+    history and finalized days are facts: generate builds around them, but your clicks can still change them
   </div>
 </section>
 
-<section>
+<section class="noprint">
   <div class="sec-label">VIOLATIONS</div>
   <div id="viol"></div>
 </section>
@@ -332,32 +322,38 @@ const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV
 
 // transient (not saved)
 let ptoMode = false;
-let activeTweaks = [];    // one-time fixes currently applied
-let availableFixes = [];  // fixes found by diagnosis
-let ruleDraft = null;     // rule builder work-in-progress
-const ptoOpen = new Set();     // staff rows with pto editor open
-const ptoPending = {};         // empId -> pending range-start iso
+let activeTweaks = [];     // flat list of one-time fix tweaks currently applied
+let availableFixes = [];   // [{tweaks:[...], label}]
+let lastBends = [];        // ideal-rule bends from the last successful generate
+let ruleDraft = null;
+let viewMode = 'grid';
+const ptoOpen = new Set();
+const ptoPending = {};
 
 let state = load();
+
+/* ── state ─────────────────────────────────────────────────────── */
 
 function defaultState() {
   const now = new Date();
   return {
     periodStart: iso(new Date(now.getFullYear(), now.getMonth(), 1)),
     periodEnd: iso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+    weekStart: 'sun',
     employees: [],
     coverage: [0,0,0,0,0,0,0],
     universal: {
-      maxConsec: { on: true, days: 5 },
-      maxHours:  { on: true, hours: 40 },
+      maxConsec: { mode: 'on', days: 5 },      // 'on' | 'ideal' | 'off'
+      maxHours:  { mode: 'on', hours: 40 },
       hoursPerDay: 8
     },
-    rules: [],   // {id, who: 'all'|[empIds], what: {...}, when: {...}}
-    weekStart: 'sun',
-    grid: {}     // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
+    rules: [],        // {id, who:'all'|[ids], what, when, mode:'must'|'ideal'|'off'}
+    bizHours: { everyday: true, all: { open: '11', close: '7' }, groups: [] },
+    finalizedThrough: null,
+    grid: {}          // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
   };
 }
-// pre-sunday-start saves stored days/coverage monday-first — rotate once
+
 function migrateToSundayWeeks(p) {
   const rot = a => (a && a.length === 7) ? [a[6], a[0], a[1], a[2], a[3], a[4], a[5]] : a;
   if (p.coverage) p.coverage = rot(p.coverage);
@@ -365,17 +361,30 @@ function migrateToSundayWeeks(p) {
   (p.rules || []).forEach(r => { if (r.what && r.what.wd != null) r.what.wd = (r.what.wd + 1) % 7; });
   p.weekStart = 'sun';
 }
+
 function normalizeState(s) {
-  s.universal = Object.assign(defaultState().universal, s.universal || {});
+  const d = defaultState();
+  s.universal = Object.assign(d.universal, s.universal || {});
+  // v1 universal rules used {on:bool}; v2 uses mode
+  ['maxConsec', 'maxHours'].forEach(k => {
+    const u = s.universal[k];
+    if (u.mode === undefined) u.mode = u.on === false ? 'off' : 'on';
+    delete u.on;
+  });
   if (!s.rules) s.rules = [];
+  s.rules.forEach(r => { if (!r.mode) r.mode = 'must'; });
+  if (!s.bizHours) s.bizHours = d.bizHours;
+  if (s.finalizedThrough === undefined) s.finalizedThrough = null;
   s.employees.forEach(e => {
     if (!e.exempt) e.exempt = {};
     if (!e.pto) e.pto = [];
-    // migrate boolean availability -> 0 off / 1 available / 2 must work
-    e.days = e.days.map(d => d === true ? 1 : (d === false ? 0 : d));
+    e.days = e.days.map(x => x === true ? 1 : (x === false ? 0 : x));
+    if (e.consecOff === true) e.consecOff = 'must';
+    if (e.consecOff === undefined) e.consecOff = false;
   });
   return s;
 }
+
 function load() {
   let s = defaultState();
   try {
@@ -395,25 +404,28 @@ function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 function iso(d) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
-function fromIso(s) {
-  const [y,m,d] = s.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-function wdIdx(d) { return d.getDay(); }  // Sun=0 .. Sat=6
+function fromIso(s) { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); }
+function wdIdx(d) { return d.getDay(); }   // Sun=0 .. Sat=6
 function nextIso(s) { const d = fromIso(s); d.setDate(d.getDate() + 1); return iso(d); }
+function prevIso(s) { const d = fromIso(s); d.setDate(d.getDate() - 1); return iso(d); }
 function fmtDate(s) { const d = fromIso(s); return MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getDate(); }
 function weekStartOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wdIdx(d)); }
 
-function periodDates() {
+// the canvas: full sun-sat weeks containing the period
+function canvasDates() {
   const out = [];
-  const end = fromIso(state.periodEnd);
-  for (let d = fromIso(state.periodStart); d <= end; d.setDate(d.getDate()+1)) {
-    out.push({ iso: iso(d), wd: wdIdx(d), dayNum: d.getDate(), month: d.getMonth() });
+  const start = weekStartOf(fromIso(state.periodStart));
+  const pe = fromIso(state.periodEnd);
+  const end = new Date(pe.getFullYear(), pe.getMonth(), pe.getDate() + (6 - wdIdx(pe)));
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+    const s = iso(d);
+    out.push({
+      iso: s, wd: wdIdx(d), dayNum: d.getDate(), month: d.getMonth(),
+      inMonth: s >= state.periodStart && s <= state.periodEnd
+    });
   }
   return out;
 }
-
-// group into Sun-Sat weeks; a week is "full" when all 7 days fall inside the period
 function groupWeeks(dates) {
   const weeks = [];
   let cur = null;
@@ -424,11 +436,9 @@ function groupWeeks(dates) {
   for (const w of weeks) w.full = (w.dates.length === 7);
   return weeks;
 }
-
-// calendar-anchored parity for "every other week" (stable across period changes)
 function weekParityOf(week) {
   const m = weekStartOf(fromIso(week.dates[0].iso));
-  const days = Math.round(m.getTime() / 86400000);   // 1970-01-04 was a Sunday (day 3)
+  const days = Math.round(m.getTime() / 86400000);   // 1970-01-04 was a sunday (day 3)
   return ((Math.floor((days - 3) / 7)) % 2 + 2) % 2;
 }
 
@@ -439,28 +449,34 @@ function empName(emp, i) {
   return (emp.name || 'EMP ' + (i+1)).toUpperCase();
 }
 
-/* ── universal rule helpers ────────────────────────────────────── */
+/* ── history / draft classification ────────────────────────────── */
 
-function ruleOn(emp, id) { return state.universal[id].on && !emp.exempt[id]; }
-
-/* ── constraint resolver ───────────────────────────────────────────
-   Merges every rule source (base availability, custom rules, PTO,
-   universal rules, one-time fixes) into a single per-person-per-week
-   sheet. The solver and validator read ONLY these sheets.
-   ctx = { active: {ruleId: Set(weekStartIso)},   nPerPeriod picks
-           tweaks: [...],                          one-time fixes
-           suspended: Set(ruleId) }                                  */
-
-function makeCtx(active) {
-  return {
-    active: active || {},
-    tweaks: activeTweaks,
-    suspended: new Set(activeTweaks.filter(t => t.type === 'suspendRule').map(t => t.ruleId))
-  };
+function fixedDate(dayIso) {
+  return dayIso < state.periodStart ||
+    (state.finalizedThrough && dayIso <= state.finalizedThrough);
+}
+function draftDate(dayIso) { return !fixedDate(dayIso); }
+// leading day with no data and never finalized = unknown history (waived, not counted)
+function unknownDate(emp, dayIso) {
+  return dayIso < state.periodStart &&
+    !state.grid[key(emp.id, dayIso)] &&
+    !(state.finalizedThrough && dayIso <= state.finalizedThrough);
+}
+function workedCell(empId, dayIso) {
+  const st = state.grid[key(empId, dayIso)];
+  return st === 'work' || st === 'lockWork';
 }
 
-function ruleTargets(r, emp) { return r.who === 'all' || r.who.includes(emp.id); }
+/* ── rule strengths ────────────────────────────────────────────── */
 
+// instance keys used in relax sets: 'consecOff' | 'maxConsec' | 'maxHours' | 'rule:<id>'
+function univApplies(emp, k, relax) {
+  const u = state.universal[k];
+  if (u.mode === 'off' || emp.exempt[k]) return false;
+  if (u.mode === 'ideal' && relax && relax.has(k)) return false;
+  return true;
+}
+function ruleTargets(r, emp) { return r.who === 'all' || r.who.includes(emp.id); }
 function ruleAppliesToWeek(r, week, ctx) {
   const w = r.when;
   if (w.type === 'always') return true;
@@ -470,25 +486,57 @@ function ruleAppliesToWeek(r, week, ctx) {
   return false;
 }
 
-function resolveWeek(emp, week, ctx) {
-  const can = [], must = [], pto = [];
+function makeCtx(active) {
+  return {
+    active: active || {},
+    tweaks: activeTweaks,
+    suspended: new Set(activeTweaks.filter(t => t.type === 'suspendRule').map(t => t.ruleId))
+  };
+}
+
+// ideal-rule instances applicable to this emp+week (candidates for bending)
+function idealInstancesFor(emp, week, ctx) {
+  const out = [];
+  const nm = empName(emp);
+  if (emp.consecOff === 'ideal') out.push({ key: 'consecOff', label: nm + ' 2 off' });
+  if (state.universal.maxConsec.mode === 'ideal' && !emp.exempt.maxConsec)
+    out.push({ key: 'maxConsec', label: nm + ' ≤' + state.universal.maxConsec.days + ' row' });
+  if (state.universal.maxHours.mode === 'ideal' && !emp.exempt.maxHours)
+    out.push({ key: 'maxHours', label: nm + ' ≤' + state.universal.maxHours.hours + 'h' });
+  for (const r of state.rules) {
+    if (r.mode !== 'ideal' || ctx.suspended.has(r.id)) continue;
+    if (ruleTargets(r, emp) && ruleAppliesToWeek(r, week, ctx))
+      out.push({ key: 'rule:' + r.id, label: nm + ' rule: ' + ruleText(r) });
+  }
+  return out;
+}
+
+/* ── constraint resolver ───────────────────────────────────────── */
+/* one sheet per person per week; relax = Set of ideal instance keys to drop */
+
+function resolveWeek(emp, week, ctx, relax) {
+  relax = relax || new Set();
+  const can = [], must = [], pto = [], fixed = [], unknown = [];
   week.dates.forEach(d => {
     const p = emp.pto.includes(d.iso);
     pto.push(p);
-    can.push(!p && emp.days[d.wd] >= 1);
-    must.push(!p && emp.days[d.wd] === 2);
+    const fx = fixedDate(d.iso);
+    fixed.push(fx ? { worked: workedCell(emp.id, d.iso) } : null);
+    unknown.push(fx && unknownDate(emp, d.iso));
+    can.push(!fx && !p && emp.days[d.wd] >= 1);
+    must.push(!fx && !p && emp.days[d.wd] === 2);
   });
-  let mn = emp.minDays, mx = emp.maxDays;
 
+  let mn = emp.minDays, mx = emp.maxDays;
   for (const r of state.rules) {
-    if (ctx.suspended.has(r.id)) continue;
+    if (r.mode === 'off' || ctx.suspended.has(r.id)) continue;
+    if (r.mode === 'ideal' && relax.has('rule:' + r.id)) continue;
     if (!ruleTargets(r, emp) || !ruleAppliesToWeek(r, week, ctx)) continue;
     const w = r.what;
     if (w.type === 'dayOff' || w.type === 'dayOn') {
       week.dates.forEach((d, i) => {
-        if (d.wd !== w.wd) return;
+        if (d.wd !== w.wd || fixed[i] || pto[i]) return;
         if (r.when.type === 'dates' && (d.iso < r.when.start || d.iso > r.when.end)) return;
-        if (pto[i]) return;                       // pto trumps rules
         if (w.type === 'dayOff') { can[i] = false; must[i] = false; }
         else { can[i] = true; must[i] = true; }
       });
@@ -500,46 +548,40 @@ function resolveWeek(emp, week, ctx) {
     }
   }
 
-  let consecOff = emp.consecOff;
+  let consecOff = emp.consecOff === 'must' || (emp.consecOff === 'ideal' && !relax.has('consecOff'));
+  const wkStart = week.dates[0].iso;
   for (const t of ctx.tweaks) {
-    if (t.empId !== emp.id) continue;
-    if (t.type === 'allowWd') week.dates.forEach((d, i) => { if (d.wd === t.wd && !pto[i]) can[i] = true; });
-    if (t.type === 'minRelax') mn = Math.max(0, mn - 1);
-    if (t.type === 'maxRelax') mx = mx + 1;
-    if (t.type === 'noConsecOff') consecOff = false;
+    if (t.empId && t.empId !== emp.id) continue;
+    if (t.type === 'allowWd') week.dates.forEach((d, i) => { if (d.wd === t.wd && !pto[i] && !fixed[i]) can[i] = true; });
+    if (t.type === 'allowDate') week.dates.forEach((d, i) => { if (d.iso === t.iso && !pto[i] && !fixed[i]) can[i] = true; });
+    if (t.type === 'minRelaxWk' && t.weekStart === wkStart) mn = Math.max(0, mn - 1);
+    if (t.type === 'maxRelaxWk' && t.weekStart === wkStart) mx = mx + 1;
+    if (t.type === 'twoOffWk' && t.weekStart === wkStart) consecOff = false;
   }
 
-  // pto counts toward the weekly minimum and the hours cap
   const ptoCount = pto.filter(Boolean).length;
-  mn = Math.max(0, mn - ptoCount);
+  const unknownCount = unknown.filter(Boolean).length;
+  mn = Math.max(0, mn - ptoCount - unknownCount);
   mx = Math.max(0, mx - ptoCount);
-  if (ruleOn(emp, 'maxHours')) {
+  if (univApplies(emp, 'maxHours', relax)) {
     const capDays = Math.floor(state.universal.maxHours.hours / Math.max(1, state.universal.hoursPerDay)) - ptoCount;
     mx = Math.min(mx, Math.max(0, capDays));
   }
-  const maxRun = ruleOn(emp, 'maxConsec') ? state.universal.maxConsec.days : Infinity;
-  return { can, must, pto, min: mn, max: mx, maxRun, consecOff, ptoCount };
+  const maxRun = univApplies(emp, 'maxConsec', relax) ? state.universal.maxConsec.days : Infinity;
+  return { can, must, pto, fixed, min: mn, max: mx, maxRun, consecOff, ptoCount };
 }
 
-// lenient envelope for validation: a week is judged against the base sheet OR
-// any nPerPeriod rule variant (the satisfaction count is checked separately)
-function envelopeSheet(emp, week, ctx) {
-  const base = resolveWeek(emp, week, ctx);
-  let mn = base.min, mx = base.max;
-  const can = base.can.slice(), must = base.must.slice();
-  for (const r of state.rules) {
-    if (r.when.type !== 'nPerPeriod' || !ruleTargets(r, emp) || ctx.suspended.has(r.id)) continue;
-    const alt = resolveWeek(emp, week, Object.assign({}, ctx, { active: { [r.id]: new Set([week.dates[0].iso]) } }));
-    mn = Math.min(mn, alt.min); mx = Math.max(mx, alt.max);
-    alt.can.forEach((c, i) => { if (c) can[i] = true; });
-    alt.must.forEach((m, i) => { if (!m) must[i] = false; });
+function relaxAllSet(emp, week, ctx) {
+  return new Set(idealInstancesFor(emp, week, ctx).map(x => x.key));
+}
+
+function needFor(dateObj, ctx) {
+  if (!draftDate(dateObj.iso)) return 0;
+  let c = state.coverage[dateObj.wd];
+  for (const t of ctx.tweaks) {
+    if (t.type === 'need' && t.wd === dateObj.wd) c = Math.max(0, c - 1);
+    if (t.type === 'needDate' && t.iso === dateObj.iso) c = Math.max(0, c - 1);
   }
-  return Object.assign({}, base, { min: mn, max: mx, can, must });
-}
-
-function needFor(wd, ctx) {
-  let c = state.coverage[wd];
-  for (const t of ctx.tweaks) if (t.type === 'need' && t.wd === wd) c = Math.max(0, c - 1);
   return c;
 }
 
@@ -549,23 +591,21 @@ function addEmployee() {
   state.employees.push({
     id: 'e' + Math.random().toString(36).slice(2, 8),
     name: '',
-    days: [0,0,0,0,0,0,0],      // default: all black (can't work) until set
+    days: [0,0,0,0,0,0,0],
     minDays: 4,
     maxDays: 5,
-    consecOff: false,
+    consecOff: false,       // false | 'must' | 'ideal'
     exempt: {},
     pto: []
   });
   save(); renderAll();
 }
-
 function removeEmployee(id) {
   state.employees = state.employees.filter(e => e.id !== id);
   for (const k in state.grid) if (k.startsWith(id + '|')) delete state.grid[k];
   ptoOpen.delete(id);
   save(); renderAll();
 }
-
 function clamp(v) { return Math.max(0, Math.min(7, parseInt(v, 10) || 0)); }
 
 function univChips() {
@@ -573,8 +613,10 @@ function univChips() {
   return [
     ['maxConsec', '≤' + u.maxConsec.days + ' row'],
     ['maxHours', '≤' + u.maxHours.hours + 'h']
-  ].filter(([id]) => u[id].on);
+  ].filter(([id]) => u[id].mode !== 'off');
 }
+
+function triLabel(v) { return v === 'must' ? ' active' : (v === 'ideal' ? ' ideal' : ''); }
 
 function renderStaff() {
   const box = document.getElementById('staff');
@@ -613,9 +655,13 @@ function renderStaff() {
     row.appendChild(mm);
 
     const co = document.createElement('button');
-    co.className = 'aight-btn' + (emp.consecOff ? ' active' : '');
+    co.className = 'aight-btn' + triLabel(emp.consecOff);
     co.textContent = '2 off';
-    co.onclick = () => { emp.consecOff = !emp.consecOff; save(); renderAll(); };
+    co.title = 'two days off in a row — ' + (emp.consecOff || 'off') + ' (click cycles must / ideal / off)';
+    co.onclick = () => {
+      emp.consecOff = emp.consecOff === false ? 'must' : (emp.consecOff === 'must' ? 'ideal' : false);
+      save(); renderAll();
+    };
     row.appendChild(co);
 
     const chips = univChips();
@@ -627,15 +673,6 @@ function renderStaff() {
       c.onclick = () => { emp.exempt[id] = !emp.exempt[id]; save(); renderAll(); };
       row.appendChild(c);
     });
-    if (chips.length > 1) {
-      const allOn = chips.every(([id]) => !emp.exempt[id]);
-      const a = document.createElement('button');
-      a.className = 'aight-btn' + (allOn ? ' active' : '');
-      a.textContent = 'all';
-      a.title = 'toggle every universal rule for this person';
-      a.onclick = () => { chips.forEach(([id]) => emp.exempt[id] = allOn); save(); renderAll(); };
-      row.appendChild(a);
-    }
 
     const pb = document.createElement('button');
     pb.className = 'aight-btn' + (ptoOpen.has(emp.id) ? ' active' : '');
@@ -663,17 +700,15 @@ function addPtoDay(emp, dayIso) {
   if (!emp.pto.includes(dayIso)) {
     emp.pto.push(dayIso);
     emp.pto.sort();
-    delete state.grid[key(emp.id, dayIso)];   // a scheduled day painted pto becomes a day off
+    delete state.grid[key(emp.id, dayIso)];
   }
 }
 function addPtoRange(emp, a, b) {
   if (a > b) { const t = a; a = b; b = t; }
   for (let s = a; s <= b; s = nextIso(s)) addPtoDay(emp, s);
 }
-function removePtoRange(emp, a, b) {
-  emp.pto = emp.pto.filter(x => x < a || x > b);
-}
-function ptoRanges(emp) {   // collapse consecutive days for display
+function removePtoRange(emp, a, b) { emp.pto = emp.pto.filter(x => x < a || x > b); }
+function ptoRanges(emp) {
   const out = [];
   let start = null, prev = null;
   for (const s of emp.pto) {
@@ -688,7 +723,6 @@ function ptoRanges(emp) {   // collapse consecutive days for display
 function buildPtoEditor(emp) {
   const ed = document.createElement('div');
   ed.className = 'ptoedit';
-
   const inp = document.createElement('input');
   inp.type = 'date';
   ed.appendChild(inp);
@@ -696,7 +730,6 @@ function buildPtoEditor(emp) {
   const and = document.createElement('button');
   and.className = 'aight-btn';
   and.textContent = 'AND';
-  and.title = 'add this date (closes a pending TO range)';
   and.onclick = () => {
     if (!inp.value) return;
     if (ptoPending[emp.id]) { addPtoRange(emp, ptoPending[emp.id], inp.value); delete ptoPending[emp.id]; }
@@ -709,7 +742,6 @@ function buildPtoEditor(emp) {
   const to = document.createElement('button');
   to.className = 'aight-btn';
   to.textContent = 'TO';
-  to.title = 'start a range at this date, then enter the end date and press AND';
   to.onclick = () => {
     if (!inp.value) return;
     ptoPending[emp.id] = inp.value;
@@ -735,17 +767,12 @@ function buildPtoEditor(emp) {
     chip.appendChild(x);
     ed.appendChild(chip);
   });
-
   return ed;
 }
 
 /* ── universal rules ───────────────────────────────────────────── */
 
-function span(txt) {
-  const s = document.createElement('span');
-  s.textContent = txt;
-  return s;
-}
+function span(txt) { const s = document.createElement('span'); s.textContent = txt; return s; }
 function numInput(val, min, max, onset) {
   const i = document.createElement('input');
   i.type = 'number'; i.min = min; i.max = max; i.value = val;
@@ -755,11 +782,14 @@ function numInput(val, min, max, onset) {
   };
   return i;
 }
-function univToggle(rule) {
+function modeToggle(rule) {
   const b = document.createElement('button');
-  b.className = 'aight-btn' + (rule.on ? ' active' : '');
-  b.textContent = rule.on ? 'on' : 'off';
-  b.onclick = () => { rule.on = !rule.on; save(); renderAll(); };
+  b.className = 'aight-btn' + (rule.mode === 'on' ? ' active' : (rule.mode === 'ideal' ? ' ideal' : ''));
+  b.textContent = rule.mode;
+  b.onclick = () => {
+    rule.mode = rule.mode === 'on' ? 'ideal' : (rule.mode === 'ideal' ? 'off' : 'on');
+    save(); renderAll();
+  };
   return b;
 }
 
@@ -770,14 +800,14 @@ function renderUniv() {
 
   const r1 = document.createElement('div');
   r1.className = 'row';
-  r1.append(univToggle(u.maxConsec), span('no more than'),
+  r1.append(modeToggle(u.maxConsec), span('no more than'),
     numInput(u.maxConsec.days, 1, 14, v => u.maxConsec.days = v),
     span('work days in a row'));
   box.appendChild(r1);
 
   const r2 = document.createElement('div');
   r2.className = 'row';
-  r2.append(univToggle(u.maxHours), span('no more than'),
+  r2.append(modeToggle(u.maxHours), span('no more than'),
     numInput(u.maxHours.hours, 1, 80, v => u.maxHours.hours = v),
     span('hours per week — a work day ='),
     numInput(u.hoursPerDay, 1, 24, v => u.hoursPerDay = v),
@@ -785,7 +815,7 @@ function renderUniv() {
   box.appendChild(r2);
 }
 
-/* ── custom rules: cards + builder ─────────────────────────────── */
+/* ── custom rules ──────────────────────────────────────────────── */
 
 function ruleText(r) {
   const who = r.who === 'all' ? 'ALL'
@@ -799,7 +829,7 @@ function ruleText(r) {
   const wh = r.when;
   let whenTxt = 'every wk';
   if (wh.type === 'altWeeks') {
-    const list = groupWeeks(periodDates()).filter(wk => weekParityOf(wk) === wh.parity).map(wk => fmtDate(wk.dates[0].iso));
+    const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === wh.parity).map(wk => fmtDate(wk.dates[0].iso));
     whenTxt = 'every other wk (' + (list.length ? 'wks of ' + list.join(', ') : 'none in period') + ')';
   }
   if (wh.type === 'nPerPeriod') whenTxt = wh.n + ' wk' + (wh.n > 1 ? 's' : '') + ' per period, solver picks';
@@ -813,6 +843,15 @@ function renderRules() {
   state.rules.forEach(r => {
     const card = document.createElement('div');
     card.className = 'rulecard';
+    const m = document.createElement('button');
+    m.className = 'aight-btn' + (r.mode === 'must' ? ' active' : (r.mode === 'ideal' ? ' ideal' : ''));
+    m.textContent = r.mode;
+    m.title = 'must / ideal / off';
+    m.onclick = () => {
+      r.mode = r.mode === 'must' ? 'ideal' : (r.mode === 'ideal' ? 'off' : 'must');
+      save(); renderAll();
+    };
+    card.appendChild(m);
     card.appendChild(span(ruleText(r)));
     const x = document.createElement('button');
     x.className = 'aight-btn';
@@ -892,7 +931,7 @@ function renderRuleBuilder() {
   hparams.className = 'brow';
   if (d.whenType === 'altWeeks') {
     [0, 1].forEach(p => {
-      const list = groupWeeks(periodDates()).filter(wk => weekParityOf(wk) === p).map(wk => fmtDate(wk.dates[0].iso));
+      const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === p).map(wk => fmtDate(wk.dates[0].iso));
       hparams.appendChild(chipBtn('wks of ' + (list.join(', ') || 'none'), d.parity === p, () => { d.parity = p; renderRuleBuilder(); }));
     });
   } else if (d.whenType === 'nPerPeriod') {
@@ -950,7 +989,7 @@ function commitRule() {
   state.rules.push({
     id: 'r' + Math.random().toString(36).slice(2, 8),
     who: d.all ? 'all' : Array.from(d.who),
-    what, when
+    what, when, mode: 'must'
   });
   ruleDraft = null;
   save(); renderAll();
@@ -959,6 +998,87 @@ function commitRule() {
 function openRuleBuilder() {
   ruleDraft = { all: false, who: new Set(), whatType: null, wd: null, n: 1, min: null, max: null, whenType: 'always', parity: 0, npp: 1, start: '', end: '' };
   renderRuleBuilder();
+}
+
+/* ── biz hours ─────────────────────────────────────────────────── */
+
+function hoursFor(wd) {
+  const b = state.bizHours;
+  if (b.everyday) return hrsTxt(b.all);
+  const g = b.groups.find(g => g.days.includes(wd));
+  return g ? hrsTxt(g) : '';
+}
+function hrsTxt(g) { return (g.open && g.close) ? g.open + '-' + g.close : ''; }
+
+function hrsInput(g, field) {
+  const i = document.createElement('input');
+  i.type = 'text'; i.className = 'hrs';
+  i.value = g[field];
+  i.onchange = () => { g[field] = i.value.trim(); save(); renderAll(); };
+  return i;
+}
+
+function renderBiz() {
+  const box = document.getElementById('bizbox');
+  box.innerHTML = '';
+  const b = state.bizHours;
+
+  if (b.everyday) {
+    const r = document.createElement('div');
+    r.className = 'row';
+    r.append(span('biz hours:'), hrsInput(b.all, 'open'), span('to'), hrsInput(b.all, 'close'));
+    const ev = document.createElement('button');
+    ev.className = 'aight-btn active';
+    ev.textContent = 'everyday';
+    ev.onclick = () => { b.everyday = false; if (!b.groups.length) b.groups = []; save(); renderAll(); };
+    r.appendChild(ev);
+    box.appendChild(r);
+    return;
+  }
+
+  const head = document.createElement('div');
+  head.className = 'row';
+  const ev = document.createElement('button');
+  ev.className = 'aight-btn';
+  ev.textContent = 'everyday';
+  ev.onclick = () => { b.everyday = true; save(); renderAll(); };
+  head.append(ev, span('off — set hours per day group:'));
+  box.appendChild(head);
+
+  const assigned = new Set();
+  b.groups.forEach(g => g.days.forEach(d => assigned.add(d)));
+
+  const groupRow = (g, isNew) => {
+    const r = document.createElement('div');
+    r.className = 'row';
+    const tog = document.createElement('div');
+    tog.className = 'daytog';
+    WD.forEach((lbl, wd) => {
+      const mine = !isNew && g.days.includes(wd);
+      if (!mine && assigned.has(wd)) return;   // day claimed by another group
+      const btn = document.createElement('button');
+      btn.textContent = lbl;
+      btn.className = mine ? 'on' : '';
+      btn.onclick = () => {
+        if (isNew) {
+          state.bizHours.groups.push({ days: [wd], open: g.open || '11', close: g.close || '7' });
+        } else if (mine) {
+          g.days = g.days.filter(x => x !== wd);
+          state.bizHours.groups = state.bizHours.groups.filter(x => x.days.length);
+        } else {
+          g.days.push(wd);
+        }
+        save(); renderAll();
+      };
+      tog.appendChild(btn);
+    });
+    r.appendChild(tog);
+    r.append(span('biz hours:'), hrsInput(g, 'open'), span('to'), hrsInput(g, 'close'));
+    return r;
+  };
+
+  b.groups.forEach(g => box.appendChild(groupRow(g, false)));
+  if (assigned.size < 7) box.appendChild(groupRow({ days: [], open: '11', close: '7' }, true));
 }
 
 /* ── need ──────────────────────────────────────────────────────── */
@@ -992,7 +1112,7 @@ function cellClick(emp, dayIso) {
     save(); renderAll();
     return;
   }
-  if (emp.pto.includes(dayIso)) return;   // green is locked outside pto mode
+  if (emp.pto.includes(dayIso)) return;
   const k = key(emp.id, dayIso);
   const cur = state.grid[k];
   if (cur === 'lockWork') state.grid[k] = 'lockOff';
@@ -1003,15 +1123,12 @@ function cellClick(emp, dayIso) {
 
 function onDuty(dayIso) {
   let n = 0;
-  for (const emp of state.employees) {
-    const st = state.grid[key(emp.id, dayIso)];
-    if (st === 'work' || st === 'lockWork') n++;
-  }
+  for (const emp of state.employees) if (workedCell(emp.id, dayIso)) n++;
   return n;
 }
 
 function renderGrid() {
-  const dates = periodDates();
+  const dates = canvasDates();
   const weeks = groupWeeks(dates);
   const ctx = makeCtx({});
   const v = validate(dates, weeks);
@@ -1019,11 +1136,10 @@ function renderGrid() {
   table.innerHTML = '';
   const todayIso = iso(new Date());
 
-  // per-cell availability map (rules + tweaks included) for hatching
   const canMap = {};
   weeks.forEach(w => state.employees.forEach(e => {
-    const sh = envelopeSheet(e, w, ctx);
-    w.dates.forEach((d, i) => { canMap[key(e.id, d.iso)] = sh.can[i]; });
+    const sh = resolveWeek(e, w, ctx, new Set());
+    w.dates.forEach((d, i) => { canMap[key(e.id, d.iso)] = sh.can[i] || (sh.fixed[i] != null); });
   }));
 
   const thead = document.createElement('tr');
@@ -1033,6 +1149,7 @@ function renderGrid() {
   dates.forEach((d, i) => {
     const th = document.createElement('th');
     if (d.wd === 0 || d.wd === 6) th.classList.add('wkend');
+    if (!d.inMonth) th.classList.add('outside');
     if (d.iso === todayIso) th.classList.add('today');
     const showMonth = (i === 0 || d.dayNum === 1) ? MONTHS[d.month] : '';
     th.innerHTML = '<span class="m">' + showMonth + '</span><span class="wd">' + WD[d.wd] + '</span><span class="dn">' + d.dayNum + '</span>';
@@ -1054,13 +1171,14 @@ function renderGrid() {
       const td = document.createElement('td');
       td.className = 'day';
       if (d.wd === 0 || d.wd === 6) td.classList.add('wkend');
+      if (!d.inMonth) td.classList.add('outside');
       const k = key(emp.id, d.iso);
       const st = state.grid[k];
       if (emp.pto.includes(d.iso)) td.classList.add('pto');
       else {
         if (st) td.classList.add(st);
         if (st === 'lockOff') td.textContent = '×';
-        if (st === 'work' || st === 'lockWork') total++;
+        if ((st === 'work' || st === 'lockWork') && d.inMonth) total++;
         if (!canMap[k]) td.classList.add('unavail');
       }
       if (v.cellViol.has(k)) td.classList.add('viol');
@@ -1084,11 +1202,13 @@ function renderGrid() {
     dates.forEach(d => {
       const td = document.createElement('td');
       const on = onDuty(d.iso);
-      const need = needFor(d.wd, ctx);
-      td.textContent = on + '/' + need;
-      if (v.touchedWeeks.size && on < need) {
-        const wk = weeks.find(w => w.dates.includes(d));
-        if (wk && v.touchedWeeks.has(wk.dates[0].iso)) td.classList.add('short');
+      if (!draftDate(d.iso)) {
+        td.textContent = on + '/–';
+        td.classList.add('past');
+      } else {
+        const need = needFor(d, ctx);
+        td.textContent = on + '/' + need;
+        if (v.touched && on < need) td.classList.add('short');
       }
       tr.appendChild(td);
     });
@@ -1097,152 +1217,310 @@ function renderGrid() {
   }
 
   renderViolations(v);
+  renderMemRow();
   if (viewMode === 'cal') renderCal();
+}
+
+/* ── calendar view (editable) ──────────────────────────────────── */
+
+function renderCal() {
+  const box = document.getElementById('calview');
+  const weeks = groupWeeks(canvasDates());
+  const t = document.createElement('table');
+  const hr = document.createElement('tr');
+  WD.forEach(l => { const th = document.createElement('th'); th.textContent = l; hr.appendChild(th); });
+  t.appendChild(hr);
+
+  weeks.forEach(w => {
+    const tr = document.createElement('tr');
+    for (let wd = 0; wd < 7; wd++) {
+      const d = w.dates.find(x => x.wd === wd);
+      const td = document.createElement('td');
+      if (wd === 0 || wd === 6) td.classList.add('wkend');
+      if (!d) { td.classList.add('blank'); tr.appendChild(td); continue; }
+      if (!d.inMonth) td.classList.add('outside');
+
+      const dn = document.createElement('div');
+      dn.className = 'dnum';
+      dn.innerHTML = (d.dayNum === 1 || (!d.inMonth && d.iso === canvasDates()[0].iso)
+        ? '<span class="mo">' + MONTHS[d.month] + '</span>' : '') + d.dayNum;
+      td.appendChild(dn);
+
+      const who = document.createElement('div');
+      who.className = 'who';
+      const hrs = hoursFor(wd);
+      let assigned = 0;
+      state.employees.forEach((emp, i) => {
+        if (!workedCell(emp.id, d.iso)) return;
+        assigned++;
+        const l = document.createElement('div');
+        l.append(empName(emp, i) + (hrs ? ' ' + hrs : ''));
+        const x = document.createElement('button');
+        x.className = 'xbtn';
+        x.textContent = '×';
+        x.title = 'remove from this day';
+        x.onclick = () => removeFromDay(emp, d);
+        l.appendChild(x);
+        who.appendChild(l);
+      });
+      state.employees.forEach((emp, i) => {
+        if (!emp.pto.includes(d.iso)) return;
+        const l = document.createElement('div');
+        l.className = 'ptoname';
+        l.textContent = '{' + empName(emp, i) + ' pto}';
+        who.appendChild(l);
+      });
+      td.appendChild(who);
+
+      if (draftDate(d.iso)) {
+        const need = needFor(d, makeCtx({}));
+        for (let s = assigned; s < need; s++) td.appendChild(buildDaySelect(d));
+      }
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  });
+  box.innerHTML = '';
+  box.appendChild(t);
+}
+
+function buildDaySelect(d) {
+  const sel = document.createElement('select');
+  const ph = document.createElement('option');
+  ph.value = ''; ph.textContent = '+';
+  sel.appendChild(ph);
+  const ctx = makeCtx({});
+  const week = groupWeeks(canvasDates()).find(w => w.dates.includes(d));
+  state.employees.forEach((emp, i) => {
+    if (workedCell(emp.id, d.iso) || emp.pto.includes(d.iso)) return;
+    const idx = week.dates.indexOf(d);
+    const sh = resolveWeek(emp, week, ctx, relaxAllSet(emp, week, ctx));
+    const ok = sh.can[idx];
+    const o = document.createElement('option');
+    o.value = emp.id;
+    o.textContent = (ok ? '' : '× ') + empName(emp, i);
+    sel.appendChild(o);
+  });
+  sel.onchange = () => {
+    if (!sel.value) return;
+    state.grid[key(sel.value, d.iso)] = 'lockWork';
+    save(); renderAll();
+  };
+  return sel;
+}
+
+function removeFromDay(emp, d) {
+  state.grid[key(emp.id, d.iso)] = 'lockOff';
+  save();
+  // offer the obvious date-scoped fixes for what this removal broke
+  const ctx = makeCtx({});
+  if (draftDate(d.iso) && onDuty(d.iso) < needFor(d, ctx)) {
+    const t = { type: 'needDate', iso: d.iso };
+    if (!availableFixes.some(f => f.tweaks.length === 1 && sameTweak(f.tweaks[0], t)))
+      availableFixes.push({ tweaks: [t], label: tweakLabel(t) });
+  }
+  const week = groupWeeks(canvasDates()).find(w => w.dates.includes(d));
+  if (week) {
+    const t2 = { type: 'minRelaxWk', empId: emp.id, weekStart: week.dates[0].iso };
+    const sh = resolveWeek(emp, week, ctx, new Set());
+    const count = week.dates.filter(x => workedCell(emp.id, x.iso)).length;
+    if (count < sh.min && !availableFixes.some(f => f.tweaks.length === 1 && sameTweak(f.tweaks[0], t2)))
+      availableFixes.push({ tweaks: [t2], label: tweakLabel(t2) });
+  }
+  renderFixes();
+  renderAll();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('gridwrap').style.display = mode === 'grid' ? '' : 'none';
+  document.getElementById('legend').style.display = mode === 'grid' ? '' : 'none';
+  document.getElementById('calview').style.display = mode === 'cal' ? '' : 'none';
+  document.getElementById('calbtn').className = 'aight-btn' + (mode === 'cal' ? ' active' : '');
+  if (mode === 'cal') renderCal();
 }
 
 /* ── validation ────────────────────────────────────────────────── */
 
+function offAt(empId, dayIso) { return !workedCell(empId, dayIso); }
+
 function validate(dates, weeks) {
   const cellViol = new Set();
-  const msgs = [];
-  const touchedWeeks = new Set();
+  const msgs = [];   // {t, note}
+  const bad = t => msgs.push({ t, note: false });
+  const note = t => msgs.push({ t, note: true });
   const ctx = makeCtx({});
+  const canvasStart = dates[0].iso, canvasEnd = dates[dates.length - 1].iso;
 
-  for (const w of weeks) {
-    const touched = state.employees.some(e => w.dates.some(d => {
-      const st = state.grid[key(e.id, d.iso)];
-      return st === 'work' || st === 'lockWork';
-    }));
-    if (touched) touchedWeeks.add(w.dates[0].iso);
-  }
+  const touched = state.employees.some(e => dates.some(d =>
+    draftDate(d.iso) && workedCell(e.id, d.iso)));
+  const anyCells = state.employees.some(e => dates.some(d => workedCell(e.id, d.iso)));
 
   state.employees.forEach((emp, ei) => {
     const nm = empName(emp, ei);
-    if (emp.minDays > emp.maxDays) msgs.push(nm + ' — min days > max days');
+    if (emp.minDays > emp.maxDays) bad(nm + ' — min days > max days');
 
     const conflictSeen = new Set();
     for (const w of weeks) {
-      const sh = envelopeSheet(emp, w, ctx);
-      const wk = 'wk of ' + w.dates[0].iso;
+      const wkStart = w.dates[0].iso;
+      const wk = 'wk of ' + wkStart;
+      const hasDraft = w.dates.some(d => draftDate(d.iso));
+      const shMust = resolveWeek(emp, w, ctx, relaxAllSet(emp, w, ctx));  // ideals dropped
+      const shAll = resolveWeek(emp, w, ctx, new Set());                  // ideals enforced
+      // n-per-period rules widen this week's acceptable bounds (satisfaction counted separately)
+      for (const r of state.rules) {
+        if (r.when.type !== 'nPerPeriod' || r.mode === 'off' || ctx.suspended.has(r.id) || !ruleTargets(r, emp)) continue;
+        const actx = Object.assign({}, ctx, { active: { [r.id]: new Set([wkStart]) } });
+        const vm = resolveWeek(emp, w, actx, relaxAllSet(emp, w, ctx));
+        const va = resolveWeek(emp, w, actx, new Set());
+        shMust.min = Math.min(shMust.min, vm.min); shMust.max = Math.max(shMust.max, vm.max);
+        shAll.min = Math.min(shAll.min, va.min); shAll.max = Math.max(shAll.max, va.max);
+      }
 
-      // setup conflicts — shown even before generating
-      if (w.full) {
-        const canCount = sh.can.filter(Boolean).length + sh.ptoCount;
-        if (sh.can.filter(Boolean).length < sh.min && !conflictSeen.has('avail')) {
-          msgs.push(nm + ' — ' + wk + ': only ' + sh.can.filter(Boolean).length + ' available days but needs ' + sh.min + (sh.ptoCount ? ' (after pto credit)' : ''));
+      if (hasDraft) {
+        const canCount = shMust.can.filter(Boolean).length +
+          shMust.fixed.filter(f => f && f.worked).length;
+        if (canCount < shMust.min && !conflictSeen.has('avail')) {
+          bad(nm + ' — ' + wk + ': only ' + canCount + ' workable days but needs ' + shMust.min);
           conflictSeen.add('avail');
         }
-        const mustCount = sh.must.filter(Boolean).length;
-        if (mustCount > sh.max && !conflictSeen.has('must')) {
-          msgs.push(nm + ' — ' + wk + ': ' + mustCount + ' must-work days exceed max ' + sh.max);
+        const mustCount = shMust.must.filter(Boolean).length;
+        if (mustCount > shMust.max && !conflictSeen.has('must')) {
+          bad(nm + ' — ' + wk + ': ' + mustCount + ' must-work days exceed max ' + shMust.max);
           conflictSeen.add('must');
         }
-        if (sh.min > sh.max && !conflictSeen.has('minmax')) {
-          msgs.push(nm + ' — ' + wk + ': effective min ' + sh.min + ' > max ' + sh.max);
+        if (shMust.min > shMust.max && !conflictSeen.has('minmax')) {
+          bad(nm + ' — ' + wk + ': effective min ' + shMust.min + ' > max ' + shMust.max);
           conflictSeen.add('minmax');
         }
       }
 
-      if (!touchedWeeks.has(w.dates[0].iso)) continue;
+      if (!anyCells) continue;
+      const weekTouched = state.employees.some(e => w.dates.some(d => workedCell(e.id, d.iso)));
+      if (!weekTouched) continue;
+
       let count = 0;
-      const working = [];
       w.dates.forEach((d, i) => {
-        const st = state.grid[key(emp.id, d.iso)];
-        const on = st === 'work' || st === 'lockWork';
-        working.push(on);
+        const on = workedCell(emp.id, d.iso);
         if (on) {
           count++;
-          if (!sh.can[i]) {
+          if (!draftDate(d.iso)) return;   // history is fact
+          if (!shMust.can[i]) {
             cellViol.add(key(emp.id, d.iso));
-            msgs.push(nm + ' — ' + d.iso + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
+            bad(nm + ' — ' + d.iso + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
+          } else if (!shAll.can[i]) {
+            note(nm + ' — ' + d.iso + ': works ' + WD_LONG[d.wd] + ' (ideal rule bent)');
           }
-        } else if (sh.must[i] && st !== 'lockOff') {
-          cellViol.add(key(emp.id, d.iso));
-          msgs.push(nm + ' — ' + d.iso + ': must work ' + WD_LONG[d.wd] + ' but not scheduled');
+        } else if (draftDate(d.iso) && state.grid[key(emp.id, d.iso)] !== 'lockOff') {
+          if (shMust.must[i]) {
+            cellViol.add(key(emp.id, d.iso));
+            bad(nm + ' — ' + d.iso + ': must work ' + WD_LONG[d.wd] + ' but not scheduled');
+          } else if (shAll.must[i]) {
+            note(nm + ' — ' + d.iso + ': ideal must-work ' + WD_LONG[d.wd] + ' not scheduled');
+          }
         }
       });
-      if (w.full) {
-        if (count < sh.min) msgs.push(nm + ' — ' + wk + ': ' + count + ' days (min ' + sh.min + (sh.ptoCount ? ' after pto' : '') + ')');
-        if (sh.consecOff) {
-          let ok = false;
-          for (let i = 0; i < 6; i++) if (!working[i] && !working[i+1]) { ok = true; break; }
-          if (!ok) msgs.push(nm + ' — ' + wk + ': no two days off in a row');
+
+      if (count < shMust.min) bad(nm + ' — ' + wk + ': ' + count + ' days (min ' + shMust.min + ')');
+      else if (count < shAll.min) note(nm + ' — ' + wk + ': ' + count + ' days (ideal min ' + shAll.min + ')');
+      if (count > shMust.max) bad(nm + ' — ' + wk + ': ' + count + ' days (max ' + shMust.max + ')');
+      else if (count > shAll.max) note(nm + ' — ' + wk + ': ' + count + ' days (ideal max ' + shAll.max + ')');
+
+      // two consecutive days off — pairs may span week boundaries
+      if (emp.consecOff) {
+        let sat = false;
+        for (let i = -1; i < 7; i++) {
+          const a = i < 0 ? prevIso(wkStart) : w.dates[i].iso;
+          const b = i + 1 > 6 ? nextIso(w.dates[6].iso) : w.dates[i + 1].iso;
+          const aOff = a < canvasStart || a > canvasEnd ? true : offAt(emp.id, a);
+          const bOff = b < canvasStart || b > canvasEnd ? true : offAt(emp.id, b);
+          if (aOff && bOff) { sat = true; break; }
+        }
+        if (!sat) {
+          if (emp.consecOff === 'must') bad(nm + ' — ' + wk + ': no two days off in a row');
+          else note(nm + ' — ' + wk + ': no two days off in a row (ideal, bent)');
         }
       }
-      if (count > sh.max) msgs.push(nm + ' — ' + wk + ': ' + count + ' days (max ' + sh.max + (sh.ptoCount ? ' after pto' : '') + ')');
-      if (ruleOn(emp, 'maxHours')) {
+
+      if (state.universal.maxHours.mode !== 'off' && !emp.exempt.maxHours) {
         const u = state.universal;
-        // pto credit maxes out at the cap itself — a full pto week is a full week, not overtime
-        const ptoHrs = Math.min(sh.ptoCount, Math.floor(u.maxHours.hours / Math.max(1, u.hoursPerDay)));
+        const ptoHrs = Math.min(shAll.ptoCount, Math.floor(u.maxHours.hours / Math.max(1, u.hoursPerDay)));
         const hrs = (count + ptoHrs) * u.hoursPerDay;
-        if (hrs > u.maxHours.hours)
-          msgs.push(nm + ' — ' + wk + ': ' + hrs + 'h' + (sh.ptoCount ? ' incl pto' : '') + ' (max ' + u.maxHours.hours + 'h)');
+        if (hrs > u.maxHours.hours) {
+          const m = nm + ' — ' + wk + ': ' + hrs + 'h' + (shAll.ptoCount ? ' incl pto' : '') + ' (max ' + u.maxHours.hours + 'h)';
+          if (u.maxHours.mode === 'on') bad(m); else note(m + ' — ideal, bent');
+        }
       }
     }
 
-    // days in a row across the whole period (pto breaks a run)
-    if (ruleOn(emp, 'maxConsec')) {
+    // days in a row across the whole canvas
+    if (state.universal.maxConsec.mode !== 'off' && !emp.exempt.maxConsec && anyCells) {
       const lim = state.universal.maxConsec.days;
-      let run = 0, runStart = null;
+      let run = 0;
+      // seed run from days just before the canvas
+      let back = prevIso(canvasStart);
+      for (let i = 0; i < lim + 1 && workedCell(emp.id, back); i++) { run++; back = prevIso(back); }
+      let runStart = null;
       for (const d of dates) {
-        const st = state.grid[key(emp.id, d.iso)];
-        if (st === 'work' || st === 'lockWork') {
+        if (workedCell(emp.id, d.iso)) {
           if (!run) runStart = d.iso;
           run++;
           if (run > lim) {
             cellViol.add(key(emp.id, d.iso));
-            if (run === lim + 1)
-              msgs.push(nm + ' — ' + runStart + ' onward: more than ' + lim + ' days in a row');
+            if (run === lim + 1) {
+              const m = nm + ' — ' + (runStart || 'carry-in') + ' onward: more than ' + lim + ' days in a row';
+              if (state.universal.maxConsec.mode === 'on') bad(m); else note(m + ' — ideal, bent');
+            }
           }
         } else run = 0;
       }
     }
   });
 
-  // n-weeks-per-period rules: is each satisfied often enough?
-  const fullWeeks = weeks.filter(w => w.full);
-  if (touchedWeeks.size) for (const r of state.rules) {
-    if (r.when.type !== 'nPerPeriod' || ctx.suspended.has(r.id)) continue;
+  // n-weeks-per-period satisfaction
+  if (anyCells) for (const r of state.rules) {
+    if (r.when.type !== 'nPerPeriod' || r.mode === 'off' || ctx.suspended.has(r.id)) continue;
     const targets = r.who === 'all' ? state.employees : state.employees.filter(e => r.who.includes(e.id));
     targets.forEach(emp => {
       let sat = 0;
-      for (const w of fullWeeks) {
-        const shR = resolveWeek(emp, w, Object.assign({}, ctx, { active: { [r.id]: new Set([w.dates[0].iso]) } }));
+      for (const w of weeks) {
+        const shR = resolveWeek(emp, w, Object.assign({}, ctx, { active: { [r.id]: new Set([w.dates[0].iso]) } }), new Set());
         let count = 0, okDays = true;
         w.dates.forEach((d, i) => {
-          const st = state.grid[key(emp.id, d.iso)];
-          const on = st === 'work' || st === 'lockWork';
-          if (on) { count++; if (!shR.can[i]) okDays = false; }
-          else if (shR.must[i] && st !== 'lockOff') okDays = false;
+          const on = workedCell(emp.id, d.iso);
+          if (on) { count++; if (!shR.can[i] && !shR.fixed[i]) okDays = false; }
+          else if (shR.must[i] && state.grid[key(emp.id, d.iso)] !== 'lockOff') okDays = false;
         });
         if (okDays && count >= shR.min && count <= shR.max) sat++;
       }
-      if (sat < r.when.n)
-        msgs.push(empName(emp) + ' — rule "' + ruleText(r) + '" met in ' + sat + '/' + r.when.n + ' wks');
+      if (sat < r.when.n) {
+        const m = empName(emp) + ' — rule "' + ruleText(r) + '" met in ' + sat + '/' + r.when.n + ' wks';
+        if (r.mode === 'must') bad(m); else note(m + ' — ideal');
+      }
     });
   }
 
-  for (const w of weeks) {
-    if (!touchedWeeks.has(w.dates[0].iso)) continue;
-    for (const d of w.dates) {
-      const on = onDuty(d.iso);
-      const need = needFor(d.wd, ctx);
-      if (on < need) msgs.push(WD_LONG[d.wd] + ' ' + d.iso + ': ' + on + ' on duty (need ' + need + ')');
-    }
+  // coverage on draft days only
+  if (touched) for (const d of dates) {
+    if (!draftDate(d.iso)) continue;
+    const on = onDuty(d.iso);
+    const need = needFor(d, ctx);
+    if (on < need) bad(WD_LONG[d.wd] + ' ' + d.iso + ': ' + on + ' on duty (need ' + need + ')');
   }
 
-  return { cellViol, msgs, touchedWeeks };
+  return { cellViol, msgs, touched };
 }
 
 function renderViolations(v) {
   const box = document.getElementById('viol');
   if (!v.msgs.length) {
-    box.innerHTML = v.touchedWeeks.size
+    box.innerHTML = v.touched
       ? '<span class="ok">aight — no violations</span>'
       : '<span style="opacity:0.4">nothing scheduled yet</span>';
     return;
   }
-  box.innerHTML = v.msgs.map(m => '<span class="bad">' + m + '</span>').join('<br>');
+  box.innerHTML = v.msgs.map(m =>
+    '<span class="' + (m.note ? 'bent' : 'bad') + '">' + m.t + '</span>').join('<br>');
 }
 
 /* ── solver ────────────────────────────────────────────────────── */
@@ -1255,187 +1533,350 @@ function shuffle(a) {
   return a;
 }
 
-function candidatesFor(emp, week, carryIn, sheet) {
-  const n = week.dates.length;
-  const out = [];
-  for (let mask = 0; mask < (1 << n); mask++) {
-    let count = 0, ok = true, run = carryIn;
-    for (let i = 0; i < n; i++) {
-      const lock = state.grid[key(emp.id, week.dates[i].iso)];
-      if (mask >> i & 1) {
-        count++; run++;
-        if (run > sheet.maxRun || !sheet.can[i] || lock === 'lockOff') { ok = false; break; }
-      } else {
-        run = 0;
-        if (lock === 'lockWork' || (sheet.must[i] && lock !== 'lockOff')) { ok = false; break; }
-      }
+// candidates for one emp+week given carry {run, lastOff, owes}
+// returns [{mask, bends, labels, carry:{run,lastOff,owes}}] sorted by bends
+function candidatesFor(emp, week, carry, ctx, isLastWeek) {
+  const n = 7;
+  const insts = idealInstancesFor(emp, week, ctx);
+  const variantSets = [new Set()];
+  insts.forEach(x => variantSets.push(new Set([x.key])));
+  if (insts.length > 1) variantSets.push(new Set(insts.map(x => x.key)));
+
+  const allFixed = week.dates.every(d => !draftDate(d.iso));
+  const best = new Map();
+
+  for (const rs of variantSets) {
+    const sheet = resolveWeek(emp, week, ctx, rs);
+    const bendLabels = insts.filter(x => rs.has(x.key)).map(x => x.label + ' (wk of ' + fmtDate(week.dates[0].iso) + ')');
+
+    if (allFixed) {
+      // history is a single fact-mask, never constraint-checked
+      let mask = 0;
+      week.dates.forEach((d, i) => { if (workedCell(emp.id, d.iso)) mask |= 1 << i; });
+      let t = 0;
+      for (let j = 6; j >= 0 && (mask >> j & 1); j--) t++;
+      const run = (t === 7) ? carry.run + 7 : t;
+      if (!best.has(mask)) best.set(mask, { mask, bends: 0, labels: [], carry: { run, lastOff: !(mask >> 6 & 1), owes: false } });
+      break;
     }
-    if (!ok || count > sheet.max) continue;
-    if (week.full) {
-      if (count < sheet.min) continue;
+
+    for (let mask = 0; mask < (1 << n); mask++) {
+      let count = 0, ok = true, run = carry.run;
+      for (let i = 0; i < n; i++) {
+        const d = week.dates[i];
+        const f = sheet.fixed[i];
+        const lock = f ? null : state.grid[key(emp.id, d.iso)];
+        if (mask >> i & 1) {
+          if (f && !f.worked) { ok = false; break; }
+          if (!f && (!sheet.can[i] || lock === 'lockOff')) { ok = false; break; }
+          count++; run++;
+          if (run > sheet.maxRun) { ok = false; break; }
+        } else {
+          if (f && f.worked) { ok = false; break; }
+          if (!f && (lock === 'lockWork' || sheet.must[i])) { ok = false; break; }
+          run = 0;
+        }
+      }
+      if (!ok || count < sheet.min || count > sheet.max) continue;
+
+      let owesOut = false;
       if (sheet.consecOff) {
-        let found = false;
-        for (let i = 0; i < 6; i++) if (!(mask >> i & 1) && !(mask >> (i+1) & 1)) { found = true; break; }
-        if (!found) continue;
-      }
+        let sat = false;
+        for (let i = 0; i < 6; i++) if (!(mask >> i & 1) && !(mask >> (i+1) & 1)) { sat = true; break; }
+        if (!sat && carry.lastOff && !(mask & 1)) sat = true;
+        if (carry.owes && (mask & 1)) continue;         // owed a sunday off
+        if (!sat) {
+          if (!(mask >> 6 & 1) && !isLastWeek) owesOut = true;   // defer: sat off, next sun must be off
+          else continue;
+        }
+      } else if (carry.owes && (mask & 1)) continue;
+
+      let t = 0;
+      for (let j = 6; j >= 0 && (mask >> j & 1); j--) t++;
+      const runOut = (t === 7) ? carry.run + 7 : t;
+      const cand = { mask, bends: rs.size, labels: bendLabels, carry: { run: runOut, lastOff: !(mask >> 6 & 1), owes: owesOut } };
+      // owes-Sunday and no-owes versions of the same mask are different candidates —
+      // collapsing them can strand the search when next week's sunday is locked
+      const kk = mask + (owesOut ? '|o' : '');
+      const prev = best.get(kk);
+      if (!prev || cand.bends < prev.bends) best.set(kk, cand);
     }
-    out.push(mask);
   }
-  return shuffle(out);
+
+  const out = Array.from(best.values());
+  shuffle(out);
+  out.sort((a, b) => a.bends - b.bends);
+  return out;
 }
 
-function solveWeek(week, carry, ctx) {
+// collect up to ~K coverage-satisfying assignments for one week.
+// two harvest passes with different candidate orderings so that solutions
+// differing in carry shape (esp. owed-sunday deferrals) are all represented.
+function collectWeekSolutions(week, carryMap, ctx, K, budget) {
   const emps = state.employees;
-  const n = week.dates.length;
-  const sheets = emps.map(e => resolveWeek(e, week, ctx));
-  const cands = emps.map((e, i) => candidatesFor(e, week, carry[e.id] || 0, sheets[i]));
-  const need = week.dates.map(d => needFor(d.wd, ctx));
-  const poss = emps.map((e, i) => week.dates.map((d, j) =>
-    (sheets[i].can[j] && state.grid[key(e.id, d.iso)] !== 'lockOff') ? 1 : 0));
-  const counts = new Array(n).fill(0);
-  const chosen = new Array(emps.length).fill(0);
-  let nodes = 0;
+  const isLast = week.isLast;
+  const cands = emps.map(e => candidatesFor(e, week, carryMap[e.id] || { run: 0, lastOff: true, owes: false }, ctx, isLast));
+  const need = week.dates.map(d => needFor(d, ctx));
+  const poss = emps.map((e, i) => week.dates.map((d, j) => {
+    if (!draftDate(d.iso)) return workedCell(e.id, d.iso) ? 1 : 0;
+    return cands[i].some(c => c.mask >> j & 1) ? 1 : 0;
+  }));
+  const sols = [];
+  const seen = new Set();
 
-  function bt(i) {
-    if (++nodes > 300000) return false;
-    if (i === emps.length) return counts.every((c, j) => c >= need[j]);
-    for (let j = 0; j < n; j++) {
-      let ub = counts[j];
-      for (let k = i; k < emps.length; k++) ub += poss[k][j];
-      if (ub < need[j]) return false;
+  function harvest(lists) {
+    const counts = new Array(7).fill(0);
+    const chosen = new Array(emps.length).fill(null);
+    let got = 0;
+    function bt(i) {
+      if (++budget.nodes > budget.cap || got >= K) return;
+      if (i === emps.length) {
+        if (counts.every((c, j) => c >= need[j])) {
+          const sig = chosen.map(c => c.mask + (c.carry.owes ? 'o' : '')).join(',');
+          if (!seen.has(sig)) {
+            seen.add(sig);
+            got++;
+            const carry = {};
+            let bends = 0, labels = [];
+            emps.forEach((e, x) => { carry[e.id] = chosen[x].carry; bends += chosen[x].bends; labels = labels.concat(chosen[x].labels); });
+            sols.push({ masks: chosen.map(c => c.mask), bends, labels, carry });
+          }
+        }
+        return;
+      }
+      for (let j = 0; j < 7; j++) {
+        let ub = counts[j];
+        for (let k2 = i; k2 < emps.length; k2++) ub += poss[k2][j];
+        if (ub < need[j]) return;
+      }
+      for (const cand of lists[i]) {
+        for (let j = 0; j < 7; j++) if (cand.mask >> j & 1) counts[j]++;
+        chosen[i] = cand;
+        bt(i + 1);
+        for (let j = 0; j < 7; j++) if (cand.mask >> j & 1) counts[j]--;
+        if (budget.nodes > budget.cap || got >= K) return;
+      }
     }
-    for (const mask of cands[i]) {
-      for (let j = 0; j < n; j++) if (mask >> j & 1) counts[j]++;
-      chosen[i] = mask;
-      if (bt(i + 1)) return true;
-      for (let j = 0; j < n; j++) if (mask >> j & 1) counts[j]--;
-    }
-    return false;
+    bt(0);
   }
 
-  if (!bt(0)) return false;
-  emps.forEach((emp, i) => {
-    week.dates.forEach((d, j) => {
-      if (chosen[i] >> j & 1) {
-        const k = key(emp.id, d.iso);
-        if (state.grid[k] !== 'lockWork') state.grid[k] = 'work';
-      }
-    });
-    let t = 0;
-    for (let j = n - 1; j >= 0 && (chosen[i] >> j & 1); j--) t++;
-    carry[emp.id] = (t === n) ? (carry[emp.id] || 0) + n : t;
+  harvest(cands);
+  // pass 2: prefer candidates that do NOT defer their 2-off pair to next sunday
+  const flipped = cands.map(list => {
+    const arr = list.slice();
+    arr.sort((a, b) => ((a.carry.owes ? 1 : 0) - (b.carry.owes ? 1 : 0)) || (a.bends - b.bends));
+    return arr;
   });
-  return true;
+  if (flipped.some((l, i) => l.length > 1 && l[0] !== cands[i][0])) harvest(flipped);
+
+  sols.sort((a, b) => a.bends - b.bends);
+  return sols;
 }
 
-function clearWorkCells() {
-  for (const k in state.grid) if (state.grid[k] === 'work') delete state.grid[k];
+function initialCarry() {
+  const start = canvasDates()[0].iso;
+  const carry = {};
+  state.employees.forEach(e => {
+    let run = 0, back = prevIso(start);
+    for (let i = 0; i < 20 && workedCell(e.id, back); i++) { run++; back = prevIso(back); }
+    carry[e.id] = { run, lastOff: !workedCell(e.id, prevIso(start)), owes: false };
+  });
+  return carry;
 }
 
-// random picks for "n weeks per period" rules — reshuffled every attempt
 function pickActive() {
-  const fullWeeks = groupWeeks(periodDates()).filter(w => w.full);
+  const weeks = groupWeeks(canvasDates()).filter(w => w.dates.some(d => draftDate(d.iso)));
   const active = {};
   for (const r of state.rules) {
-    if (r.when.type !== 'nPerPeriod') continue;
-    active[r.id] = new Set(shuffle(fullWeeks.slice()).slice(0, r.when.n).map(w => w.dates[0].iso));
+    if (r.when.type !== 'nPerPeriod' || r.mode === 'off') continue;
+    active[r.id] = new Set(shuffle(weeks.slice()).slice(0, r.when.n).map(w => w.dates[0].iso));
   }
   return active;
 }
 
-function runSolve(attempts) {
-  const weeks = groupWeeks(periodDates());
-  let failedAt = null;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    clearWorkCells();
-    const ctx = makeCtx(pickActive());
-    const carry = {};
-    failedAt = null;
-    for (const w of weeks) {
-      if (!solveWeek(w, carry, ctx)) { failedAt = w.dates[0].iso; break; }
+// whole-period search with backtracking across weeks
+function solvePeriod(ctx, capNodes) {
+  const weeks = groupWeeks(canvasDates());
+  weeks.forEach((w, i) => { w.isLast = i === weeks.length - 1; });
+  const budget = { nodes: 0, cap: capNodes || 600000 };
+  let deepestFail = -1;
+  const K = 8;
+
+  function down(wi, carryMap, bendAcc) {
+    if (budget.nodes > budget.cap) return null;
+    if (wi === weeks.length) return { bends: bendAcc };
+    const sols = collectWeekSolutions(weeks[wi], carryMap, ctx, K, budget);
+    if (!sols.length && wi > deepestFail) deepestFail = wi;
+    for (const sol of sols) {
+      const res = down(wi + 1, sol.carry, bendAcc.concat(sol.labels));
+      if (res) { res['w' + wi] = sol; return res; }
+      if (budget.nodes > budget.cap) return null;
     }
-    if (!failedAt) break;
+    if (wi > deepestFail) deepestFail = wi;
+    return null;
   }
-  return failedAt;
+
+  const res = down(0, initialCarry(), []);
+  if (!res) return { ok: false, failWeek: weeks[Math.max(0, deepestFail)] ? weeks[Math.max(0, deepestFail)].dates[0].iso : weeks[0].dates[0].iso };
+
+  // write draft cells
+  weeks.forEach((w, wi) => {
+    const sol = res['w' + wi];
+    if (!sol) return;
+    state.employees.forEach((emp, i) => {
+      w.dates.forEach((d, j) => {
+        if (!draftDate(d.iso)) return;
+        const k = key(emp.id, d.iso);
+        if (sol.masks[i] >> j & 1) {
+          if (state.grid[k] !== 'lockWork') state.grid[k] = 'work';
+        }
+      });
+    });
+  });
+  return { ok: true, bends: res.bends };
+}
+
+function clearDraftWork() {
+  for (const k in state.grid) {
+    if (state.grid[k] !== 'work') continue;
+    const dayIso = k.split('|')[1];
+    if (draftDate(dayIso)) delete state.grid[k];
+  }
+}
+
+function runSolve(capNodes) {
+  let res = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    clearDraftWork();
+    res = solvePeriod(makeCtx(pickActive()), capNodes);
+    if (res.ok) break;
+  }
+  return res;
 }
 
 function generate() {
-  const failedAt = runSolve(25);
+  const res = runSolve();
+  lastBends = res.ok ? (res.bends || []) : [];
   save(); renderGrid();
   const msgEl = document.getElementById('solvemsg');
-  if (failedAt) {
-    msgEl.textContent = 'could not fill wk of ' + failedAt + ' — looking for fixes…';
-    diagnose();
+  if (!res.ok) {
+    msgEl.innerHTML = '<span class="bad">could not fill (stuck at wk of ' + res.failWeek + ') — looking for fixes…</span>';
+    diagnose(res.failWeek);
   } else {
-    msgEl.textContent = activeTweaks.length ? 'generated with ' + activeTweaks.length + ' fix(es) applied — one-time, not saved' : '';
+    let html = '';
+    if (activeTweaks.length) html += '<span class="bent">generated with ' + activeTweaks.length + ' one-time fix(es)</span>';
+    if (lastBends.length) {
+      const uniq = Array.from(new Set(lastBends));
+      html += (html ? '<br>' : '') + '<span class="bent">bent ideal rules: ' + uniq.join(' · ') + '</span>';
+    }
+    msgEl.innerHTML = html;
   }
 }
 
-/* ── conflict fix menu ─────────────────────────────────────────────
-   When generate fails, try small one-time parameter changes and list
-   every one that unlocks a solution. Nothing applies until selected,
-   and a re-generate runs the full rule pipeline again.              */
+/* ── conflict fix menu ─────────────────────────────────────────── */
 
 function sameTweak(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 
-function candidateTweaks() {
+function tweakLabel(t) {
+  if (t.type === 'needDate') {
+    const d = fromIso(t.iso);
+    return WD_LONG[wdIdx(d)] + ' ' + fmtDate(t.iso) + ' need −1';
+  }
+  if (t.type === 'need') return 'all ' + WD_LONG[t.wd] + 's need −1';
+  if (t.type === 'allowDate') return empName(empById(t.empId)) + ' can work ' + fmtDate(t.iso);
+  if (t.type === 'allowWd') return empName(empById(t.empId)) + ' can work ' + WD_LONG[t.wd] + 's';
+  if (t.type === 'suspendRule') { const r = state.rules.find(x => x.id === t.ruleId); return 'skip: ' + (r ? ruleText(r) : '?'); }
+  if (t.type === 'minRelaxWk') return empName(empById(t.empId)) + ' min −1 (wk of ' + fmtDate(t.weekStart) + ')';
+  if (t.type === 'maxRelaxWk') return empName(empById(t.empId)) + ' max +1 (wk of ' + fmtDate(t.weekStart) + ')';
+  if (t.type === 'twoOffWk') return empName(empById(t.empId)) + ' 2-off waived (wk of ' + fmtDate(t.weekStart) + ')';
+  return '?';
+}
+
+function candidateTweaks(failWeekIso) {
+  const weeks = groupWeeks(canvasDates());
+  const week = weeks.find(w => w.dates[0].iso === failWeekIso) || weeks[0];
   const out = [];
+  const ctx = makeCtx({});
+  week.dates.forEach(d => {
+    if (draftDate(d.iso) && needFor(d, ctx) > 0) out.push({ type: 'needDate', iso: d.iso });
+  });
+  state.employees.forEach(e => {
+    week.dates.forEach(d => {
+      if (!draftDate(d.iso) || e.pto.includes(d.iso) || e.days[d.wd] >= 1) return;
+      out.push({ type: 'allowDate', empId: e.id, iso: d.iso });
+    });
+  });
+  state.rules.forEach(r => { if (r.mode !== 'off') out.push({ type: 'suspendRule', ruleId: r.id }); });
+  state.employees.forEach(e => {
+    if (e.consecOff === 'must') out.push({ type: 'twoOffWk', empId: e.id, weekStart: failWeekIso });
+    out.push({ type: 'minRelaxWk', empId: e.id, weekStart: failWeekIso });
+    out.push({ type: 'maxRelaxWk', empId: e.id, weekStart: failWeekIso });
+  });
+  // weekday-wide variants last (broader — for shortfalls that recur every week)
   for (let wd = 0; wd < 7; wd++) if (state.coverage[wd] > 0) out.push({ type: 'need', wd });
   state.employees.forEach(e => {
     for (let wd = 0; wd < 7; wd++) if (e.days[wd] === 0) out.push({ type: 'allowWd', empId: e.id, wd });
   });
-  state.rules.forEach(r => out.push({ type: 'suspendRule', ruleId: r.id }));
-  state.employees.forEach(e => {
-    if (e.consecOff) out.push({ type: 'noConsecOff', empId: e.id });
-    out.push({ type: 'minRelax', empId: e.id });
-    out.push({ type: 'maxRelax', empId: e.id });
-  });
   return out.filter(t => !activeTweaks.some(a => sameTweak(a, t)));
 }
 
-function tweakLabel(t) {
-  if (t.type === 'need') return WD_LONG[t.wd] + ' need ' + state.coverage[t.wd] + '→' + Math.max(0, state.coverage[t.wd] - 1);
-  if (t.type === 'allowWd') return empName(empById(t.empId)) + ' can work ' + WD_LONG[t.wd];
-  if (t.type === 'suspendRule') { const r = state.rules.find(x => x.id === t.ruleId); return 'skip: ' + (r ? ruleText(r) : '?'); }
-  if (t.type === 'minRelax') return empName(empById(t.empId)) + ' min −1';
-  if (t.type === 'maxRelax') return empName(empById(t.empId)) + ' max +1';
-  if (t.type === 'noConsecOff') return empName(empById(t.empId)) + ' 2-off waived';
-  return '?';
+function tryWith(tweaks) {
+  const saved = activeTweaks;
+  activeTweaks = activeTweaks.concat(tweaks);
+  const res = runSolve(150000);
+  activeTweaks = saved;
+  return res.ok;
 }
 
-function diagnose() {
+function diagnose(failWeekIso) {
+  const cands = candidateTweaks(failWeekIso);
   const found = [];
-  for (const t of candidateTweaks()) {
+  for (const t of cands) {
     if (found.length >= 10) break;
-    activeTweaks.push(t);
-    const failed = runSolve(6);
-    activeTweaks.pop();
-    if (!failed) found.push(t);
+    if (tryWith([t])) found.push({ tweaks: [t], label: tweakLabel(t) });
   }
-  clearWorkCells();
+  if (!found.length) {
+    // try pairs among the first candidates
+    const pool = cands.slice(0, 12);
+    let trials = 0;
+    outer:
+    for (let i = 0; i < pool.length; i++) {
+      for (let j = i + 1; j < pool.length; j++) {
+        if (++trials > 50 || found.length >= 6) break outer;
+        if (tryWith([pool[i], pool[j]]))
+          found.push({ tweaks: [pool[i], pool[j]], label: tweakLabel(pool[i]) + ' + ' + tweakLabel(pool[j]) });
+      }
+    }
+  }
+  clearDraftWork();
   save(); renderGrid();
   availableFixes = found;
   renderFixes();
-  document.getElementById('solvemsg').textContent = found.length
-    ? 'could not fill — pick one or more fixes below, then {generate}'
-    : 'could not fill — no single-change fix found; adjust rules, availability, or need';
+  document.getElementById('solvemsg').innerHTML = found.length
+    ? '<span class="bad">could not fill — pick a fix below, then {generate}</span>'
+    : '<span class="bad">could not fill — no small fix found; adjust rules, availability, or need</span>';
 }
+
+function fixActive(f) { return f.tweaks.every(t => activeTweaks.some(a => sameTweak(a, t))); }
 
 function renderFixes() {
   const box = document.getElementById('fixmenu');
   box.innerHTML = '';
   const shown = availableFixes.slice();
-  activeTweaks.forEach(t => { if (!shown.some(s => sameTweak(s, t))) shown.push(t); });
+  activeTweaks.forEach(t => {
+    if (!shown.some(f => f.tweaks.length === 1 && sameTweak(f.tweaks[0], t)))
+      shown.push({ tweaks: [t], label: tweakLabel(t) });
+  });
   if (!shown.length) return;
-  shown.forEach(t => {
-    const on = activeTweaks.some(a => sameTweak(a, t));
+  shown.forEach(f => {
+    const on = fixActive(f);
     const b = document.createElement('button');
     b.className = 'aight-btn' + (on ? ' active' : '');
-    b.textContent = tweakLabel(t);
-    b.title = 'one-time fix for this generate — rules themselves stay unchanged';
+    b.textContent = f.label;
+    b.title = 'one-time fix — applies to the next generate only, rules stay unchanged';
     b.onclick = () => {
-      if (on) activeTweaks = activeTweaks.filter(a => !sameTweak(a, t));
-      else activeTweaks.push(t);
+      if (on) activeTweaks = activeTweaks.filter(a => !f.tweaks.some(t => sameTweak(a, t)));
+      else f.tweaks.forEach(t => { if (!activeTweaks.some(a => sameTweak(a, t))) activeTweaks.push(t); });
       renderFixes(); renderGrid();
     };
     box.appendChild(b);
@@ -1448,81 +1889,64 @@ function renderFixes() {
 }
 
 function clearFills() {
-  clearWorkCells();
+  clearDraftWork();
+  document.getElementById('solvemsg').textContent = '';
+  save(); renderGrid();
+}
+function clearAll() {
+  for (const k in state.grid) {
+    const dayIso = k.split('|')[1];
+    if (draftDate(dayIso)) delete state.grid[k];
+  }
   document.getElementById('solvemsg').textContent = '';
   save(); renderGrid();
 }
 
-function clearAll() {   // clears schedule marks; pto is kept (remove via editors)
-  state.grid = {};
-  document.getElementById('solvemsg').textContent = '';
+/* ── finalize / memory ─────────────────────────────────────────── */
+
+function canvasEndIso() { const d = canvasDates(); return d[d.length - 1].iso; }
+function isFinalized() { return state.finalizedThrough && state.finalizedThrough >= canvasEndIso(); }
+
+function finalize() {
+  if (isFinalized()) state.finalizedThrough = null;      // toggle off = un-finalize
+  else state.finalizedThrough = canvasEndIso();
   save(); renderGrid();
 }
 
-/* ── calendar view (read-only) ─────────────────────────────────── */
+function renderMemRow() {
+  document.getElementById('finalize').className = 'aight-btn' + (isFinalized() ? ' active' : '');
+  document.getElementById('fintxt').textContent = state.finalizedThrough
+    ? 'finalized through ' + fmtDate(state.finalizedThrough) : '';
+  document.getElementById('printbtn').style.display = isFinalized() ? '' : 'none';
+}
 
-let viewMode = 'grid';
-
-function renderCal() {
-  const box = document.getElementById('calview');
-  const weeks = groupWeeks(periodDates());
-  const t = document.createElement('table');
-  const hr = document.createElement('tr');
-  WD.forEach(l => {
-    const th = document.createElement('th');
-    th.textContent = l;
-    hr.appendChild(th);
-  });
-  t.appendChild(hr);
-  weeks.forEach(w => {
-    const tr = document.createElement('tr');
-    for (let wd = 0; wd < 7; wd++) {
-      const d = w.dates.find(x => x.wd === wd);
-      const td = document.createElement('td');
-      if (wd === 0 || wd === 6) td.classList.add('wkend');
-      if (!d) { td.classList.add('blank'); tr.appendChild(td); continue; }
-      const dn = document.createElement('div');
-      dn.className = 'dnum';
-      dn.innerHTML = (d.dayNum === 1 || d.iso === state.periodStart
-        ? '<span class="mo">' + MONTHS[d.month] + '</span>' : '') + d.dayNum;
-      td.appendChild(dn);
-      const who = document.createElement('div');
-      who.className = 'who';
-      state.employees.forEach((emp, i) => {
-        const st = state.grid[key(emp.id, d.iso)];
-        if (st === 'work' || st === 'lockWork') {
-          const l = document.createElement('div');
-          l.textContent = empName(emp, i);
-          who.appendChild(l);
-        } else if (emp.pto.includes(d.iso)) {
-          const l = document.createElement('div');
-          l.className = 'ptoname';
-          l.textContent = empName(emp, i) + ' pto';
-          who.appendChild(l);
-        }
-      });
-      td.appendChild(who);
-      tr.appendChild(td);
+function downloadState() {
+  const blob = new Blob([JSON.stringify(state, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aight-schedule-' + iso(new Date()) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function restoreState(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const p = JSON.parse(reader.result);
+      if (p.weekStart !== 'sun') migrateToSundayWeeks(p);
+      state = normalizeState(Object.assign(defaultState(), p));
+      save(); renderAll();
+    } catch (e) {
+      document.getElementById('solvemsg').innerHTML = '<span class="bad">restore failed — not a valid backup file</span>';
     }
-    t.appendChild(tr);
-  });
-  box.innerHTML = '';
-  box.appendChild(t);
+  };
+  reader.readAsText(file);
 }
 
-function setView(mode) {
-  viewMode = mode;
-  document.getElementById('gridwrap').style.display = mode === 'grid' ? '' : 'none';
-  document.getElementById('legend').style.display = mode === 'grid' ? '' : 'none';
-  document.getElementById('calview').style.display = mode === 'cal' ? '' : 'none';
-  document.getElementById('calbtn').className = 'aight-btn' + (mode === 'cal' ? ' active' : '');
-  if (mode === 'cal') renderCal();
-}
-
-/* ── csv export — calendar layout: week bands, names stacked per day ── */
+/* ── csv export ────────────────────────────────────────────────── */
 
 function csvContent() {
-  const dates = periodDates();
+  const dates = canvasDates();
   const weeks = groupWeeks(dates);
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
   const rows = [];
@@ -1534,9 +1958,12 @@ function csvContent() {
     const names = [[],[],[],[],[],[],[]];
     w.dates.forEach(d => {
       dateRow[d.wd] = MONTHS[d.month] + ' ' + d.dayNum;
+      const hrs = hoursFor(d.wd);
       state.employees.forEach((emp, i) => {
-        const st = state.grid[key(emp.id, d.iso)];
-        if (st === 'work' || st === 'lockWork') names[d.wd].push(empName(emp, i));
+        if (workedCell(emp.id, d.iso)) names[d.wd].push(empName(emp, i) + (hrs ? ' ' + hrs : ''));
+      });
+      state.employees.forEach((emp, i) => {
+        if (emp.pto.includes(d.iso)) names[d.wd].push(empName(emp, i) + ' PTO');
       });
     });
     rows.push(dateRow.map(esc).join(','));
@@ -1547,7 +1974,6 @@ function csvContent() {
   }
   return rows.join('\r\n');
 }
-
 function exportCsv() {
   const blob = new Blob([csvContent()], { type: 'text/csv' });
   const a = document.createElement('a');
@@ -1567,7 +1993,6 @@ function setMonth(offset) {
   state.periodEnd = iso(last);
   save(); renderAll();
 }
-
 function bindPeriod() {
   const s = document.getElementById('pstart');
   const e = document.getElementById('pend');
@@ -1596,6 +2021,7 @@ function renderAll() {
   renderStaff();
   renderRules();
   renderRuleBuilder();
+  renderBiz();
   renderFixes();
   renderGrid();
 }
@@ -1607,6 +2033,11 @@ document.getElementById('clearfills').onclick = clearFills;
 document.getElementById('clearall').onclick = clearAll;
 document.getElementById('csv').onclick = exportCsv;
 document.getElementById('calbtn').onclick = () => setView(viewMode === 'cal' ? 'grid' : 'cal');
+document.getElementById('finalize').onclick = finalize;
+document.getElementById('download').onclick = downloadState;
+document.getElementById('restore').onclick = () => document.getElementById('restorefile').click();
+document.getElementById('restorefile').onchange = function () { if (this.files && this.files[0]) restoreState(this.files[0]); };
+document.getElementById('printbtn').onclick = () => { setView('cal'); window.print(); };
 document.getElementById('ptomode').onclick = () => {
   ptoMode = !ptoMode;
   document.getElementById('ptomode').className = 'aight-btn' + (ptoMode ? ' active' : '');
