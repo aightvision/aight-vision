@@ -220,14 +220,17 @@
     #keyrow { margin-top: 8px; }
     #viewbar { margin-bottom: 8px; }
 
+    @page { size: landscape; margin: 5mm 8mm 6mm 8mm; }
     @media print {
-      body { background: #fff !important; color: #000 !important; padding: 8px; }
+      body { background: #fff !important; color: #000 !important; padding: 0; }
       header, .noprint, #gridwrap, .legend, #viewbar { display: none !important; }
-      #printhead { display: block !important; text-align: center; color: #000; margin-bottom: 10px; }
-      #printhead .t { font-size: 16px; letter-spacing: 0.3em; font-weight: 700; }
-      #printhead .p { font-size: 10px; opacity: 0.7; margin-top: 2px; }
+      #printhead { display: block !important; text-align: center; color: #000; margin-bottom: 5px; }
+      #printhead .t { font-size: 13px; letter-spacing: 0.3em; font-weight: 700; }
+      #printhead .p { font-size: 9px; opacity: 0.7; margin-top: 1px; }
       #calview { display: block !important; border-color: #999; }
       #calview table { min-width: 0; font-size: 9px; }
+      #calview td { height: 64px; min-height: 0; padding: 2px 4px; }
+      #calview .who { line-height: 1.45; }
       #calview th, #calview td { border-color: #aaa !important; background: #fff !important; color: #000 !important; opacity: 1 !important; }
       #calview td.wkend { background: #f4f4f4 !important; }
       #calview .dnum, #calview .who div { color: #000 !important; opacity: 1 !important; }
