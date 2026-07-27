@@ -53,10 +53,20 @@
     }
     .aight-btn.important:hover,
     .aight-btn.active:hover { background: var(--aight-yellow-hover); }
-    .aight-btn.ideal {
-      border-style: dashed;
-      background: rgba(200,166,60,0.12);
-    }
+    .aight-btn.ideal { border-style: dashed; background: rgba(200,166,60,0.12); }
+
+    /* green = action, red = destructive */
+    .aight-btn.green { color: var(--green); border-color: var(--green); }
+    .aight-btn.green:hover { background: rgba(76,200,76,0.15); }
+    .aight-btn.green.active,
+    .aight-btn.green-fill { background: var(--green); border-color: var(--green); color: #000; font-weight: 700; }
+    .aight-btn.green-fill:hover, .aight-btn.green.active:hover { background: #5fd45f; }
+    .aight-btn.red { color: var(--red); border-color: var(--red); }
+    .aight-btn.red:hover { background: rgba(200,74,60,0.15); }
+    .aight-btn.red-fill { background: var(--red); border-color: var(--red); color: #000; font-weight: 700; }
+    .aight-btn.red-fill:hover { background: #d65a4c; }
+    .delx { margin-left: 6px; opacity: 0.6; }
+    .delx:hover { color: var(--red); opacity: 1; }
 
     header { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; flex-wrap: wrap; }
     header h1 { font-size: 15px; letter-spacing: 0.35em; font-weight: 700; }
@@ -143,6 +153,7 @@
     th.wkend, td.wkend { background: rgba(200,166,60,0.05); }
     th.today .dn { color: #fff; }
     th.outside, td.day.outside { opacity: 0.4; }
+    th.wksep, td.wksep { border-left: 2px solid rgba(255,255,255,0.22); }
     td.namecell, th.namecell {
       position: sticky; left: 0;
       background: #000;
@@ -203,13 +214,18 @@
     #solvemsg { font-size: 11px; margin-top: 8px; letter-spacing: 0.05em; line-height: 1.7; }
     #solvemsg .bad { color: var(--red); }
     #solvemsg .bent { color: var(--aight-yellow); opacity: 0.8; }
+    #solvemsg .ok { color: var(--green); }
     #fixmenu { margin-top: 8px; }
-    #memrow { margin-top: 10px; }
-    #memrow .fin { font-size: 10px; opacity: 0.6; letter-spacing: 0.08em; }
+    #loadpicker { margin-top: 8px; font-size: 11px; }
+    #keyrow { margin-top: 8px; }
+    #viewbar { margin-bottom: 8px; }
 
     @media print {
       body { background: #fff !important; color: #000 !important; padding: 8px; }
-      header, .noprint, #gridwrap, .legend { display: none !important; }
+      header, .noprint, #gridwrap, .legend, #viewbar { display: none !important; }
+      #printhead { display: block !important; text-align: center; color: #000; margin-bottom: 10px; }
+      #printhead .t { font-size: 16px; letter-spacing: 0.3em; font-weight: 700; }
+      #printhead .p { font-size: 10px; opacity: 0.7; margin-top: 2px; }
       #calview { display: block !important; border-color: #999; }
       #calview table { min-width: 0; font-size: 9px; }
       #calview th, #calview td { border-color: #aaa !important; background: #fff !important; color: #000 !important; opacity: 1 !important; }
@@ -225,6 +241,7 @@
 <header>
   <h1>AIGHT.SCHEDULE</h1>
   <a class="aight-btn" href="/">&nbsp;&larr; vision&nbsp;</a>
+  <button class="aight-btn red" id="startover" style="margin-left:auto">start overrr :c</button>
 </header>
 
 <section class="noprint">
@@ -235,8 +252,11 @@
     <input type="date" id="pend">
     <button class="aight-btn" id="thismonth">this month</button>
     <button class="aight-btn" id="nextmonth">next month</button>
-    <span class="rules-hint">grid always shows full sun&ndash;sat weeks; dimmed days belong to the prior/next month</span>
+    <span style="opacity:0.6;font-size:10px;letter-spacing:0.2em">TITLE:</span>
+    <input type="text" id="title" maxlength="30" style="width:180px" placeholder="untitled">
+    <button class="aight-btn green" id="history">history</button>
   </div>
+  <div class="rules-hint" style="margin-top:6px">grid shows full sun&ndash;sat weeks; dimmed days belong to neighboring months &middot; {history} pulls last month's tail from a cloud save when it isn't already here</div>
 </section>
 
 <section class="noprint">
@@ -276,26 +296,34 @@
 
 <section class="noprint">
   <div class="row">
-    <button class="aight-btn important" id="generate">generate</button>
-    <button class="aight-btn" id="clearfills">clear fills</button>
-    <button class="aight-btn" id="clearall">clear all</button>
-    <button class="aight-btn" id="ptomode">PTO</button>
-    <button class="aight-btn" id="csv">csv</button>
-    <button class="aight-btn" id="calbtn">calendar</button>
+    <button class="aight-btn green-fill" id="generate">generate</button>
+    <span style="flex:1"></span>
+    <button class="aight-btn green" id="save">save</button>
+    <button class="aight-btn green" id="load">load</button>
+    <button class="aight-btn green" id="csv">csv</button>
+    <button class="aight-btn green" id="download">download</button>
+    <button class="aight-btn green" id="printbtn" style="display:none">print</button>
   </div>
-  <div class="row" id="memrow">
-    <button class="aight-btn" id="finalize">finalize</button>
-    <button class="aight-btn" id="download">download</button>
-    <button class="aight-btn" id="restore">restore</button>
-    <button class="aight-btn" id="printbtn" style="display:none">print</button>
-    <span class="fin" id="fintxt"></span>
-    <input type="file" id="restorefile" accept=".json,application/json" style="display:none">
+  <div class="row" style="justify-content:flex-end;margin-top:8px">
+    <button class="aight-btn red-fill" id="clearbtn">clear</button>
   </div>
+  <div class="row" id="keyrow" style="display:none">
+    <span class="rules-hint">access key:</span>
+    <input type="text" id="keyinput" style="width:220px">
+    <button class="aight-btn green" id="keyok">ok</button>
+  </div>
+  <div class="row" id="loadpicker" style="display:none"></div>
+  <input type="file" id="restorefile" accept=".json,application/json" style="display:none">
   <div id="solvemsg"></div>
   <div id="fixmenu" class="row"></div>
 </section>
 
 <section>
+  <div class="row noprint" id="viewbar">
+    <button class="aight-btn green" id="calbtn">calendar</button>
+    <button class="aight-btn green" id="ptomode">PTO</button>
+  </div>
+  <div id="printhead" style="display:none"></div>
   <div class="grid-wrap" id="gridwrap"><table id="grid"></table></div>
   <div id="calview" style="display:none"></div>
   <div class="legend" id="legend">
@@ -303,7 +331,7 @@
     dim yellow = generated &middot; solid yellow = locked &middot;
     <b class="g">green = pto</b> &middot;
     hatched = can't work &middot; dimmed columns = neighboring month (history in front, carry-over behind) &middot;
-    history and finalized days are facts: generate builds around them, but your clicks can still change them
+    history days are facts: generate builds around them, but your clicks can still change them
   </div>
 </section>
 
@@ -316,17 +344,20 @@
 'use strict';
 
 const LS_KEY = 'aight-schedule-v1';
+const CLOUD_KEY_LS = 'aight-schedule-key';
 const WD = ['SU','M','TU','W','TH','F','SA'];
 const WD_LONG = ['sun','mon','tue','wed','thu','fri','sat'];
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 // transient (not saved)
 let ptoMode = false;
-let activeTweaks = [];     // flat list of one-time fix tweaks currently applied
-let availableFixes = [];   // [{tweaks:[...], label}]
-let lastBends = [];        // ideal-rule bends from the last successful generate
+let activeTweaks = [];
+let availableFixes = [];
+let lastBends = [];
 let ruleDraft = null;
 let viewMode = 'grid';
+let startArmed = false;
+let pendingCloud = null;
 const ptoOpen = new Set();
 const ptoPending = {};
 
@@ -340,16 +371,16 @@ function defaultState() {
     periodStart: iso(new Date(now.getFullYear(), now.getMonth(), 1)),
     periodEnd: iso(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
     weekStart: 'sun',
+    title: '',
     employees: [],
     coverage: [0,0,0,0,0,0,0],
     universal: {
-      maxConsec: { mode: 'on', days: 5 },      // 'on' | 'ideal' | 'off'
+      maxConsec: { mode: 'on', days: 5 },
       maxHours:  { mode: 'on', hours: 40 },
       hoursPerDay: 8
     },
-    rules: [],        // {id, who:'all'|[ids], what, when, mode:'must'|'ideal'|'off'}
+    rules: [],
     bizHours: { everyday: true, all: { open: '11', close: '7' }, groups: [] },
-    finalizedThrough: null,
     grid: {}          // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
   };
 }
@@ -365,7 +396,6 @@ function migrateToSundayWeeks(p) {
 function normalizeState(s) {
   const d = defaultState();
   s.universal = Object.assign(d.universal, s.universal || {});
-  // v1 universal rules used {on:bool}; v2 uses mode
   ['maxConsec', 'maxHours'].forEach(k => {
     const u = s.universal[k];
     if (u.mode === undefined) u.mode = u.on === false ? 'off' : 'on';
@@ -374,7 +404,8 @@ function normalizeState(s) {
   if (!s.rules) s.rules = [];
   s.rules.forEach(r => { if (!r.mode) r.mode = 'must'; });
   if (!s.bizHours) s.bizHours = d.bizHours;
-  if (s.finalizedThrough === undefined) s.finalizedThrough = null;
+  if (s.title === undefined) s.title = '';
+  delete s.finalizedThrough;   // v3 concept, retired — history inference replaces it
   s.employees.forEach(e => {
     if (!e.exempt) e.exempt = {};
     if (!e.pto) e.pto = [];
@@ -399,6 +430,10 @@ function load() {
 }
 function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 
+function currentTitle() {
+  return (state.title || '').trim() || ('schedule-' + state.periodStart + '_' + state.periodEnd);
+}
+
 /* ── dates ─────────────────────────────────────────────────────── */
 
 function iso(d) {
@@ -411,7 +446,6 @@ function prevIso(s) { const d = fromIso(s); d.setDate(d.getDate() - 1); return i
 function fmtDate(s) { const d = fromIso(s); return MONTHS[d.getMonth()].toLowerCase() + ' ' + d.getDate(); }
 function weekStartOf(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() - wdIdx(d)); }
 
-// the canvas: full sun-sat weeks containing the period
 function canvasDates() {
   const out = [];
   const start = weekStartOf(fromIso(state.periodStart));
@@ -433,13 +467,17 @@ function groupWeeks(dates) {
     if (!cur || d.wd === 0) { cur = { dates: [] }; weeks.push(cur); }
     cur.dates.push(d);
   }
-  for (const w of weeks) w.full = (w.dates.length === 7);
+  weeks.forEach((w, i) => { w.full = w.dates.length === 7; w.num = i + 1; });
   return weeks;
 }
 function weekParityOf(week) {
   const m = weekStartOf(fromIso(week.dates[0].iso));
   const days = Math.round(m.getTime() / 86400000);   // 1970-01-04 was a sunday (day 3)
   return ((Math.floor((days - 3) / 7)) % 2 + 2) % 2;
+}
+function weekNumOf(dayIso) {
+  const w = groupWeeks(canvasDates()).find(w => w.dates.some(d => d.iso === dayIso));
+  return w ? w.num : 0;
 }
 
 function key(empId, dayIso) { return empId + '|' + dayIso; }
@@ -451,17 +489,8 @@ function empName(emp, i) {
 
 /* ── history / draft classification ────────────────────────────── */
 
-function fixedDate(dayIso) {
-  return dayIso < state.periodStart ||
-    (state.finalizedThrough && dayIso <= state.finalizedThrough);
-}
-function draftDate(dayIso) { return !fixedDate(dayIso); }
-// leading day with no data and never finalized = unknown history (waived, not counted)
-function unknownDate(emp, dayIso) {
-  return dayIso < state.periodStart &&
-    !state.grid[key(emp.id, dayIso)] &&
-    !(state.finalizedThrough && dayIso <= state.finalizedThrough);
-}
+function fixedDate(dayIso) { return dayIso < state.periodStart; }
+function draftDate(dayIso) { return dayIso >= state.periodStart; }
 function workedCell(empId, dayIso) {
   const st = state.grid[key(empId, dayIso)];
   return st === 'work' || st === 'lockWork';
@@ -469,7 +498,6 @@ function workedCell(empId, dayIso) {
 
 /* ── rule strengths ────────────────────────────────────────────── */
 
-// instance keys used in relax sets: 'consecOff' | 'maxConsec' | 'maxHours' | 'rule:<id>'
 function univApplies(emp, k, relax) {
   const u = state.universal[k];
   if (u.mode === 'off' || emp.exempt[k]) return false;
@@ -494,7 +522,6 @@ function makeCtx(active) {
   };
 }
 
-// ideal-rule instances applicable to this emp+week (candidates for bending)
 function idealInstancesFor(emp, week, ctx) {
   const out = [];
   const nm = empName(emp);
@@ -512,17 +539,20 @@ function idealInstancesFor(emp, week, ctx) {
 }
 
 /* ── constraint resolver ───────────────────────────────────────── */
-/* one sheet per person per week; relax = Set of ideal instance keys to drop */
 
 function resolveWeek(emp, week, ctx, relax) {
   relax = relax || new Set();
   const can = [], must = [], pto = [], fixed = [], unknown = [];
+  // a blank history day counts as a real day off only if this person has ANY
+  // recorded cell among this week's history days; a fully-blank history week
+  // is "unknown" and waived from the minimum instead
+  const leadKnown = week.dates.some(d => d.iso < state.periodStart && state.grid[key(emp.id, d.iso)]);
   week.dates.forEach(d => {
     const p = emp.pto.includes(d.iso);
     pto.push(p);
     const fx = fixedDate(d.iso);
     fixed.push(fx ? { worked: workedCell(emp.id, d.iso) } : null);
-    unknown.push(fx && unknownDate(emp, d.iso));
+    unknown.push(fx && !state.grid[key(emp.id, d.iso)] && !leadKnown);
     can.push(!fx && !p && emp.days[d.wd] >= 1);
     must.push(!fx && !p && emp.days[d.wd] === 2);
   });
@@ -594,7 +624,7 @@ function addEmployee() {
     days: [0,0,0,0,0,0,0],
     minDays: 4,
     maxDays: 5,
-    consecOff: false,       // false | 'must' | 'ideal'
+    consecOff: false,
     exempt: {},
     pto: []
   });
@@ -615,8 +645,6 @@ function univChips() {
     ['maxHours', '≤' + u.maxHours.hours + 'h']
   ].filter(([id]) => u[id].mode !== 'off');
 }
-
-function triLabel(v) { return v === 'must' ? ' active' : (v === 'ideal' ? ' ideal' : ''); }
 
 function renderStaff() {
   const box = document.getElementById('staff');
@@ -655,8 +683,8 @@ function renderStaff() {
     row.appendChild(mm);
 
     const co = document.createElement('button');
-    co.className = 'aight-btn' + triLabel(emp.consecOff);
-    co.textContent = '2 off';
+    co.className = 'aight-btn' + (emp.consecOff === 'must' ? ' active' : (emp.consecOff === 'ideal' ? ' ideal' : ''));
+    co.textContent = emp.consecOff === 'ideal' ? '2 off · ideal' : '2 off';
     co.title = 'two days off in a row — ' + (emp.consecOff || 'off') + ' (click cycles must / ideal / off)';
     co.onclick = () => {
       emp.consecOff = emp.consecOff === false ? 'must' : (emp.consecOff === 'must' ? 'ideal' : false);
@@ -829,8 +857,8 @@ function ruleText(r) {
   const wh = r.when;
   let whenTxt = 'every wk';
   if (wh.type === 'altWeeks') {
-    const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === wh.parity).map(wk => fmtDate(wk.dates[0].iso));
-    whenTxt = 'every other wk (' + (list.length ? 'wks of ' + list.join(', ') : 'none in period') + ')';
+    const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === wh.parity).map(wk => 'week ' + wk.num);
+    whenTxt = 'every other wk (' + (list.length ? list.join(', ') : 'none in period') + ')';
   }
   if (wh.type === 'nPerPeriod') whenTxt = wh.n + ' wk' + (wh.n > 1 ? 's' : '') + ' per period, solver picks';
   if (wh.type === 'dates') whenTxt = fmtDate(wh.start) + (wh.end !== wh.start ? '–' + fmtDate(wh.end) : '');
@@ -931,8 +959,8 @@ function renderRuleBuilder() {
   hparams.className = 'brow';
   if (d.whenType === 'altWeeks') {
     [0, 1].forEach(p => {
-      const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === p).map(wk => fmtDate(wk.dates[0].iso));
-      hparams.appendChild(chipBtn('wks of ' + (list.join(', ') || 'none'), d.parity === p, () => { d.parity = p; renderRuleBuilder(); }));
+      const list = groupWeeks(canvasDates()).filter(wk => weekParityOf(wk) === p).map(wk => 'week ' + wk.num);
+      hparams.appendChild(chipBtn(list.join(', ') || 'none', d.parity === p, () => { d.parity = p; renderRuleBuilder(); }));
     });
   } else if (d.whenType === 'nPerPeriod') {
     const n = document.createElement('input');
@@ -1030,7 +1058,7 @@ function renderBiz() {
     const ev = document.createElement('button');
     ev.className = 'aight-btn active';
     ev.textContent = 'everyday';
-    ev.onclick = () => { b.everyday = false; if (!b.groups.length) b.groups = []; save(); renderAll(); };
+    ev.onclick = () => { b.everyday = false; save(); renderAll(); };
     r.appendChild(ev);
     box.appendChild(r);
     return;
@@ -1055,7 +1083,7 @@ function renderBiz() {
     tog.className = 'daytog';
     WD.forEach((lbl, wd) => {
       const mine = !isNew && g.days.includes(wd);
-      if (!mine && assigned.has(wd)) return;   // day claimed by another group
+      if (!mine && assigned.has(wd)) return;
       const btn = document.createElement('button');
       btn.textContent = lbl;
       btn.className = mine ? 'on' : '';
@@ -1127,6 +1155,10 @@ function onDuty(dayIso) {
   return n;
 }
 
+function hasSchedule() {
+  return canvasDates().some(d => state.employees.some(e => workedCell(e.id, d.iso)));
+}
+
 function renderGrid() {
   const dates = canvasDates();
   const weeks = groupWeeks(dates);
@@ -1149,6 +1181,7 @@ function renderGrid() {
   dates.forEach((d, i) => {
     const th = document.createElement('th');
     if (d.wd === 0 || d.wd === 6) th.classList.add('wkend');
+    if (d.wd === 0 && i > 0) th.classList.add('wksep');
     if (!d.inMonth) th.classList.add('outside');
     if (d.iso === todayIso) th.classList.add('today');
     const showMonth = (i === 0 || d.dayNum === 1) ? MONTHS[d.month] : '';
@@ -1167,10 +1200,11 @@ function renderGrid() {
     nc.textContent = empName(emp, ei);
     tr.appendChild(nc);
     let total = 0;
-    dates.forEach(d => {
+    dates.forEach((d, i) => {
       const td = document.createElement('td');
       td.className = 'day';
       if (d.wd === 0 || d.wd === 6) td.classList.add('wkend');
+      if (d.wd === 0 && i > 0) td.classList.add('wksep');
       if (!d.inMonth) td.classList.add('outside');
       const k = key(emp.id, d.iso);
       const st = state.grid[k];
@@ -1199,8 +1233,9 @@ function renderGrid() {
     nc.className = 'namecell';
     nc.textContent = 'ON / NEED';
     tr.appendChild(nc);
-    dates.forEach(d => {
+    dates.forEach((d, i) => {
       const td = document.createElement('td');
+      if (d.wd === 0 && i > 0) td.classList.add('wksep');
       const on = onDuty(d.iso);
       if (!draftDate(d.iso)) {
         td.textContent = on + '/–';
@@ -1217,19 +1252,25 @@ function renderGrid() {
   }
 
   renderViolations(v);
-  renderMemRow();
+  document.getElementById('printbtn').style.display = hasSchedule() ? '' : 'none';
   if (viewMode === 'cal') renderCal();
 }
 
 /* ── calendar view (editable) ──────────────────────────────────── */
 
 function renderCal() {
+  const ph = document.getElementById('printhead');
+  ph.innerHTML = '';
+  const t = document.createElement('div'); t.className = 't'; t.textContent = currentTitle();
+  const p = document.createElement('div'); p.className = 'p'; p.textContent = state.periodStart + ' → ' + state.periodEnd;
+  ph.append(t, p);
+
   const box = document.getElementById('calview');
   const weeks = groupWeeks(canvasDates());
-  const t = document.createElement('table');
+  const tbl = document.createElement('table');
   const hr = document.createElement('tr');
   WD.forEach(l => { const th = document.createElement('th'); th.textContent = l; hr.appendChild(th); });
-  t.appendChild(hr);
+  tbl.appendChild(hr);
 
   weeks.forEach(w => {
     const tr = document.createElement('tr');
@@ -1242,7 +1283,7 @@ function renderCal() {
 
       const dn = document.createElement('div');
       dn.className = 'dnum';
-      dn.innerHTML = (d.dayNum === 1 || (!d.inMonth && d.iso === canvasDates()[0].iso)
+      dn.innerHTML = (d.dayNum === 1 || d.iso === canvasDates()[0].iso
         ? '<span class="mo">' + MONTHS[d.month] + '</span>' : '') + d.dayNum;
       td.appendChild(dn);
 
@@ -1278,10 +1319,10 @@ function renderCal() {
       }
       tr.appendChild(td);
     }
-    t.appendChild(tr);
+    tbl.appendChild(tr);
   });
   box.innerHTML = '';
-  box.appendChild(t);
+  box.appendChild(tbl);
 }
 
 function buildDaySelect(d) {
@@ -1312,7 +1353,6 @@ function buildDaySelect(d) {
 function removeFromDay(emp, d) {
   state.grid[key(emp.id, d.iso)] = 'lockOff';
   save();
-  // offer the obvious date-scoped fixes for what this removal broke
   const ctx = makeCtx({});
   if (draftDate(d.iso) && onDuty(d.iso) < needFor(d, ctx)) {
     const t = { type: 'needDate', iso: d.iso };
@@ -1333,11 +1373,17 @@ function removeFromDay(emp, d) {
 
 function setView(mode) {
   viewMode = mode;
+  if (mode === 'cal' && ptoMode) togglePtoMode();
   document.getElementById('gridwrap').style.display = mode === 'grid' ? '' : 'none';
   document.getElementById('legend').style.display = mode === 'grid' ? '' : 'none';
   document.getElementById('calview').style.display = mode === 'cal' ? '' : 'none';
-  document.getElementById('calbtn').className = 'aight-btn' + (mode === 'cal' ? ' active' : '');
+  document.getElementById('calbtn').textContent = mode === 'cal' ? 'grid view' : 'calendar';
+  document.getElementById('ptomode').style.display = mode === 'cal' ? 'none' : '';
   if (mode === 'cal') renderCal();
+}
+function togglePtoMode() {
+  ptoMode = !ptoMode;
+  document.getElementById('ptomode').className = 'aight-btn green' + (ptoMode ? ' active' : '');
 }
 
 /* ── validation ────────────────────────────────────────────────── */
@@ -1346,7 +1392,7 @@ function offAt(empId, dayIso) { return !workedCell(empId, dayIso); }
 
 function validate(dates, weeks) {
   const cellViol = new Set();
-  const msgs = [];   // {t, note}
+  const msgs = [];
   const bad = t => msgs.push({ t, note: false });
   const note = t => msgs.push({ t, note: true });
   const ctx = makeCtx({});
@@ -1363,11 +1409,10 @@ function validate(dates, weeks) {
     const conflictSeen = new Set();
     for (const w of weeks) {
       const wkStart = w.dates[0].iso;
-      const wk = 'wk of ' + wkStart;
+      const wk = 'week ' + w.num;
       const hasDraft = w.dates.some(d => draftDate(d.iso));
-      const shMust = resolveWeek(emp, w, ctx, relaxAllSet(emp, w, ctx));  // ideals dropped
-      const shAll = resolveWeek(emp, w, ctx, new Set());                  // ideals enforced
-      // n-per-period rules widen this week's acceptable bounds (satisfaction counted separately)
+      const shMust = resolveWeek(emp, w, ctx, relaxAllSet(emp, w, ctx));
+      const shAll = resolveWeek(emp, w, ctx, new Set());
       for (const r of state.rules) {
         if (r.when.type !== 'nPerPeriod' || r.mode === 'off' || ctx.suspended.has(r.id) || !ruleTargets(r, emp)) continue;
         const actx = Object.assign({}, ctx, { active: { [r.id]: new Set([wkStart]) } });
@@ -1380,7 +1425,7 @@ function validate(dates, weeks) {
       if (hasDraft) {
         const canCount = shMust.can.filter(Boolean).length +
           shMust.fixed.filter(f => f && f.worked).length;
-        if (canCount < shMust.min && !conflictSeen.has('avail')) {
+        if (shMust.can.filter(Boolean).length + shMust.fixed.filter(f => f && f.worked).length < shMust.min && !conflictSeen.has('avail')) {
           bad(nm + ' — ' + wk + ': only ' + canCount + ' workable days but needs ' + shMust.min);
           conflictSeen.add('avail');
         }
@@ -1404,19 +1449,19 @@ function validate(dates, weeks) {
         const on = workedCell(emp.id, d.iso);
         if (on) {
           count++;
-          if (!draftDate(d.iso)) return;   // history is fact
+          if (!draftDate(d.iso)) return;
           if (!shMust.can[i]) {
             cellViol.add(key(emp.id, d.iso));
-            bad(nm + ' — ' + d.iso + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
+            bad(nm + ' — ' + fmtDate(d.iso) + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
           } else if (!shAll.can[i]) {
-            note(nm + ' — ' + d.iso + ': works ' + WD_LONG[d.wd] + ' (ideal rule bent)');
+            note(nm + ' — ' + fmtDate(d.iso) + ': works ' + WD_LONG[d.wd] + ' (ideal rule bent)');
           }
         } else if (draftDate(d.iso) && state.grid[key(emp.id, d.iso)] !== 'lockOff') {
           if (shMust.must[i]) {
             cellViol.add(key(emp.id, d.iso));
-            bad(nm + ' — ' + d.iso + ': must work ' + WD_LONG[d.wd] + ' but not scheduled');
+            bad(nm + ' — ' + fmtDate(d.iso) + ': must work ' + WD_LONG[d.wd] + ' but not scheduled');
           } else if (shAll.must[i]) {
-            note(nm + ' — ' + d.iso + ': ideal must-work ' + WD_LONG[d.wd] + ' not scheduled');
+            note(nm + ' — ' + fmtDate(d.iso) + ': ideal must-work ' + WD_LONG[d.wd] + ' not scheduled');
           }
         }
       });
@@ -1426,7 +1471,6 @@ function validate(dates, weeks) {
       if (count > shMust.max) bad(nm + ' — ' + wk + ': ' + count + ' days (max ' + shMust.max + ')');
       else if (count > shAll.max) note(nm + ' — ' + wk + ': ' + count + ' days (ideal max ' + shAll.max + ')');
 
-      // two consecutive days off — pairs may span week boundaries
       if (emp.consecOff) {
         let sat = false;
         for (let i = -1; i < 7; i++) {
@@ -1453,11 +1497,9 @@ function validate(dates, weeks) {
       }
     }
 
-    // days in a row across the whole canvas
     if (state.universal.maxConsec.mode !== 'off' && !emp.exempt.maxConsec && anyCells) {
       const lim = state.universal.maxConsec.days;
       let run = 0;
-      // seed run from days just before the canvas
       let back = prevIso(canvasStart);
       for (let i = 0; i < lim + 1 && workedCell(emp.id, back); i++) { run++; back = prevIso(back); }
       let runStart = null;
@@ -1468,7 +1510,7 @@ function validate(dates, weeks) {
           if (run > lim) {
             cellViol.add(key(emp.id, d.iso));
             if (run === lim + 1) {
-              const m = nm + ' — ' + (runStart || 'carry-in') + ' onward: more than ' + lim + ' days in a row';
+              const m = nm + ' — ' + (runStart ? fmtDate(runStart) : 'carry-in') + ' onward: more than ' + lim + ' days in a row';
               if (state.universal.maxConsec.mode === 'on') bad(m); else note(m + ' — ideal, bent');
             }
           }
@@ -1477,7 +1519,6 @@ function validate(dates, weeks) {
     }
   });
 
-  // n-weeks-per-period satisfaction
   if (anyCells) for (const r of state.rules) {
     if (r.when.type !== 'nPerPeriod' || r.mode === 'off' || ctx.suspended.has(r.id)) continue;
     const targets = r.who === 'all' ? state.employees : state.employees.filter(e => r.who.includes(e.id));
@@ -1500,12 +1541,11 @@ function validate(dates, weeks) {
     });
   }
 
-  // coverage on draft days only
   if (touched) for (const d of dates) {
     if (!draftDate(d.iso)) continue;
     const on = onDuty(d.iso);
     const need = needFor(d, ctx);
-    if (on < need) bad(WD_LONG[d.wd] + ' ' + d.iso + ': ' + on + ' on duty (need ' + need + ')');
+    if (on < need) bad(WD_LONG[d.wd] + ' ' + fmtDate(d.iso) + ' (week ' + weekNumOf(d.iso) + '): ' + on + ' on duty (need ' + need + ')');
   }
 
   return { cellViol, msgs, touched };
@@ -1533,8 +1573,6 @@ function shuffle(a) {
   return a;
 }
 
-// candidates for one emp+week given carry {run, lastOff, owes}
-// returns [{mask, bends, labels, carry:{run,lastOff,owes}}] sorted by bends
 function candidatesFor(emp, week, carry, ctx, isLastWeek) {
   const n = 7;
   const insts = idealInstancesFor(emp, week, ctx);
@@ -1547,10 +1585,9 @@ function candidatesFor(emp, week, carry, ctx, isLastWeek) {
 
   for (const rs of variantSets) {
     const sheet = resolveWeek(emp, week, ctx, rs);
-    const bendLabels = insts.filter(x => rs.has(x.key)).map(x => x.label + ' (wk of ' + fmtDate(week.dates[0].iso) + ')');
+    const bendLabels = insts.filter(x => rs.has(x.key)).map(x => x.label + ' (week ' + week.num + ')');
 
     if (allFixed) {
-      // history is a single fact-mask, never constraint-checked
       let mask = 0;
       week.dates.forEach((d, i) => { if (workedCell(emp.id, d.iso)) mask |= 1 << i; });
       let t = 0;
@@ -1584,9 +1621,9 @@ function candidatesFor(emp, week, carry, ctx, isLastWeek) {
         let sat = false;
         for (let i = 0; i < 6; i++) if (!(mask >> i & 1) && !(mask >> (i+1) & 1)) { sat = true; break; }
         if (!sat && carry.lastOff && !(mask & 1)) sat = true;
-        if (carry.owes && (mask & 1)) continue;         // owed a sunday off
+        if (carry.owes && (mask & 1)) continue;
         if (!sat) {
-          if (!(mask >> 6 & 1) && !isLastWeek) owesOut = true;   // defer: sat off, next sun must be off
+          if (!(mask >> 6 & 1) && !isLastWeek) owesOut = true;
           else continue;
         }
       } else if (carry.owes && (mask & 1)) continue;
@@ -1595,8 +1632,6 @@ function candidatesFor(emp, week, carry, ctx, isLastWeek) {
       for (let j = 6; j >= 0 && (mask >> j & 1); j--) t++;
       const runOut = (t === 7) ? carry.run + 7 : t;
       const cand = { mask, bends: rs.size, labels: bendLabels, carry: { run: runOut, lastOff: !(mask >> 6 & 1), owes: owesOut } };
-      // owes-Sunday and no-owes versions of the same mask are different candidates —
-      // collapsing them can strand the search when next week's sunday is locked
       const kk = mask + (owesOut ? '|o' : '');
       const prev = best.get(kk);
       if (!prev || cand.bends < prev.bends) best.set(kk, cand);
@@ -1609,9 +1644,6 @@ function candidatesFor(emp, week, carry, ctx, isLastWeek) {
   return out;
 }
 
-// collect up to ~K coverage-satisfying assignments for one week.
-// two harvest passes with different candidate orderings so that solutions
-// differing in carry shape (esp. owed-sunday deferrals) are all represented.
 function collectWeekSolutions(week, carryMap, ctx, K, budget) {
   const emps = state.employees;
   const isLast = week.isLast;
@@ -1661,7 +1693,6 @@ function collectWeekSolutions(week, carryMap, ctx, K, budget) {
   }
 
   harvest(cands);
-  // pass 2: prefer candidates that do NOT defer their 2-off pair to next sunday
   const flipped = cands.map(list => {
     const arr = list.slice();
     arr.sort((a, b) => ((a.carry.owes ? 1 : 0) - (b.carry.owes ? 1 : 0)) || (a.bends - b.bends));
@@ -1694,13 +1725,40 @@ function pickActive() {
   return active;
 }
 
-// whole-period search with backtracking across weeks
-function solvePeriod(ctx, capNodes) {
+// enumerate every combination of "n weeks per period" picks (all rules crossed);
+// returns null when the space is too big to enumerate — random picks then
+function kSubsets(arr, k) {
+  const out = [];
+  (function rec(startIdx, cur) {
+    if (cur.length === k) { out.push(cur.slice()); return; }
+    for (let i = startIdx; i < arr.length; i++) { cur.push(arr[i]); rec(i + 1, cur); cur.pop(); }
+  })(0, []);
+  return out;
+}
+function pickCombos() {
+  const rules = state.rules.filter(r => r.when.type === 'nPerPeriod' && r.mode !== 'off');
+  if (!rules.length) return [{}];
+  const dw = groupWeeks(canvasDates()).filter(w => w.dates.some(d => draftDate(d.iso))).map(w => w.dates[0].iso);
+  let combos = [{}];
+  for (const r of rules) {
+    const subs = kSubsets(dw, Math.min(r.when.n, dw.length));
+    const next = [];
+    for (const c of combos) for (const s of subs) {
+      const cc = Object.assign({}, c);
+      cc[r.id] = new Set(s);
+      next.push(cc);
+      if (next.length > 60) return null;
+    }
+    combos = next;
+  }
+  return combos;
+}
+
+function solvePeriod(active, budget, K) {
   const weeks = groupWeeks(canvasDates());
   weeks.forEach((w, i) => { w.isLast = i === weeks.length - 1; });
-  const budget = { nodes: 0, cap: capNodes || 600000 };
+  const ctx = makeCtx(active);
   let deepestFail = -1;
-  const K = 8;
 
   function down(wi, carryMap, bendAcc) {
     if (budget.nodes > budget.cap) return null;
@@ -1717,9 +1775,11 @@ function solvePeriod(ctx, capNodes) {
   }
 
   const res = down(0, initialCarry(), []);
-  if (!res) return { ok: false, failWeek: weeks[Math.max(0, deepestFail)] ? weeks[Math.max(0, deepestFail)].dates[0].iso : weeks[0].dates[0].iso };
+  if (!res) {
+    const fw = weeks[Math.max(0, deepestFail)] || weeks[0];
+    return { ok: false, failWeek: fw.dates[0].iso, failNum: fw.num };
+  }
 
-  // write draft cells
   weeks.forEach((w, wi) => {
     const sol = res['w' + wi];
     if (!sol) return;
@@ -1739,19 +1799,32 @@ function solvePeriod(ctx, capNodes) {
 function clearDraftWork() {
   for (const k in state.grid) {
     if (state.grid[k] !== 'work') continue;
-    const dayIso = k.split('|')[1];
-    if (draftDate(dayIso)) delete state.grid[k];
+    if (draftDate(k.split('|')[1])) delete state.grid[k];
   }
 }
 
-function runSolve(capNodes) {
-  let res = null;
-  for (let attempt = 0; attempt < 2; attempt++) {
-    clearDraftWork();
-    res = solvePeriod(makeCtx(pickActive()), capNodes);
-    if (res.ok) break;
+// escalation ladder: quick pass first; a failing month earns bigger budgets,
+// wider per-week harvests, and every week-pick combination before we believe it
+function runSolve(quickCap) {
+  const tiers = quickCap
+    ? [{ cap: quickCap, K: 8, rounds: 1 }]
+    : [{ cap: 1200000, K: 8, rounds: 2 }, { cap: 3000000, K: 16, rounds: 2 }, { cap: 6000000, K: 24, rounds: 2 }];
+  const combos = pickCombos();
+  let last = null;
+  for (const tier of tiers) {
+    const budget = { nodes: 0, cap: tier.cap };
+    for (let round = 0; round < tier.rounds && budget.nodes < budget.cap; round++) {
+      const picks = combos ? shuffle(combos.slice()) : [null, null, null];
+      for (const p of picks) {
+        if (budget.nodes >= budget.cap) break;
+        clearDraftWork();
+        const res = solvePeriod(p || pickActive(), budget, tier.K);
+        if (res.ok) return res;
+        last = res;
+      }
+    }
   }
-  return res;
+  return last || { ok: false, failWeek: canvasDates()[0].iso, failNum: 1 };
 }
 
 function generate() {
@@ -1760,7 +1833,7 @@ function generate() {
   save(); renderGrid();
   const msgEl = document.getElementById('solvemsg');
   if (!res.ok) {
-    msgEl.innerHTML = '<span class="bad">could not fill (stuck at wk of ' + res.failWeek + ') — looking for fixes…</span>';
+    msgEl.innerHTML = '<span class="bad">could not fill (stuck at week ' + res.failNum + ') — looking for fixes…</span>';
     diagnose(res.failWeek);
   } else {
     let html = '';
@@ -1780,15 +1853,18 @@ function sameTweak(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
 function tweakLabel(t) {
   if (t.type === 'needDate') {
     const d = fromIso(t.iso);
-    return WD_LONG[wdIdx(d)] + ' ' + fmtDate(t.iso) + ' need −1';
+    return WD_LONG[wdIdx(d)] + ' need −1 (week ' + weekNumOf(t.iso) + ')';
   }
   if (t.type === 'need') return 'all ' + WD_LONG[t.wd] + 's need −1';
-  if (t.type === 'allowDate') return empName(empById(t.empId)) + ' can work ' + fmtDate(t.iso);
+  if (t.type === 'allowDate') {
+    const d = fromIso(t.iso);
+    return empName(empById(t.empId)) + ' can work ' + WD_LONG[wdIdx(d)] + ' (week ' + weekNumOf(t.iso) + ')';
+  }
   if (t.type === 'allowWd') return empName(empById(t.empId)) + ' can work ' + WD_LONG[t.wd] + 's';
   if (t.type === 'suspendRule') { const r = state.rules.find(x => x.id === t.ruleId); return 'skip: ' + (r ? ruleText(r) : '?'); }
-  if (t.type === 'minRelaxWk') return empName(empById(t.empId)) + ' min −1 (wk of ' + fmtDate(t.weekStart) + ')';
-  if (t.type === 'maxRelaxWk') return empName(empById(t.empId)) + ' max +1 (wk of ' + fmtDate(t.weekStart) + ')';
-  if (t.type === 'twoOffWk') return empName(empById(t.empId)) + ' 2-off waived (wk of ' + fmtDate(t.weekStart) + ')';
+  if (t.type === 'minRelaxWk') return empName(empById(t.empId)) + ' min −1 (week ' + weekNumOf(t.weekStart) + ')';
+  if (t.type === 'maxRelaxWk') return empName(empById(t.empId)) + ' max +1 (week ' + weekNumOf(t.weekStart) + ')';
+  if (t.type === 'twoOffWk') return empName(empById(t.empId)) + ' 2-off waived (week ' + weekNumOf(t.weekStart) + ')';
   return '?';
 }
 
@@ -1812,7 +1888,6 @@ function candidateTweaks(failWeekIso) {
     out.push({ type: 'minRelaxWk', empId: e.id, weekStart: failWeekIso });
     out.push({ type: 'maxRelaxWk', empId: e.id, weekStart: failWeekIso });
   });
-  // weekday-wide variants last (broader — for shortfalls that recur every week)
   for (let wd = 0; wd < 7; wd++) if (state.coverage[wd] > 0) out.push({ type: 'need', wd });
   state.employees.forEach(e => {
     for (let wd = 0; wd < 7; wd++) if (e.days[wd] === 0) out.push({ type: 'allowWd', empId: e.id, wd });
@@ -1823,7 +1898,7 @@ function candidateTweaks(failWeekIso) {
 function tryWith(tweaks) {
   const saved = activeTweaks;
   activeTweaks = activeTweaks.concat(tweaks);
-  const res = runSolve(150000);
+  const res = runSolve(250000);
   activeTweaks = saved;
   return res.ok;
 }
@@ -1836,7 +1911,6 @@ function diagnose(failWeekIso) {
     if (tryWith([t])) found.push({ tweaks: [t], label: tweakLabel(t) });
   }
   if (!found.length) {
-    // try pairs among the first candidates
     const pool = cands.slice(0, 12);
     let trials = 0;
     outer:
@@ -1888,43 +1962,181 @@ function renderFixes() {
   box.appendChild(c);
 }
 
-function clearFills() {
-  clearDraftWork();
-  document.getElementById('solvemsg').textContent = '';
-  save(); renderGrid();
-}
-function clearAll() {
+/* ── clear / start over ────────────────────────────────────────── */
+
+function clearSchedule() {
   for (const k in state.grid) {
-    const dayIso = k.split('|')[1];
-    if (draftDate(dayIso)) delete state.grid[k];
+    if (k.split('|')[1] >= state.periodStart) delete state.grid[k];
   }
+  activeTweaks = []; availableFixes = []; lastBends = [];
   document.getElementById('solvemsg').textContent = '';
-  save(); renderGrid();
+  save(); renderFixes(); renderGrid();
 }
 
-/* ── finalize / memory ─────────────────────────────────────────── */
-
-function canvasEndIso() { const d = canvasDates(); return d[d.length - 1].iso; }
-function isFinalized() { return state.finalizedThrough && state.finalizedThrough >= canvasEndIso(); }
-
-function finalize() {
-  if (isFinalized()) state.finalizedThrough = null;      // toggle off = un-finalize
-  else state.finalizedThrough = canvasEndIso();
-  save(); renderGrid();
+function armStartOver() {
+  const b = document.getElementById('startover');
+  if (!startArmed) {
+    startArmed = true;
+    b.className = 'aight-btn red-fill';
+    b.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fr?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+    return;
+  }
+  startArmed = false;
+  const ps = state.periodStart, pe = state.periodEnd;
+  state = defaultState();
+  state.periodStart = ps;
+  state.periodEnd = pe;
+  activeTweaks = []; availableFixes = []; lastBends = [];
+  ptoOpen.clear();
+  disarmStartOver();
+  document.getElementById('solvemsg').textContent = '';
+  save(); renderAll();
+}
+function disarmStartOver() {
+  startArmed = false;
+  const b = document.getElementById('startover');
+  b.className = 'aight-btn red';
+  b.textContent = 'start overrr :c';
 }
 
-function renderMemRow() {
-  document.getElementById('finalize').className = 'aight-btn' + (isFinalized() ? ' active' : '');
-  document.getElementById('fintxt').textContent = state.finalizedThrough
-    ? 'finalized through ' + fmtDate(state.finalizedThrough) : '';
-  document.getElementById('printbtn').style.display = isFinalized() ? '' : 'none';
+/* ── cloud (KV via /api/schedule) ──────────────────────────────── */
+
+function cloudMsg(html) { document.getElementById('solvemsg').innerHTML = html; }
+
+function cloudFetch(params, method, body) {
+  return fetch('/api/schedule' + params, {
+    method: method || 'GET',
+    headers: { 'x-upload-secret': localStorage.getItem(CLOUD_KEY_LS) || '' },
+    body: body || undefined
+  });
 }
+function needKey(fn) {
+  pendingCloud = fn;
+  document.getElementById('keyrow').style.display = '';
+  document.getElementById('keyinput').focus();
+}
+function submitKey() {
+  const v = document.getElementById('keyinput').value.trim();
+  if (!v) return;
+  localStorage.setItem(CLOUD_KEY_LS, v);
+  document.getElementById('keyrow').style.display = 'none';
+  document.getElementById('keyinput').value = '';
+  if (pendingCloud) { const fn = pendingCloud; pendingCloud = null; fn(); }
+}
+
+async function saveCloud() {
+  const t = currentTitle();
+  try {
+    const r = await cloudFetch('?title=' + encodeURIComponent(t), 'PUT', JSON.stringify(state));
+    if (r.status === 401) return needKey(saveCloud);
+    cloudMsg(r.ok ? '<span class="ok">saved "' + t + '"</span>' : '<span class="bad">save failed (' + r.status + ')</span>');
+  } catch (e) {
+    cloudMsg('<span class="bad">save failed — offline?</span>');
+  }
+}
+
+async function openPicker(mode) {
+  const box = document.getElementById('loadpicker');
+  if (box.style.display !== 'none' && box.getAttribute('data-mode') === mode) {
+    box.style.display = 'none';
+    return;
+  }
+  box.setAttribute('data-mode', mode);
+  box.style.display = '';
+  box.innerHTML = '';
+  box.appendChild(span(mode === 'history' ? 'pull history from:' : 'load:'));
+  try {
+    const r = await cloudFetch('?list=1');
+    if (r.status === 401) { box.style.display = 'none'; return needKey(() => openPicker(mode)); }
+    if (!r.ok) { box.appendChild(span('list failed (' + r.status + ')')); return; }
+    const items = await r.json();
+    if (!items.length) box.appendChild(span('nothing saved yet'));
+    items.forEach(it => {
+      const b = document.createElement('button');
+      b.className = 'aight-btn green';
+      b.append(it.title + (it.savedAt ? ' · ' + it.savedAt : ''));
+      const x = document.createElement('span');
+      x.className = 'delx';
+      x.textContent = '×';
+      x.title = 'delete this cloud save';
+      x.onclick = ev => { ev.stopPropagation(); deleteCloud(it.title, mode); };
+      b.appendChild(x);
+      b.onclick = () => mode === 'history' ? pullHistory(it.title) : loadCloud(it.title);
+      box.appendChild(b);
+    });
+    if (mode === 'load') {
+      const f = document.createElement('button');
+      f.className = 'aight-btn green';
+      f.textContent = 'from file';
+      f.onclick = () => document.getElementById('restorefile').click();
+      box.appendChild(f);
+    }
+  } catch (e) {
+    box.appendChild(span('list failed — offline?'));
+  }
+}
+
+async function loadCloud(title) {
+  try {
+    const r = await cloudFetch('?title=' + encodeURIComponent(title));
+    if (r.status === 401) return needKey(() => loadCloud(title));
+    if (!r.ok) return cloudMsg('<span class="bad">load failed (' + r.status + ')</span>');
+    const p = await r.json();
+    if (p.weekStart !== 'sun') migrateToSundayWeeks(p);
+    state = normalizeState(Object.assign(defaultState(), p));
+    document.getElementById('loadpicker').style.display = 'none';
+    save(); renderAll();
+    cloudMsg('<span class="ok">loaded "' + title + '"</span>');
+  } catch (e) {
+    cloudMsg('<span class="bad">load failed — offline?</span>');
+  }
+}
+
+// merge only the days BEFORE this period's start, matched by staff name —
+// this is how a fresh device (or post-reset) gets last month's tail
+async function pullHistory(title) {
+  try {
+    const r = await cloudFetch('?title=' + encodeURIComponent(title));
+    if (r.status === 401) return needKey(() => pullHistory(title));
+    if (!r.ok) return cloudMsg('<span class="bad">history pull failed (' + r.status + ')</span>');
+    const p = await r.json();
+    const nameOf = {};
+    (p.employees || []).forEach(e => { nameOf[e.id] = (e.name || '').trim().toUpperCase(); });
+    let merged = 0;
+    for (const k in (p.grid || {})) {
+      const [eid, dayIso] = k.split('|');
+      if (dayIso >= state.periodStart) continue;
+      const nm = nameOf[eid];
+      if (!nm) continue;
+      const cur = state.employees.find(e => (e.name || '').trim().toUpperCase() === nm);
+      if (!cur) continue;
+      state.grid[key(cur.id, dayIso)] = p.grid[k];
+      merged++;
+    }
+    document.getElementById('loadpicker').style.display = 'none';
+    save(); renderAll();
+    cloudMsg('<span class="ok">pulled ' + merged + ' history day' + (merged === 1 ? '' : 's') + ' from "' + title + '"</span>');
+  } catch (e) {
+    cloudMsg('<span class="bad">history pull failed — offline?</span>');
+  }
+}
+
+async function deleteCloud(title, mode) {
+  try {
+    const r = await cloudFetch('?title=' + encodeURIComponent(title), 'DELETE');
+    if (r.status === 401) return needKey(() => deleteCloud(title, mode));
+    document.getElementById('loadpicker').style.display = 'none';
+    openPicker(mode);
+  } catch (e) {}
+}
+
+/* ── local file backup ─────────────────────────────────────────── */
 
 function downloadState() {
   const blob = new Blob([JSON.stringify(state, null, 1)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'aight-schedule-' + iso(new Date()) + '.json';
+  a.download = currentTitle().replace(/[\/\\:]/g, '-') + '.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1935,9 +2147,10 @@ function restoreState(file) {
       const p = JSON.parse(reader.result);
       if (p.weekStart !== 'sun') migrateToSundayWeeks(p);
       state = normalizeState(Object.assign(defaultState(), p));
+      document.getElementById('loadpicker').style.display = 'none';
       save(); renderAll();
     } catch (e) {
-      document.getElementById('solvemsg').innerHTML = '<span class="bad">restore failed — not a valid backup file</span>';
+      cloudMsg('<span class="bad">restore failed — not a valid backup file</span>');
     }
   };
   reader.readAsText(file);
@@ -1950,7 +2163,7 @@ function csvContent() {
   const weeks = groupWeeks(dates);
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
   const rows = [];
-  rows.push([esc('AIGHT.SCHEDULE'), esc(state.periodStart + ' to ' + state.periodEnd)].join(','));
+  rows.push([esc(currentTitle()), esc(state.periodStart + ' to ' + state.periodEnd)].join(','));
   rows.push(WD.map(esc).join(','));
   rows.push('');
   for (const w of weeks) {
@@ -1978,7 +2191,7 @@ function exportCsv() {
   const blob = new Blob([csvContent()], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'schedule-' + state.periodStart + '_' + state.periodEnd + '.csv';
+  a.download = currentTitle().replace(/[\/\\:]/g, '-') + '.csv';
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -2017,6 +2230,7 @@ function bindPeriod() {
 function renderAll() {
   document.getElementById('pstart').value = state.periodStart;
   document.getElementById('pend').value = state.periodEnd;
+  document.getElementById('title').value = state.title;
   renderUniv();
   renderStaff();
   renderRules();
@@ -2029,19 +2243,23 @@ function renderAll() {
 document.getElementById('addemp').onclick = addEmployee;
 document.getElementById('addrule').onclick = () => { if (ruleDraft) { ruleDraft = null; renderRuleBuilder(); } else openRuleBuilder(); };
 document.getElementById('generate').onclick = generate;
-document.getElementById('clearfills').onclick = clearFills;
-document.getElementById('clearall').onclick = clearAll;
+document.getElementById('clearbtn').onclick = clearSchedule;
 document.getElementById('csv').onclick = exportCsv;
 document.getElementById('calbtn').onclick = () => setView(viewMode === 'cal' ? 'grid' : 'cal');
-document.getElementById('finalize').onclick = finalize;
+document.getElementById('save').onclick = saveCloud;
+document.getElementById('load').onclick = () => openPicker('load');
+document.getElementById('history').onclick = () => openPicker('history');
 document.getElementById('download').onclick = downloadState;
-document.getElementById('restore').onclick = () => document.getElementById('restorefile').click();
 document.getElementById('restorefile').onchange = function () { if (this.files && this.files[0]) restoreState(this.files[0]); };
-document.getElementById('printbtn').onclick = () => { setView('cal'); window.print(); };
-document.getElementById('ptomode').onclick = () => {
-  ptoMode = !ptoMode;
-  document.getElementById('ptomode').className = 'aight-btn' + (ptoMode ? ' active' : '');
-};
+document.getElementById('printbtn').onclick = () => { setView('cal'); renderCal(); window.print(); };
+document.getElementById('ptomode').onclick = togglePtoMode;
+document.getElementById('keyok').onclick = submitKey;
+document.getElementById('keyinput').onkeydown = e => { if (e.key === 'Enter') submitKey(); };
+document.getElementById('startover').onclick = armStartOver;
+document.addEventListener('click', e => {
+  if (startArmed && e.target !== document.getElementById('startover')) disarmStartOver();
+}, true);
+document.getElementById('title').oninput = function () { state.title = this.value; save(); };
 document.getElementById('thismonth').onclick = () => setMonth(0);
 document.getElementById('nextmonth').onclick = () => setMonth(1);
 bindPeriod();
