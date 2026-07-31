@@ -176,6 +176,12 @@
     tr.covrow td { padding: 3px 0; font-size: 9px; opacity: 0.85; border-top: 1px solid rgba(200,166,60,0.4); }
     tr.covrow td.short { color: var(--red); opacity: 1; font-weight: 700; }
     tr.covrow td.past { opacity: 0.4; }
+    th.closed, td.day.closed { background: rgba(200,74,60,0.12) !important; }
+    th.closed .dn { color: var(--red); }
+    td.day.closed { cursor: default; }
+    tr.covrow td.closedc { color: var(--red); opacity: 0.55; }
+    #calview .closedlbl { color: var(--red); font-size: 9px; letter-spacing: 0.2em; margin-top: 2px; }
+    #calview td.closedtd { background: rgba(200,74,60,0.08) !important; }
     td.total { padding: 0 8px; font-size: 10px; opacity: 0.7; }
 
     /* calendar view */
@@ -293,7 +299,7 @@
 </section>
 
 <section class="noprint">
-  <div class="sec-label">NEED &mdash; MIN ON DUTY PER DAY</div>
+  <div class="sec-label">NEED &mdash; STAFF ON DUTY PER DAY (EXACT &middot; 0 = no requirement)</div>
   <div class="need" id="need"></div>
 </section>
 
@@ -334,6 +340,7 @@
     dim yellow = generated &middot; solid yellow = locked &middot;
     <b class="g">green = pto</b> &middot;
     hatched = can't work &middot; dimmed columns = neighboring month (history in front, carry-over behind) &middot;
+    click a <b>date header</b> to close the store that day (red column, nobody scheduled) &middot;
     history days are facts: generate builds around them, but your clicks can still change them
   </div>
 </section>
@@ -384,6 +391,7 @@ function defaultState() {
     },
     rules: [],
     bizHours: { everyday: true, all: { open: '11', close: '7' }, groups: [] },
+    closedDays: [],   // iso dates the store is closed (holiday, maintenance)
     grid: {}          // 'empId|iso' -> 'work' | 'lockWork' | 'lockOff'
   };
 }
@@ -407,6 +415,7 @@ function normalizeState(s) {
   if (!s.rules) s.rules = [];
   s.rules.forEach(r => { if (!r.mode) r.mode = 'must'; });
   if (!s.bizHours) s.bizHours = d.bizHours;
+  if (!s.closedDays) s.closedDays = [];
   if (s.title === undefined) s.title = '';
   delete s.finalizedThrough;   // v3 concept, retired — history inference replaces it
   s.employees.forEach(e => {
@@ -499,6 +508,19 @@ function workedCell(empId, dayIso) {
   return st === 'work' || st === 'lockWork';
 }
 
+// closed day: the store takes the day off. an ordinary off day for everyone —
+// no min or hours credit — though pto entered on it still counts per person
+function isClosed(dayIso) { return state.closedDays.includes(dayIso); }
+function toggleClosed(dayIso) {
+  if (isClosed(dayIso)) state.closedDays = state.closedDays.filter(x => x !== dayIso);
+  else {
+    state.closedDays.push(dayIso);
+    state.closedDays.sort();
+    state.employees.forEach(e => { delete state.grid[key(e.id, dayIso)]; });
+  }
+  save(); renderAll();
+}
+
 /* ── rule strengths ────────────────────────────────────────────── */
 
 function univApplies(emp, k, relax) {
@@ -556,8 +578,9 @@ function resolveWeek(emp, week, ctx, relax) {
     const fx = fixedDate(d.iso);
     fixed.push(fx ? { worked: workedCell(emp.id, d.iso) } : null);
     unknown.push(fx && !state.grid[key(emp.id, d.iso)] && !leadKnown);
-    can.push(!fx && !p && emp.days[d.wd] >= 1);
-    must.push(!fx && !p && emp.days[d.wd] === 2);
+    const cl = isClosed(d.iso);
+    can.push(!fx && !p && !cl && emp.days[d.wd] >= 1);
+    must.push(!fx && !p && !cl && emp.days[d.wd] === 2);
   });
 
   let mn = emp.minDays, mx = emp.maxDays;
@@ -568,7 +591,7 @@ function resolveWeek(emp, week, ctx, relax) {
     const w = r.what;
     if (w.type === 'dayOff' || w.type === 'dayOn') {
       week.dates.forEach((d, i) => {
-        if (d.wd !== w.wd || fixed[i] || pto[i]) return;
+        if (d.wd !== w.wd || fixed[i] || pto[i] || isClosed(d.iso)) return;
         if (r.when.type === 'dates' && (d.iso < r.when.start || d.iso > r.when.end)) return;
         if (w.type === 'dayOff') { can[i] = false; must[i] = false; }
         else { can[i] = true; must[i] = true; }
@@ -585,8 +608,8 @@ function resolveWeek(emp, week, ctx, relax) {
   const wkStart = week.dates[0].iso;
   for (const t of ctx.tweaks) {
     if (t.empId && t.empId !== emp.id) continue;
-    if (t.type === 'allowWd') week.dates.forEach((d, i) => { if (d.wd === t.wd && !pto[i] && !fixed[i]) can[i] = true; });
-    if (t.type === 'allowDate') week.dates.forEach((d, i) => { if (d.iso === t.iso && !pto[i] && !fixed[i]) can[i] = true; });
+    if (t.type === 'allowWd') week.dates.forEach((d, i) => { if (d.wd === t.wd && !pto[i] && !fixed[i] && !isClosed(d.iso)) can[i] = true; });
+    if (t.type === 'allowDate') week.dates.forEach((d, i) => { if (d.iso === t.iso && !pto[i] && !fixed[i] && !isClosed(d.iso)) can[i] = true; });
     if (t.type === 'minRelaxWk' && t.weekStart === wkStart) mn = Math.max(0, mn - 1);
     if (t.type === 'maxRelaxWk' && t.weekStart === wkStart) mx = mx + 1;
     if (t.type === 'twoOffWk' && t.weekStart === wkStart) consecOff = false;
@@ -609,11 +632,24 @@ function relaxAllSet(emp, week, ctx) {
 }
 
 function needFor(dateObj, ctx) {
-  if (!draftDate(dateObj.iso)) return 0;
+  if (!draftDate(dateObj.iso) || isClosed(dateObj.iso)) return 0;
   let c = state.coverage[dateObj.wd];
   for (const t of ctx.tweaks) {
     if (t.type === 'need' && t.wd === dateObj.wd) c = Math.max(0, c - 1);
     if (t.type === 'needDate' && t.iso === dateObj.iso) c = Math.max(0, c - 1);
+  }
+  return c;
+}
+
+// exact staffing: the daily need is a ceiling too. 0 = no requirement (close
+// the day for a true zero); overstaffing only via approved over-tweaks
+function needMaxFor(dateObj, ctx) {
+  if (!draftDate(dateObj.iso) || isClosed(dateObj.iso)) return Infinity;
+  if (state.coverage[dateObj.wd] === 0) return Infinity;
+  let c = needFor(dateObj, ctx);
+  for (const t of ctx.tweaks) {
+    if (t.type === 'overDate' && t.iso === dateObj.iso) c += 1;
+    if (t.type === 'overWd' && t.wd === dateObj.wd) c += 1;
   }
   return c;
 }
@@ -1143,7 +1179,7 @@ function cellClick(emp, dayIso) {
     save(); renderAll();
     return;
   }
-  if (emp.pto.includes(dayIso)) return;
+  if (emp.pto.includes(dayIso) || isClosed(dayIso)) return;
   const k = key(emp.id, dayIso);
   const cur = state.grid[k];
   if (cur === 'lockWork') state.grid[k] = 'lockOff';
@@ -1187,8 +1223,14 @@ function renderGrid() {
     if (d.wd === 0 && i > 0) th.classList.add('wksep');
     if (!d.inMonth) th.classList.add('outside');
     if (d.iso === todayIso) th.classList.add('today');
+    if (isClosed(d.iso)) th.classList.add('closed');
     const showMonth = (i === 0 || d.dayNum === 1) ? MONTHS[d.month] : '';
     th.innerHTML = '<span class="m">' + showMonth + '</span><span class="wd">' + WD[d.wd] + '</span><span class="dn">' + d.dayNum + '</span>';
+    if (draftDate(d.iso)) {
+      th.style.cursor = 'pointer';
+      th.title = isClosed(d.iso) ? 'closed — click to reopen' : 'click to close the store this day';
+      th.onclick = () => toggleClosed(d.iso);
+    }
     thead.appendChild(th);
   });
   const totalH = document.createElement('th');
@@ -1211,6 +1253,7 @@ function renderGrid() {
       if (!d.inMonth) td.classList.add('outside');
       const k = key(emp.id, d.iso);
       const st = state.grid[k];
+      if (isClosed(d.iso)) td.classList.add('closed');
       if (emp.pto.includes(d.iso)) td.classList.add('pto');
       else {
         if (st) td.classList.add(st);
@@ -1243,10 +1286,14 @@ function renderGrid() {
       if (!draftDate(d.iso)) {
         td.textContent = on + '/–';
         td.classList.add('past');
+      } else if (isClosed(d.iso)) {
+        td.textContent = '×';
+        td.classList.add('closedc');
       } else {
         const need = needFor(d, ctx);
+        const mx = needMaxFor(d, ctx);
         td.textContent = on + '/' + need;
-        if (v.touched && on < need) td.classList.add('short');
+        if (v.touched && (on < need || (isFinite(mx) && on > mx))) td.classList.add('short');
       }
       tr.appendChild(td);
     });
@@ -1289,6 +1336,14 @@ function renderCal() {
       dn.innerHTML = (d.dayNum === 1 || d.iso === canvasDates()[0].iso
         ? '<span class="mo">' + MONTHS[d.month] + '</span>' : '') + d.dayNum;
       td.appendChild(dn);
+
+      if (isClosed(d.iso)) {
+        td.classList.add('closedtd');
+        const cl = document.createElement('div');
+        cl.className = 'closedlbl';
+        cl.textContent = 'CLOSED';
+        td.appendChild(cl);
+      }
 
       const who = document.createElement('div');
       who.className = 'who';
@@ -1418,6 +1473,7 @@ function validate(dates, weeks) {
       const shAll = resolveWeek(emp, w, ctx, new Set());
       for (const r of state.rules) {
         if (r.when.type !== 'nPerPeriod' || r.mode === 'off' || ctx.suspended.has(r.id) || !ruleTargets(r, emp)) continue;
+        if (!fullyDraftWeek(w)) continue;
         const actx = Object.assign({}, ctx, { active: { [r.id]: new Set([wkStart]) } });
         const vm = resolveWeek(emp, w, actx, relaxAllSet(emp, w, ctx));
         const va = resolveWeek(emp, w, actx, new Set());
@@ -1453,6 +1509,11 @@ function validate(dates, weeks) {
         if (on) {
           count++;
           if (!draftDate(d.iso)) return;
+          if (isClosed(d.iso)) {
+            cellViol.add(key(emp.id, d.iso));
+            bad(nm + ' — ' + fmtDate(d.iso) + ': scheduled on a closed day');
+            return;
+          }
           if (!shMust.can[i]) {
             cellViol.add(key(emp.id, d.iso));
             bad(nm + ' — ' + fmtDate(d.iso) + ': scheduled but can\'t work ' + WD_LONG[d.wd]);
@@ -1528,6 +1589,7 @@ function validate(dates, weeks) {
     targets.forEach(emp => {
       let sat = 0;
       for (const w of weeks) {
+        if (!fullyDraftWeek(w)) continue;
         const shR = resolveWeek(emp, w, Object.assign({}, ctx, { active: { [r.id]: new Set([w.dates[0].iso]) } }), new Set());
         let count = 0, okDays = true;
         w.dates.forEach((d, i) => {
@@ -1548,7 +1610,9 @@ function validate(dates, weeks) {
     if (!draftDate(d.iso)) continue;
     const on = onDuty(d.iso);
     const need = needFor(d, ctx);
+    const mx = needMaxFor(d, ctx);
     if (on < need) bad(WD_LONG[d.wd] + ' ' + fmtDate(d.iso) + ' (week ' + weekNumOf(d.iso) + '): ' + on + ' on duty (need ' + need + ')');
+    else if (isFinite(mx) && on > mx) bad(WD_LONG[d.wd] + ' ' + fmtDate(d.iso) + ' (week ' + weekNumOf(d.iso) + '): ' + on + ' on duty (need exactly ' + need + ')');
   }
 
   return { cellViol, msgs, touched };
@@ -1652,6 +1716,7 @@ function collectWeekSolutions(week, carryMap, ctx, K, budget) {
   const isLast = week.isLast;
   const cands = emps.map(e => candidatesFor(e, week, carryMap[e.id] || { run: 0, lastOff: true, owes: false }, ctx, isLast));
   const need = week.dates.map(d => needFor(d, ctx));
+  const needMax = week.dates.map(d => needMaxFor(d, ctx));
   const poss = emps.map((e, i) => week.dates.map((d, j) => {
     if (!draftDate(d.iso)) return workedCell(e.id, d.iso) ? 1 : 0;
     return cands[i].some(c => c.mask >> j & 1) ? 1 : 0;
@@ -1685,9 +1750,10 @@ function collectWeekSolutions(week, carryMap, ctx, K, budget) {
         if (ub < need[j]) return;
       }
       for (const cand of lists[i]) {
-        for (let j = 0; j < 7; j++) if (cand.mask >> j & 1) counts[j]++;
+        let over = false;
+        for (let j = 0; j < 7; j++) if (cand.mask >> j & 1) { counts[j]++; if (counts[j] > needMax[j]) over = true; }
         chosen[i] = cand;
-        bt(i + 1);
+        if (!over) bt(i + 1);   // exact staffing: never exceed the ceiling
         for (let j = 0; j < 7; j++) if (cand.mask >> j & 1) counts[j]--;
         if (budget.nodes > budget.cap || got >= K) return;
       }
@@ -1718,8 +1784,12 @@ function initialCarry() {
   return carry;
 }
 
+// n-per-period rules only target fully-draft weeks: a straddle week's waived
+// minimums would otherwise satisfy the rule without scheduling anyone
+function fullyDraftWeek(w) { return w.dates.every(d => draftDate(d.iso)); }
+
 function pickActive() {
-  const weeks = groupWeeks(canvasDates()).filter(w => w.dates.some(d => draftDate(d.iso)));
+  const weeks = groupWeeks(canvasDates()).filter(fullyDraftWeek);
   const active = {};
   for (const r of state.rules) {
     if (r.when.type !== 'nPerPeriod' || r.mode === 'off') continue;
@@ -1741,7 +1811,7 @@ function kSubsets(arr, k) {
 function pickCombos() {
   const rules = state.rules.filter(r => r.when.type === 'nPerPeriod' && r.mode !== 'off');
   if (!rules.length) return [{}];
-  const dw = groupWeeks(canvasDates()).filter(w => w.dates.some(d => draftDate(d.iso))).map(w => w.dates[0].iso);
+  const dw = groupWeeks(canvasDates()).filter(fullyDraftWeek).map(w => w.dates[0].iso);
   let combos = [{}];
   for (const r of rules) {
     const subs = kSubsets(dw, Math.min(r.when.n, dw.length));
@@ -1810,7 +1880,7 @@ function clearDraftWork() {
 // wider per-week harvests, and every week-pick combination before we believe it
 function runSolve(quickCap) {
   const tiers = quickCap
-    ? [{ cap: quickCap, K: 8, rounds: 1 }]
+    ? [{ cap: quickCap, K: 12, rounds: 2 }]
     : [{ cap: 1200000, K: 8, rounds: 2 }, { cap: 3000000, K: 16, rounds: 2 }, { cap: 6000000, K: 24, rounds: 2 }];
   const combos = pickCombos();
   let last = null;
@@ -1859,6 +1929,11 @@ function tweakLabel(t) {
     return WD_LONG[wdIdx(d)] + ' need −1 (week ' + weekNumOf(t.iso) + ')';
   }
   if (t.type === 'need') return 'all ' + WD_LONG[t.wd] + 's need −1';
+  if (t.type === 'overDate') {
+    const d = fromIso(t.iso);
+    return 'allow ' + (state.coverage[wdIdx(d)] + 1) + ' on ' + WD_LONG[wdIdx(d)] + ' (week ' + weekNumOf(t.iso) + ')';
+  }
+  if (t.type === 'overWd') return 'allow ' + (state.coverage[t.wd] + 1) + ' on ' + WD_LONG[t.wd] + 's';
   if (t.type === 'allowDate') {
     const d = fromIso(t.iso);
     return empName(empById(t.empId)) + ' can work ' + WD_LONG[wdIdx(d)] + ' (week ' + weekNumOf(t.iso) + ')';
@@ -1879,6 +1954,9 @@ function candidateTweaks(failWeekIso) {
   week.dates.forEach(d => {
     if (draftDate(d.iso) && needFor(d, ctx) > 0) out.push({ type: 'needDate', iso: d.iso });
   });
+  week.dates.forEach(d => {
+    if (draftDate(d.iso) && !isClosed(d.iso) && state.coverage[d.wd] > 0) out.push({ type: 'overDate', iso: d.iso });
+  });
   state.employees.forEach(e => {
     week.dates.forEach(d => {
       if (!draftDate(d.iso) || e.pto.includes(d.iso) || e.days[d.wd] >= 1) return;
@@ -1891,7 +1969,7 @@ function candidateTweaks(failWeekIso) {
     out.push({ type: 'minRelaxWk', empId: e.id, weekStart: failWeekIso });
     out.push({ type: 'maxRelaxWk', empId: e.id, weekStart: failWeekIso });
   });
-  for (let wd = 0; wd < 7; wd++) if (state.coverage[wd] > 0) out.push({ type: 'need', wd });
+  for (let wd = 0; wd < 7; wd++) if (state.coverage[wd] > 0) { out.push({ type: 'need', wd }); out.push({ type: 'overWd', wd }); }
   state.employees.forEach(e => {
     for (let wd = 0; wd < 7; wd++) if (e.days[wd] === 0) out.push({ type: 'allowWd', empId: e.id, wd });
   });
@@ -1901,7 +1979,8 @@ function candidateTweaks(failWeekIso) {
 function tryWith(tweaks) {
   const saved = activeTweaks;
   activeTweaks = activeTweaks.concat(tweaks);
-  const res = runSolve(250000);
+  // exact staffing makes trial solves tighter — give each candidate a real chance
+  const res = runSolve(800000);
   activeTweaks = saved;
   return res.ok;
 }
@@ -1912,6 +1991,19 @@ function diagnose(failWeekIso) {
   for (const t of cands) {
     if (found.length >= 10) break;
     if (tryWith([t])) found.push({ tweaks: [t], label: tweakLabel(t) });
+  }
+  if (!found.length) {
+    // nothing unlocked at quick effort: the failure is likely period-wide, which
+    // is what the recurring (weekday-wide) fixes address — trial those at full
+    // ladder strength before resorting to pairs
+    for (const t of cands.filter(x => x.type === 'overWd' || x.type === 'need' || x.type === 'allowWd')) {
+      if (found.length >= 8) break;
+      const saved = activeTweaks;
+      activeTweaks = activeTweaks.concat([t]);
+      const res = runSolve();
+      activeTweaks = saved;
+      if (res.ok) found.push({ tweaks: [t], label: tweakLabel(t) });
+    }
   }
   if (!found.length) {
     const pool = cands.slice(0, 12);
@@ -2174,6 +2266,7 @@ function csvContent() {
     const names = [[],[],[],[],[],[],[]];
     w.dates.forEach(d => {
       dateRow[d.wd] = MONTHS[d.month] + ' ' + d.dayNum;
+      if (isClosed(d.iso)) names[d.wd].push('CLOSED');
       const hrs = hoursFor(d.wd);
       state.employees.forEach((emp, i) => {
         if (workedCell(emp.id, d.iso)) names[d.wd].push(empName(emp, i) + (hrs ? ' ' + hrs : ''));
