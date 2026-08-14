@@ -196,6 +196,8 @@
     #calview .dnum .mo { font-size: 8px; opacity: 0.6; letter-spacing: 0.1em; margin-right: 4px; }
     #calview .who { letter-spacing: 0.06em; line-height: 1.6; }
     #calview .who div { white-space: nowrap; }
+    #calview .who .focus { font-weight: 700; }
+    #printbar { margin-top: 8px; font-size: 11px; }
     #calview .ptoname { color: var(--green); opacity: 0.85; }
     #calview .xbtn {
       color: var(--dim); cursor: pointer; padding: 0 3px; font-size: 10px;
@@ -234,9 +236,11 @@
       #printhead .t { font-size: 13px; letter-spacing: 0.3em; font-weight: 700; }
       #printhead .p { font-size: 9px; opacity: 0.7; margin-top: 1px; }
       #calview { display: block !important; border-color: #999; }
-      #calview table { min-width: 0; font-size: 9px; }
-      #calview td { height: 64px; min-height: 0; padding: 2px 4px; }
-      #calview .who { line-height: 1.45; }
+      #calview table { min-width: 0; font-size: 11px; }
+      #calview td { height: var(--printrow, 130px); min-height: 0; padding: 3px 5px; }
+      #calview .dnum { font-size: 12px; }
+      #calview .who { line-height: 1.7; font-size: 11px; }
+      #calview .who .focus { font-weight: 700; }
       #calview th, #calview td { border-color: #aaa !important; background: #fff !important; color: #000 !important; opacity: 1 !important; }
       #calview td.wkend { background: #f4f4f4 !important; }
       #calview .dnum, #calview .who div { color: #000 !important; opacity: 1 !important; }
@@ -322,6 +326,7 @@
     <button class="aight-btn green" id="keyok">ok</button>
   </div>
   <div class="row" id="loadpicker" style="display:none"></div>
+  <div class="row" id="printbar" style="display:none"></div>
   <input type="file" id="restorefile" accept=".json,application/json" style="display:none">
   <div id="solvemsg"></div>
   <div id="fixmenu" class="row"></div>
@@ -360,6 +365,7 @@ const WD_LONG = ['sun','mon','tue','wed','thu','fri','sat'];
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 // transient (not saved)
+let printFocus = null;   // empId to bold + list first on the printed calendar
 let ptoMode = false;
 let activeTweaks = [];
 let availableFixes = [];
@@ -1317,6 +1323,9 @@ function renderCal() {
 
   const box = document.getElementById('calview');
   const weeks = groupWeeks(canvasDates());
+  // print row height sized so the week rows fill one landscape page (A4/letter)
+  if (document.documentElement && document.documentElement.style)
+    document.documentElement.style.setProperty('--printrow', (weeks.length <= 5 ? 132 : 110) + 'px');
   const tbl = document.createElement('table');
   const hr = document.createElement('tr');
   WD.forEach(l => { const th = document.createElement('th'); th.textContent = l; hr.appendChild(th); });
@@ -1348,11 +1357,13 @@ function renderCal() {
       const who = document.createElement('div');
       who.className = 'who';
       const hrs = hoursFor(wd);
-      let assigned = 0;
-      state.employees.forEach((emp, i) => {
-        if (!workedCell(emp.id, d.iso)) return;
-        assigned++;
+      const workers = [];
+      state.employees.forEach((emp, i) => { if (workedCell(emp.id, d.iso)) workers.push([emp, i]); });
+      if (printFocus) workers.sort((a, b) => (a[0].id === printFocus ? 0 : 1) - (b[0].id === printFocus ? 0 : 1));
+      const assigned = workers.length;
+      workers.forEach(([emp, i]) => {
         const l = document.createElement('div');
+        if (emp.id === printFocus) l.classList.add('focus');
         l.append(empName(emp, i) + (hrs ? ' ' + hrs : ''));
         const x = document.createElement('button');
         x.className = 'xbtn';
@@ -1389,10 +1400,10 @@ function buildDaySelect(d) {
   ph.value = ''; ph.textContent = '+';
   sel.appendChild(ph);
   const ctx = makeCtx({});
-  const week = groupWeeks(canvasDates()).find(w => w.dates.includes(d));
+  const week = groupWeeks(canvasDates()).find(w => w.dates.some(x => x.iso === d.iso));
   state.employees.forEach((emp, i) => {
     if (workedCell(emp.id, d.iso) || emp.pto.includes(d.iso)) return;
-    const idx = week.dates.indexOf(d);
+    const idx = week.dates.findIndex(x => x.iso === d.iso);
     const sh = resolveWeek(emp, week, ctx, relaxAllSet(emp, week, ctx));
     const ok = sh.can[idx];
     const o = document.createElement('option');
@@ -1417,7 +1428,7 @@ function removeFromDay(emp, d) {
     if (!availableFixes.some(f => f.tweaks.length === 1 && sameTweak(f.tweaks[0], t)))
       availableFixes.push({ tweaks: [t], label: tweakLabel(t) });
   }
-  const week = groupWeeks(canvasDates()).find(w => w.dates.includes(d));
+  const week = groupWeeks(canvasDates()).find(w => w.dates.some(x => x.iso === d.iso));
   if (week) {
     const t2 = { type: 'minRelaxWk', empId: emp.id, weekStart: week.dates[0].iso };
     const sh = resolveWeek(emp, week, ctx, new Set());
@@ -2225,6 +2236,38 @@ async function deleteCloud(title, mode) {
   } catch (e) {}
 }
 
+/* ── print bar: {general} + one button per staff ───────────────── */
+
+function openPrintBar() {
+  const box = document.getElementById('printbar');
+  if (box.style.display !== 'none') { box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = '';
+  box.appendChild(span('print:'));
+  const doPrint = focus => {
+    printFocus = focus;
+    setView('cal');
+    renderCal();
+    window.print();
+    printFocus = null;
+    renderCal();
+    box.style.display = 'none';
+  };
+  const g = document.createElement('button');
+  g.className = 'aight-btn green';
+  g.textContent = 'general';
+  g.onclick = () => doPrint(null);
+  box.appendChild(g);
+  state.employees.forEach((emp, i) => {
+    const b = document.createElement('button');
+    b.className = 'aight-btn green';
+    b.textContent = empName(emp, i).toLowerCase();
+    b.title = 'print with ' + empName(emp, i) + ' bold and listed first on their days';
+    b.onclick = () => doPrint(emp.id);
+    box.appendChild(b);
+  });
+}
+
 /* ── local file backup ─────────────────────────────────────────── */
 
 function downloadState() {
@@ -2347,7 +2390,7 @@ document.getElementById('load').onclick = () => openPicker('load');
 document.getElementById('history').onclick = () => openPicker('history');
 document.getElementById('download').onclick = downloadState;
 document.getElementById('restorefile').onchange = function () { if (this.files && this.files[0]) restoreState(this.files[0]); };
-document.getElementById('printbtn').onclick = () => { setView('cal'); renderCal(); window.print(); };
+document.getElementById('printbtn').onclick = openPrintBar;
 document.getElementById('ptomode').onclick = togglePtoMode;
 document.getElementById('keyok').onclick = submitKey;
 document.getElementById('keyinput').onkeydown = e => { if (e.key === 'Enter') submitKey(); };
