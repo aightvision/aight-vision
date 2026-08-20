@@ -1,0 +1,2 @@
+# Rewrite /tag/xxxxx → /tag.html?g=xxxxx (status 200 = internal rewrite, not visible)
+/tag/*  /tag.html?g=:splat  200

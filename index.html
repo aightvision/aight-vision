@@ -319,6 +319,65 @@
       font-style: italic;
     }
 
+    /* ── Share/download sheet (triggered by {⬇⬆}) ────────────────── */
+
+    #share-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #share-sheet.open { display: flex; }
+    .share-sheet-inner {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 22px 24px;
+      width: min(420px, 90vw);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      color: #ddd;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    }
+    .share-sheet-title { font-size: 11px; letter-spacing: 0.28em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .share-sheet-url {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      word-break: break-all;
+      user-select: all;
+    }
+    .share-sheet-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .share-sheet-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.75);
+      padding: 8px 14px;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .share-sheet-btn::before { content: "{"; padding-right: 3px; }
+    .share-sheet-btn::after  { content: "}"; padding-left: 3px; }
+    .share-sheet-btn:hover { color: #fff; border-color: #fff; }
+    .share-sheet-btn.primary { color: #C8A63C; border-color: #C8A63C; }
+    .share-sheet-btn.primary:hover { background: rgba(200,166,60,0.15); border-color: #C8A63C; color: #C8A63C; }
+    .share-sheet-btn.copied { color: #6ecf7a; border-color: #6ecf7a; }
+
     /* ── Home overlay ─────────────────────────────────────────────── */
 
     #overlay {
@@ -384,7 +443,21 @@
 <div id="controls">
   <button class="btn" id="btn-prev" aria-label="Previous"><svg><use href="#icon-arrow-left"/></svg></button>
   <button class="btn" id="btn-mute" aria-label="Mute"><svg><use href="#icon-speaker-on"/></svg></button>
+  <button class="btn" id="btn-share" aria-label="Share or download"><span style="font-size:14px;line-height:1;">⬇⬆</span></button>
   <button class="btn" id="btn-next" aria-label="Next"><svg><use href="#icon-arrow-right"/></svg></button>
+</div>
+
+<!-- Share/download popover triggered from {⬇⬆} button -->
+<div id="share-sheet">
+  <div class="share-sheet-inner">
+    <div class="share-sheet-title">current video</div>
+    <div class="share-sheet-url" id="share-sheet-url"></div>
+    <div class="share-sheet-actions">
+      <button class="share-sheet-btn" id="share-sheet-close">close</button>
+      <button class="share-sheet-btn" id="share-sheet-download">download</button>
+      <button class="share-sheet-btn primary" id="share-sheet-share">share</button>
+    </div>
+  </div>
 </div>
 
 <div id="tag-panel" aria-hidden="true">
@@ -543,6 +616,24 @@
       v[bg].src = url;
       v[bg].load();
     }
+    // Also nudge the browser to warm the cache for the video AFTER this one.
+    // Uses <link rel=preload> which primes without a full <video> element.
+    warmCacheForNext(futureIdx + 1);
+  }
+
+  let warmedUrl = null;
+  let warmLinkEl = null;
+  function warmCacheForNext(futureIdx) {
+    if (!playlist.length) return;
+    const url = urlOf(playlist[wrap(futureIdx)]);
+    if (warmedUrl === url) return;
+    warmedUrl = url;
+    if (warmLinkEl && warmLinkEl.parentNode) warmLinkEl.parentNode.removeChild(warmLinkEl);
+    warmLinkEl = document.createElement('link');
+    warmLinkEl.rel = 'preload';
+    warmLinkEl.as = 'video';
+    warmLinkEl.href = url;
+    document.head.appendChild(warmLinkEl);
   }
 
   function playAt(newIdx) {
@@ -942,15 +1033,94 @@
     })
     .then(function (data) {
       if (!Array.isArray(data) || !data.length) throw new Error('empty playlist');
-      // Normalize in case any items are strings (shouldn't be after backend update)
+      // Normalize; keep slug + duration for the share button and length filter
       masterPlaylist = data.map(function (d) {
-        return typeof d === 'string' ? { url: d, tags: [] } : { url: d.url, tags: d.tags || [] };
+        return typeof d === 'string'
+          ? { url: d, tags: [], slug: null, duration: null }
+          : { url: d.url, tags: d.tags || [], slug: d.slug || null, duration: d.duration != null ? d.duration : null };
       });
       playlist = shuffle(masterPlaylist.slice());
       idx = Math.floor(Math.random() * playlist.length);
+
+      // Preload the first video immediately so playback is instant when user taps
+      v[0].src = playlist[idx].url;
+      v[0].setAttribute('data-src', playlist[idx].url);
+      v[0].load();
+      // Warm the second element as well
+      setTimeout(function () { preloadBg(idx + 1); }, 400);
+
       if (pendingStart) beginPlayback();
     })
     .catch(function (err) { console.error('Playlist error:', err); });
+
+  // ── Share sheet ({⬇⬆} on the bottom controls) ─────────────────────
+
+  const shareSheet = document.getElementById('share-sheet');
+  const shareSheetUrl = document.getElementById('share-sheet-url');
+  const shareSheetShare = document.getElementById('share-sheet-share');
+  const shareSheetDownload = document.getElementById('share-sheet-download');
+  const shareSheetClose = document.getElementById('share-sheet-close');
+
+  function currentShareUrl() {
+    const item = playlist[idx];
+    if (!item) return null;
+    if (item.slug) return window.location.origin + '/f/' + item.slug;
+    return item.url;  // fallback for videos without a slug
+  }
+
+  document.getElementById('btn-share').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const url = currentShareUrl();
+    if (!url) return;
+    shareSheetUrl.textContent = url.replace(/^https?:\/\//, '');
+    shareSheetShare.textContent = 'share';
+    shareSheetShare.classList.remove('copied');
+    shareSheetDownload.textContent = 'download';
+    shareSheet.classList.add('open');
+  });
+  shareSheetClose.addEventListener('click', function () { shareSheet.classList.remove('open'); });
+  shareSheet.addEventListener('click', function (e) { if (e.target === shareSheet) shareSheet.classList.remove('open'); });
+
+  shareSheetShare.addEventListener('click', function () {
+    const url = currentShareUrl();
+    if (!url) return;
+    // Use Web Share API on mobile if available — opens iOS/Android share sheet
+    if (navigator.share) {
+      navigator.share({ url }).catch(function () {});
+      shareSheet.classList.remove('open');
+      return;
+    }
+    // Desktop fallback: copy to clipboard
+    const flash = () => {
+      shareSheetShare.classList.add('copied');
+      shareSheetShare.textContent = 'copied';
+      setTimeout(() => { shareSheetShare.classList.remove('copied'); shareSheetShare.textContent = 'share'; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(flash).catch(function () { alert('Copy failed: ' + url); });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flash(); } catch (e) { alert('Copy failed: ' + url); }
+      ta.remove();
+    }
+  });
+
+  shareSheetDownload.addEventListener('click', function () {
+    const item = playlist[idx];
+    if (!item) return;
+    // Direct link to the R2 asset; browser handles download
+    const a = document.createElement('a');
+    a.href = item.url;
+    a.download = '';  // hint filename from server or default
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    shareSheet.classList.remove('open');
+  });
 
 }());
 </script>

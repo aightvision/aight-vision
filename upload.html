@@ -386,6 +386,102 @@
     .tag-plus::after  { content: "}"; padding-left: 2px; }
     .tag-plus:hover { background: rgba(200,166,60,0.15); }
 
+    /* {🜃} share-tag button — same pattern as .tag-plus but green */
+    .tag-share {
+      margin-left: 6px;
+      padding: 2px 8px;
+      font-size: 12px;
+      line-height: 1;
+      background: transparent;
+      border: 1px solid #6ecf7a;
+      color: #6ecf7a;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tag-share::before { content: "{"; padding-right: 2px; }
+    .tag-share::after  { content: "}"; padding-left: 2px; }
+    .tag-share:hover { background: rgba(110,207,122,0.15); }
+
+    /* Header {🜃} button — only appears when a tag filter is active */
+    #lib-share {
+      display: none;
+      border-color: #6ecf7a !important;
+      color: #6ecf7a !important;
+    }
+    #lib-share.visible { display: inline-flex; }
+    #lib-share:hover { background: rgba(110,207,122,0.15) !important; }
+
+    /* Share popover — shows the copyable URL */
+    #share-popover {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #share-popover.open { display: flex; }
+    .share-inner {
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 22px 24px;
+      width: min(420px, 90vw);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .share-title { font-size: 11px; letter-spacing: 0.28em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .share-tags {
+      font-size: 12px;
+      color: rgba(200,166,60,0.85);
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      word-break: break-word;
+    }
+    .share-url {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      font-size: 12px;
+      word-break: break-all;
+      user-select: all;
+      cursor: text;
+    }
+    .share-note {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .share-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .share-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.75);
+      padding: 8px 14px;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .share-btn::before { content: "{"; padding-right: 3px; }
+    .share-btn::after  { content: "}"; padding-left: 3px; }
+    .share-btn:hover { color: #fff; border-color: #fff; }
+    .share-btn.primary { color: #6ecf7a; border-color: #6ecf7a; }
+    .share-btn.primary:hover { background: rgba(110,207,122,0.15); color: #6ecf7a; border-color: #6ecf7a; }
+    .share-btn.copied { color: #6ecf7a; border-color: #6ecf7a; background: rgba(110,207,122,0.15); }
+
     .tag-row.tag-nested {
       padding: 6px 4px 6px 24px;
       color: rgba(255,255,255,0.7);
@@ -841,6 +937,7 @@
       <div class="lib-header-actions">
         <button class="aight-btn big-glyph" id="lib-refresh" aria-label="Refresh"><span class="glyph">⟲</span></button>
         <button class="aight-btn" id="lib-filter" aria-label="Filter">#</button>
+        <button class="aight-btn" id="lib-share" aria-label="Share tag URL">🜃</button>
         <button class="aight-btn" id="lib-drafts" aria-label="Drafts only">unpublished</button>
       </div>
     </div>
@@ -998,6 +1095,20 @@
     <div class="processing-title" id="processing-title">processing</div>
     <div class="processing-bar-wrap"><div class="processing-bar" id="processing-bar"></div></div>
     <div class="processing-info" id="processing-info">this may take a moment</div>
+  </div>
+</div>
+
+<!-- Share-tag URL popover -->
+<div id="share-popover">
+  <div class="share-inner">
+    <div class="share-title">share tag URL</div>
+    <div class="share-tags" id="share-tags-display"></div>
+    <div class="share-url" id="share-url"></div>
+    <div class="share-note">receiver will need the access key</div>
+    <div class="share-actions">
+      <button class="share-btn" id="share-close">close</button>
+      <button class="share-btn primary" id="share-copy">copy</button>
+    </div>
   </div>
 </div>
 
@@ -1571,6 +1682,7 @@
 
     const anyFilter = selectNoTags || tagGroups.length > 0 || selectedLengths.size > 0;
     $('lib-filter').classList.toggle('active', anyFilter);
+    updateHeaderShareBtn();
 
     if (selectAll) { libraryFiltered = base; }
     else {
@@ -1679,6 +1791,70 @@
   }
 
   $('lib-refresh').addEventListener('click', loadLibrary);
+
+  // ── Share-tag URL helpers ─────────────────────────────────────────
+
+  function serializeTagGroups(groups) {
+    // Array<Set<string>> → "food+pizza,drinks"
+    return groups
+      .map(g => Array.from(g).map(t => encodeURIComponent(t)).join('+'))
+      .filter(s => s.length > 0)
+      .join(',');
+  }
+  function displayGroups(groups) {
+    return groups.map(g => '#' + Array.from(g).join(' + ')).join(' or ');
+  }
+  function shareUrlFor(groupsArg) {
+    const encoded = serializeTagGroups(groupsArg);
+    return window.location.origin + '/tag/' + encoded;
+  }
+
+  const sharePopover = $('share-popover');
+  const shareUrlEl = $('share-url');
+  const shareTagsEl = $('share-tags-display');
+  const shareCopyBtn = $('share-copy');
+
+  function openSharePopover(groupsArg) {
+    const url = shareUrlFor(groupsArg);
+    shareTagsEl.textContent = displayGroups(groupsArg);
+    shareUrlEl.textContent = url.replace(/^https?:\/\//, '');
+    shareCopyBtn.dataset.url = url;
+    shareCopyBtn.textContent = 'copy';
+    shareCopyBtn.classList.remove('copied');
+    sharePopover.classList.add('open');
+  }
+  function closeSharePopover() { sharePopover.classList.remove('open'); }
+
+  $('share-close').addEventListener('click', closeSharePopover);
+  sharePopover.addEventListener('click', function (e) { if (e.target === sharePopover) closeSharePopover(); });
+
+  shareCopyBtn.addEventListener('click', function () {
+    const url = this.dataset.url;
+    const flash = () => {
+      shareCopyBtn.classList.add('copied');
+      shareCopyBtn.textContent = 'copied';
+      setTimeout(() => { shareCopyBtn.classList.remove('copied'); shareCopyBtn.textContent = 'copy'; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(flash).catch(function () {
+        const ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); flash(); } catch (e) { alert('Copy failed: ' + url); }
+        ta.remove();
+      });
+    }
+  });
+
+  // Header {🜃} button visibility: only when a tag/group filter is active
+  function updateHeaderShareBtn() {
+    const hasTagFilter = tagGroups.length > 0;
+    $('lib-share').classList.toggle('visible', hasTagFilter);
+  }
+  $('lib-share').addEventListener('click', function () {
+    if (!tagGroups.length) return;
+    openSharePopover(tagGroups);
+  });
 
   $('lib-drafts').addEventListener('click', function () {
     showOnlyUnpublished = !showOnlyUnpublished;
@@ -1821,12 +1997,21 @@
     }
 
     // Unselected tags — click adds as a new group (OR clause)
+    // Also gets a {🜃} button to share this single tag as a URL
     for (const [t, c] of agg.list) {
       if (selected.has(t)) continue;
       const row = document.createElement('div');
       row.className = 'tag-row';
-      row.innerHTML = '<span class="tag-marker"></span><span class="tag-name">' + escHtml(t) + '</span><span class="tag-count">' + c + '</span>';
-      row.addEventListener('click', function () {
+      row.innerHTML =
+        '<span class="tag-marker"></span>' +
+        '<span class="tag-name">' + escHtml(t) + '</span>' +
+        '<span class="tag-count">' + c + '</span>' +
+        '<button class="tag-share" data-tag="' + escHtml(t) + '">🜃</button>';
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.tag-share')) {
+          openSharePopover([ new Set([t]) ]);
+          return;
+        }
         tagGroups.push(new Set([t]));
         expandedGroupIdx = -1;
         selectAll = false;

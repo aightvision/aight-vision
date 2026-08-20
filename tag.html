@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AIGHT.VISION</title>
+  <style>
+    :root { --aight-yellow: #C8A63C; --aight-yellow-hover: #d8b345; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      color: #ddd;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Access key prompt ─────────────────────────────────────────── */
+
+    #gate {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 22px;
+      padding: 20px;
+    }
+    #gate.hidden { display: none; }
+    #gate-title { font-size: 11px; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    #gate-tags { font-size: 13px; color: rgba(200,166,60,0.85); font-family: 'SF Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.05em; text-align: center; word-break: break-word; max-width: 90vw; }
+    #gate-input-row { display: flex; gap: 10px; max-width: 320px; width: 100%; }
+    #gate-input {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #gate-input:focus { border-color: rgba(255,255,255,0.4); }
+    #gate-input.error { border-color: #c0392b; }
+    #gate-enter {
+      background: transparent;
+      border: 1px solid var(--aight-yellow);
+      color: var(--aight-yellow);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #gate-enter::before { content: "{"; padding-right: 3px; }
+    #gate-enter::after { content: "}"; padding-left: 3px; }
+    #gate-enter:hover { background: rgba(200,166,60,0.15); }
+    #gate-error {
+      color: #e57373;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: none;
+    }
+    #gate-error.show { display: block; }
+
+    /* ── Stream view ───────────────────────────────────────────────── */
+
+    #stage { position: relative; width: 100vw; height: 100vh; }
+    video.player { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+    #v0 { z-index: 1; }
+    #v1 { z-index: 0; }
+
+    /* ── Controls (stream) ─────────────────────────────────────────── */
+
+    #controls {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 32px 24px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+    #controls.show { opacity: 1; pointer-events: auto; }
+
+    .btn {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: #fff;
+      font-size: 19px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .btn:active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.6); }
+
+    /* ── Top-right {tile} toggle ───────────────────────────────────── */
+
+    #view-toggle {
+      position: fixed;
+      top: 20px; right: 20px;
+      z-index: 12;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--aight-yellow);
+      color: var(--aight-yellow);
+      padding: 6px 12px;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      cursor: pointer;
+      transition: opacity 0.35s ease, background 0.15s;
+      opacity: 0;
+      pointer-events: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #view-toggle::before { content: "{"; padding-right: 3px; }
+    #view-toggle::after { content: "}"; padding-left: 3px; }
+    #view-toggle.show { opacity: 1; pointer-events: auto; }
+    #view-toggle:hover { background: rgba(200,166,60,0.15); }
+
+    /* ── Tile view ─────────────────────────────────────────────────── */
+
+    #tile-view {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      background: #0a0a0a;
+      overflow-y: auto;
+      display: none;
+      padding: 50px 16px 24px;
+    }
+    #tile-view.visible { display: block; }
+    #tile-title {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    #tile-count { font-size: 11px; color: rgba(255,255,255,0.25); }
+    #tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; max-width: 1080px; margin: 0 auto; }
+    .tile-item { position: relative; background: #141414; border: 1px solid #222; border-radius: 7px; overflow: hidden; cursor: pointer; transition: border-color 0.15s; }
+    .tile-item:hover { border-color: #333; }
+    .tile-thumb-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #0a0a0a; overflow: hidden; }
+    .tile-thumb { width: 100%; height: 100%; object-fit: cover; background: #0a0a0a; display: block; }
+    .tile-meta { padding: 6px 8px; font-size: 10px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; }
+    .tile-tags { padding: 0 8px 6px; display: flex; flex-wrap: wrap; gap: 3px; }
+    .tile-tag-chip { font-size: 9px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 3px; letter-spacing: 0.03em; }
+
+    /* ── Empty state ──────────────────────────────────────────────── */
+    #empty {
+      position: fixed;
+      inset: 0;
+      z-index: 4;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.35);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 20px;
+    }
+    #empty.visible { display: flex; }
+  </style>
+</head>
+<body>
+
+<!-- Access key gate — first thing user sees -->
+<div id="gate">
+  <div id="gate-title">access required</div>
+  <div id="gate-tags" id="gate-tags-display"></div>
+  <div id="gate-input-row">
+    <input type="password" id="gate-input" placeholder="access key" autocomplete="off">
+    <button id="gate-enter">enter</button>
+  </div>
+  <div id="gate-error"></div>
+</div>
+
+<!-- Stream view -->
+<div id="stage">
+  <video id="v0" class="player" playsinline preload="auto" muted></video>
+  <video id="v1" class="player" playsinline preload="auto" muted></video>
+</div>
+
+<button id="view-toggle">tile</button>
+
+<div id="controls">
+  <button class="btn" id="btn-prev" aria-label="Previous">&larr;</button>
+  <button class="btn" id="btn-mute" aria-label="Mute">&#128266;</button>
+  <button class="btn" id="btn-next" aria-label="Next">&rarr;</button>
+</div>
+
+<!-- Tile view -->
+<div id="tile-view">
+  <div id="tile-title">
+    <span id="tile-tags-display"></span> <span id="tile-count"></span>
+  </div>
+  <div id="tile-grid"></div>
+</div>
+
+<!-- Empty state (no matching videos) -->
+<div id="empty">no videos match</div>
+
+<script>
+(function () {
+  // ── Parse URL params ───────────────────────────────────────────────
+
+  const params = new URLSearchParams(window.location.search);
+  const groupsParam = params.get('g') || '';
+  if (!groupsParam) {
+    document.body.innerHTML = '<div style="padding:40px;color:#888;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;text-align:center;">no tag specified</div>';
+    return;
+  }
+
+  // Parse "food+pizza,drinks" → [['food','pizza'], ['drinks']]
+  function parseGroups(s) {
+    return decodeURIComponent(s).split(',')
+      .map(g => g.split('+').map(t => t.trim().toLowerCase()).filter(Boolean))
+      .filter(g => g.length > 0);
+  }
+  const tagGroups = parseGroups(groupsParam);
+  const displayText = tagGroups.map(g => '#' + g.join(' + ')).join(' or ');
+
+  document.getElementById('gate-tags').textContent = displayText;
+  document.getElementById('tile-tags-display').textContent = displayText;
+
+  // ── Access gate ───────────────────────────────────────────────────
+
+  const gateEl = document.getElementById('gate');
+  const gateInput = document.getElementById('gate-input');
+  const gateEnter = document.getElementById('gate-enter');
+  const gateError = document.getElementById('gate-error');
+  let accessKey = sessionStorage.getItem('tagAccessKey') || '';
+
+  function showGateError(msg) {
+    gateInput.classList.add('error');
+    gateError.textContent = msg;
+    gateError.classList.add('show');
+  }
+  function clearGateError() {
+    gateInput.classList.remove('error');
+    gateError.classList.remove('show');
+  }
+
+  async function tryUnlock(key) {
+    const url = '/api/playlist?g=' + encodeURIComponent(groupsParam) + '&k=' + encodeURIComponent(key);
+    const res = await fetch(url);
+    if (res.status === 401) return { ok: false };
+    if (!res.ok) return { ok: false, err: 'server ' + res.status };
+    const data = await res.json();
+    return { ok: true, data };
+  }
+
+  async function attemptUnlock(key) {
+    const result = await tryUnlock(key);
+    if (!result.ok) {
+      sessionStorage.removeItem('tagAccessKey');
+      showGateError(result.err || 'invalid key');
+      return false;
+    }
+    accessKey = key;
+    sessionStorage.setItem('tagAccessKey', key);
+    clearGateError();
+    gateEl.classList.add('hidden');
+    initPlaylist(result.data);
+    return true;
+  }
+
+  gateEnter.addEventListener('click', async function () {
+    const val = gateInput.value.trim();
+    if (!val) { showGateError('enter your key'); return; }
+    clearGateError();
+    gateEnter.disabled = true;
+    gateEnter.textContent = 'verifying…';
+    await attemptUnlock(val);
+    gateEnter.disabled = false;
+    gateEnter.textContent = 'enter';
+  });
+  gateInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') gateEnter.click();
+    if (e.key !== 'Enter') clearGateError();
+  });
+
+  // If we have a stored key from a previous session, silently try it
+  if (accessKey) {
+    attemptUnlock(accessKey).then(function (ok) {
+      if (!ok) { gateEl.classList.remove('hidden'); }
+    });
+  } else {
+    gateInput.focus();
+  }
+
+  // ── Playlist / stream logic ───────────────────────────────────────
+
+  const v = [document.getElementById('v0'), document.getElementById('v1')];
+  const controls = document.getElementById('controls');
+  let playlist = [];
+  let idx = 0;
+  let active = 0;
+  let started = false;
+  let hideTimer = null;
+  let prevPressAt = 0;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function wrap(i) { return ((i % playlist.length) + playlist.length) % playlist.length; }
+
+  function initPlaylist(items) {
+    if (!items || !items.length) {
+      document.getElementById('empty').classList.add('visible');
+      document.getElementById('view-toggle').classList.add('show');
+      return;
+    }
+    playlist = shuffle(items);
+    idx = Math.floor(Math.random() * playlist.length);
+    // Preload first video immediately so playback is instant on first user gesture
+    v[0].src = playlist[idx].url;
+    v[0].setAttribute('data-src', playlist[idx].url);
+    v[0].load();
+    // Prime next as well
+    setTimeout(function () { preloadBg(idx + 1); }, 400);
+
+    beginPlayback();
+    renderTiles();
+    document.getElementById('view-toggle').classList.add('show');
+  }
+
+  function preloadBg(futureIdx) {
+    if (!playlist.length) return;
+    const bg = active ^ 1;
+    const url = playlist[wrap(futureIdx)].url;
+    if (v[bg].getAttribute('data-src') !== url) {
+      v[bg].setAttribute('data-src', url);
+      v[bg].src = url;
+      v[bg].load();
+    }
+  }
+
+  function playAt(newIdx) {
+    if (!playlist.length) return;
+    idx = wrap(newIdx);
+    const incoming = active ^ 1;
+    const outgoing = active;
+    v[outgoing].pause();
+    const url = playlist[idx].url;
+    if (v[incoming].getAttribute('data-src') !== url) {
+      v[incoming].setAttribute('data-src', url);
+      v[incoming].src = url;
+    } else {
+      try { v[incoming].currentTime = 0; } catch (e) {}
+    }
+    v[incoming].muted = v[outgoing].muted;
+    v[incoming].style.zIndex = 1;
+    v[outgoing].style.zIndex = 0;
+    v[incoming].play().catch(function () {});
+    active = incoming;
+    setTimeout(function () { if (active === incoming) preloadBg(idx + 1); }, 200);
+  }
+
+  function advance() {
+    if (!started || !playlist.length) return;
+    const next = idx + 1;
+    if (next >= playlist.length) { playlist = shuffle(playlist); playAt(0); }
+    else { playAt(next); }
+  }
+
+  function beginPlayback() {
+    if (started || !playlist.length) return;
+    started = true;
+    // Try unmuted (browser may block on first-load without gesture)
+    v[0].muted = true;
+    v[0].style.zIndex = 1;
+    v[1].style.zIndex = 0;
+    active = 0;
+    v[0].play().catch(function () {});
+    v[0].addEventListener('ended', advance);
+    v[1].addEventListener('ended', advance);
+    setTimeout(function () { preloadBg(idx + 1); }, 300);
+  }
+
+  function updateMuteIcon() {
+    const btn = document.getElementById('btn-mute');
+    btn.innerHTML = v[active].muted ? '&#128263;' : '&#128266;';
+  }
+
+  function showControls() {
+    controls.classList.add('show');
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () { controls.classList.remove('show'); }, 3000);
+  }
+
+  document.getElementById('btn-prev').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!started) return;
+    const now = Date.now();
+    if (now - prevPressAt < 1500) { playAt(idx - 1); }
+    else { v[active].currentTime = 0; v[active].play().catch(function () {}); }
+    prevPressAt = now;
+  });
+  document.getElementById('btn-next').addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (!started) return;
+    advance();
+  });
+  document.getElementById('btn-mute').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const willMute = !v[active].muted;
+    v[0].muted = willMute;
+    v[1].muted = willMute;
+    updateMuteIcon();
+  });
+
+  document.getElementById('stage').addEventListener('click', function () {
+    if (!started) return;
+    if (v[active].paused) v[active].play().catch(function () {});
+    else v[active].pause();
+  });
+
+  document.addEventListener('mousemove', showControls);
+  document.addEventListener('touchstart', showControls, { passive: true });
+  document.addEventListener('keydown', function (e) {
+    showControls();
+    if (!started) return;
+    if (e.key === 'ArrowLeft')  document.getElementById('btn-prev').click();
+    if (e.key === 'ArrowRight') document.getElementById('btn-next').click();
+  });
+
+  // ── Tile view ─────────────────────────────────────────────────────
+
+  const tileView = document.getElementById('tile-view');
+  const tileGrid = document.getElementById('tile-grid');
+  const tileCount = document.getElementById('tile-count');
+  const viewToggle = document.getElementById('view-toggle');
+  const stage = document.getElementById('stage');
+  const streamControls = controls;
+  let inTileView = false;
+
+  const thumbObserver = new IntersectionObserver(function (entries) {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const vid = entry.target;
+      if (vid.dataset.loaded) continue;
+      vid.preload = 'metadata';
+      vid.src = vid.dataset.url + '#t=0.1';
+      vid.dataset.loaded = '1';
+      thumbObserver.unobserve(vid);
+    }
+  }, { rootMargin: '300px' });
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtTime(sec) {
+    if (!isFinite(sec) || sec < 0) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function renderTiles() {
+    tileGrid.innerHTML = '';
+    tileCount.textContent = '(' + playlist.length + ')';
+    for (let i = 0; i < playlist.length; i++) {
+      const item = playlist[i];
+      const tile = document.createElement('div');
+      tile.className = 'tile-item';
+      const tagsHtml = (item.tags || []).map(function (t) { return '<span class="tile-tag-chip">#' + escHtml(t) + '</span>'; }).join('');
+      const durStr = item.duration != null ? fmtTime(item.duration) : '';
+      tile.innerHTML =
+        '<div class="tile-thumb-wrap"><video class="tile-thumb" muted playsinline preload="none"></video></div>' +
+        '<div class="tile-meta"><span>' + (durStr) + '</span></div>' +
+        (tagsHtml ? '<div class="tile-tags">' + tagsHtml + '</div>' : '');
+      const thumb = tile.querySelector('.tile-thumb');
+      thumb.dataset.url = item.url;
+      thumbObserver.observe(thumb);
+      tile.addEventListener('click', function () {
+        idx = i;
+        exitTileView();
+        playAt(idx);
+      });
+      tileGrid.appendChild(tile);
+    }
+  }
+
+  function enterTileView() {
+    inTileView = true;
+    tileView.classList.add('visible');
+    stage.style.display = 'none';
+    streamControls.classList.remove('show');
+    v[active].pause();
+    viewToggle.textContent = 'stream';
+  }
+  function exitTileView() {
+    inTileView = false;
+    tileView.classList.remove('visible');
+    stage.style.display = '';
+    v[active].play().catch(function () {});
+    viewToggle.textContent = 'tile';
+  }
+
+  viewToggle.addEventListener('click', function () {
+    if (inTileView) exitTileView(); else enterTileView();
+  });
+
+}());
+</script>
+
+</body>
+</html>
