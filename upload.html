@@ -2033,7 +2033,7 @@
       if (!item.tags || item.tags.length === 0) noTagCount++;
       else for (const t of item.tags) counts.set(t, (counts.get(t) || 0) + 1);
     }
-    const list = Array.from(counts.entries()).sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); });
+    const list = Array.from(counts.entries()).sort(function (a, b) { return a[0].localeCompare(b[0]); });
     return { list: list, noTagCount: noTagCount, total: libraryItems.length };
   }
 

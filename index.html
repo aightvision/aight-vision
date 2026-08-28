@@ -738,7 +738,7 @@
       }
     }
     const list = Array.from(counts.entries())
-      .sort(function (a, b) { return b[1] - a[1] || a[0].localeCompare(b[0]); });
+      .sort(function (a, b) { return a[0].localeCompare(b[0]); });
     return { list: list, noTagCount: noTagCount, total: masterPlaylist.length };
   }
 
