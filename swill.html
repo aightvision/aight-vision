@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex">
+  <title>SWILL</title>
+  <style>
+    :root { --aight-yellow: #C8A63C; --aight-yellow-hover: #d8b345; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html.locked { overflow: hidden; }
+
+    /* ── Gate ──────────────────────────────────────────────────────── */
+
+    #gate {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 22px;
+      padding: 20px;
+    }
+    #gate.hidden { display: none; }
+    #gate-title { font-size: 11px; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    #gate-input-row { display: flex; gap: 10px; max-width: 320px; width: 100%; }
+    #gate-input {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #gate-input:focus { border-color: rgba(255,255,255,0.4); }
+    #gate-input.error { border-color: #c0392b; }
+    #gate-error {
+      color: #e57373;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: none;
+    }
+    #gate-error.show { display: block; }
+
+    .brace-btn {
+      background: transparent;
+      border: 1px solid var(--aight-yellow);
+      color: var(--aight-yellow);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .brace-btn::before { content: "{"; padding-right: 3px; }
+    .brace-btn::after { content: "}"; padding-left: 3px; }
+    .brace-btn:hover { background: rgba(200,166,60,0.15); }
+
+    /* ── Feed: fixed stacked cards, scroll-space drives the peel ───── */
+
+    #scroll-space { width: 1px; }
+
+    .card {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 52px 20px 56px;
+      will-change: transform;
+      visibility: hidden;
+    }
+    .card.live { visibility: visible; }
+
+    .card .cap {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 18px 16px 0;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.78);
+    }
+    .card img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .card .ser {
+      position: absolute;
+      right: 18px; bottom: 16px;
+      font-style: italic;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      color: rgba(200,166,60,0.85);
+    }
+
+    #counter {
+      position: fixed;
+      left: 18px; bottom: 16px;
+      z-index: 10;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.3);
+      visibility: hidden;
+    }
+
+    #info-btn {
+      position: fixed;
+      bottom: 12px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: 13px;
+      padding: 8px 14px;
+      visibility: hidden;
+    }
+
+    /* ── Info modal ────────────────────────────────────────────────── */
+
+    #modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0,0,0,0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #modal.open { display: flex; }
+    #modal-box {
+      background: rgba(12,12,12,0.97);
+      border: 1px solid #333;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 82vh;
+      overflow-y: auto;
+      padding: 22px 22px 18px;
+      position: relative;
+    }
+    #modal-close {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      font-family: inherit;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+    #modal-close:hover { color: #fff; }
+    #modal-serial {
+      font-style: italic;
+      font-size: 13px;
+      color: rgba(200,166,60,0.85);
+      letter-spacing: 0.06em;
+      margin-bottom: 2px;
+    }
+    #modal-title {
+      font-size: 16px;
+      letter-spacing: 0.02em;
+      margin-bottom: 14px;
+    }
+    .row { display: flex; gap: 12px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.07); }
+    .row .k {
+      flex: 0 0 96px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      padding-top: 2px;
+    }
+    .row .v { flex: 1; font-size: 13px; line-height: 1.45; color: rgba(255,255,255,0.85); }
+    #modal-thumbs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    #modal-thumbs figure { width: 84px; }
+    #modal-thumbs img {
+      width: 84px; height: 84px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #2a2a2a;
+      display: block;
+    }
+    #modal-thumbs figcaption {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      padding-top: 4px;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="gate">
+    <div id="gate-title">SWILL</div>
+    <div id="gate-input-row">
+      <input id="gate-input" type="password" placeholder="access key" autocomplete="off">
+      <button id="gate-enter" class="brace-btn">ENTER</button>
+    </div>
+    <div id="gate-error">invalid key</div>
+  </div>
+
+  <div id="scroll-space"></div>
+  <div id="feed"></div>
+
+  <div id="counter"></div>
+  <button id="info-btn" class="brace-btn">?</button>
+
+  <div id="modal">
+    <div id="modal-box">
+      <button id="modal-close">{X}</button>
+      <div id="modal-serial"></div>
+      <div id="modal-title"></div>
+      <div id="modal-rows"></div>
+      <div id="modal-thumbs"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    //  Peel-scroll feed (sunglasses.website mechanic, single-photo
+    //  cards): every card is position:fixed and stacked by z-index;
+    //  #scroll-space provides the scrollable height. Each card owns
+    //  one window W of scroll — it rests for REST_FRAC of the
+    //  window, then slides up (translateY) over the remainder,
+    //  revealing the card beneath. 3 cycles of scroll space with a
+    //  silent mid-rest reset make the feed loop forever. Only the
+    //  cards around the active index keep decoded pixels in memory.
+    // ============================================================
+
+    const API = '/api/swill';
+    const LS_KEY = 'swill_key';
+    const REST_FRAC = 0.35;   // fraction of each window the card sits still
+    const SWIPE = 0.9;        // windows per viewport-height of scroll
+    const CYCLES = 3;
+
+    let key = localStorage.getItem(LS_KEY) || '';
+    let data = null;
+    let cards = [];
+    let currentIdx = 0;
+    let ticking = false;
+
+    const $ = id => document.getElementById(id);
+
+    // ── Gate ──────────────────────────────────────────────────
+
+    function showGate(err) {
+      $('gate').classList.remove('hidden');
+      $('gate-error').classList.toggle('show', !!err);
+      $('gate-input').classList.toggle('error', !!err);
+      $('gate-input').focus();
+    }
+
+    function logout() {
+      localStorage.removeItem(LS_KEY);
+      key = '';
+      showGate(true);
+    }
+
+    async function tryKey(k) {
+      const res = await fetch(`${API}?verify=1&s=${encodeURIComponent(k)}`);
+      if (!res.ok) return false;
+      key = k;
+      localStorage.setItem(LS_KEY, k);
+      return true;
+    }
+
+    async function enter() {
+      const k = $('gate-input').value.trim();
+      if (!k) return;
+      if (await tryKey(k)) {
+        $('gate').classList.add('hidden');
+        boot();
+      } else {
+        showGate(true);
+      }
+    }
+
+    $('gate-enter').addEventListener('click', enter);
+    $('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') enter(); });
+
+    // ── Feed ──────────────────────────────────────────────────
+
+    const imgUrl = f => `${API}?img=${encodeURIComponent(f)}&s=${encodeURIComponent(key)}`;
+
+    function windowH() { return window.innerHeight; }
+    function stepW() { return windowH() / SWIPE; }
+
+    function buildFeed() {
+      const feed = $('feed');
+      feed.innerHTML = '';
+      cards = data.order.map(serial => {
+        const w = data.works[serial];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="cap"></div>
+          <img draggable="false" alt="">
+          <div class="ser"></div>`;
+        card.querySelector('.cap').textContent = w.caption || '';
+        card.querySelector('.ser').textContent = serial;
+        card.dataset.serial = serial;
+        card.dataset.src = w.images[0];
+        feed.appendChild(card);
+        return card;
+      });
+      $('scroll-space').style.height =
+        (cards.length * stepW() * CYCLES + windowH()) + 'px';
+      $('counter').style.visibility = 'visible';
+      $('info-btn').style.visibility = 'visible';
+      window.scrollTo(0, 0);
+      update();
+    }
+
+    function loadCard(card) {
+      const img = card.querySelector('img');
+      if (!img.getAttribute('src')) img.src = imgUrl(card.dataset.src);
+    }
+    function unloadCard(card) {
+      const img = card.querySelector('img');
+      if (img.getAttribute('src')) img.removeAttribute('src');
+    }
+
+    function update() {
+      ticking = false;
+      const n = cards.length;
+      if (!n) return;
+
+      const W = stepW();
+      const cycle = n * W;
+      let y = window.scrollY;
+
+      // Silent reset: past 2 cycles, jump back one cycle while the
+      // active card is at rest so the repaint is pixel-identical.
+      const s = y / W;
+      const u = s - Math.floor(s);
+      if (y > cycle * 2 && u < REST_FRAC) {
+        document.documentElement.scrollTop = y - cycle;
+        return;
+      }
+
+      const w = Math.floor(s);
+      const idx = ((w % n) + n) % n;
+      const next = (idx + 1) % n;
+      const deck = (idx + 2) % n;
+      const prev = (idx - 1 + n) % n;
+
+      const peel = u <= REST_FRAC ? 0 : (u - REST_FRAC) / (1 - REST_FRAC);
+      currentIdx = peel < 0.5 ? idx : next;
+
+      cards.forEach((card, i) => {
+        if (i === idx || i === next || i === deck || i === prev) {
+          loadCard(card);
+        } else {
+          unloadCard(card);
+        }
+        if (i === idx) {
+          card.style.zIndex = 3;
+          card.style.transform = `translateY(${-peel * 100}%)`;
+          card.classList.add('live');
+        } else if (i === next) {
+          card.style.zIndex = 2;
+          card.style.transform = 'translateY(0)';
+          card.classList.add('live');
+        } else if (i === deck) {
+          card.style.zIndex = 1;
+          card.style.transform = 'translateY(0)';
+          card.classList.remove('live');
+        } else {
+          card.style.zIndex = 0;
+          card.style.transform = 'translateY(0)';
+          card.classList.remove('live');
+        }
+      });
+
+      $('counter').textContent = `${currentIdx + 1} / ${n}`;
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (!data) return;
+      $('scroll-space').style.height =
+        (cards.length * stepW() * CYCLES + windowH()) + 'px';
+      update();
+    });
+
+    window.addEventListener('keydown', e => {
+      if ($('modal').classList.contains('open')) {
+        if (e.key === 'Escape') closeModal();
+        return;
+      }
+      if (!data || !$('gate').classList.contains('hidden')) return;
+      const W = stepW();
+      const k = Math.floor(window.scrollY / W);
+      const u = window.scrollY / W - k;
+      const rest = i => Math.max(0, i * W + W * 0.02); // rest zone of window i
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        window.scrollTo({ top: rest(k + 1), behavior: 'smooth' });
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        // mid-peel settles back to the current card; at rest goes to previous
+        window.scrollTo({ top: rest(u > REST_FRAC ? k : k - 1), behavior: 'smooth' });
+      }
+    });
+
+    // ── Info modal ────────────────────────────────────────────
+
+    const FIELDS = [
+      ['category', 'Category'],
+      ['description', 'Description'],
+      ['dimensions', 'Dimensions'],
+      ['material', 'Material'],
+      ['approx_date', 'Approx date'],
+      ['condition', 'Condition'],
+      ['stretched_or_unstretched', 'Canvas'],
+      ['past_exhibition', 'Exhibited'],
+      ['notes', 'Notes'],
+    ];
+
+    function openModal() {
+      const serial = data.order[currentIdx];
+      const w = data.works[serial];
+      $('modal-serial').textContent = serial;
+      $('modal-title').textContent = w.theme_title || w.caption || '';
+
+      const rows = $('modal-rows');
+      rows.innerHTML = '';
+      FIELDS.forEach(([k, label]) => {
+        if (!w[k]) return;
+        const row = document.createElement('div');
+        row.className = 'row';
+        const kd = document.createElement('div');
+        kd.className = 'k';
+        kd.textContent = label;
+        const vd = document.createElement('div');
+        vd.className = 'v';
+        vd.textContent = w[k];
+        row.append(kd, vd);
+        rows.appendChild(row);
+      });
+
+      const thumbs = $('modal-thumbs');
+      thumbs.innerHTML = '';
+      const extra = [];
+      w.images.slice(1).forEach(f => extra.push([f, 'alt view']));
+      (w.related || []).forEach(r => {
+        const rw = data.works[r];
+        if (rw) extra.push([rw.images[0], r]);
+      });
+      extra.forEach(([f, label]) => {
+        const fig = document.createElement('figure');
+        const img = document.createElement('img');
+        img.src = imgUrl(f);
+        const cap = document.createElement('figcaption');
+        cap.textContent = label;
+        fig.append(img, cap);
+        thumbs.appendChild(fig);
+      });
+
+      $('modal').classList.add('open');
+      document.documentElement.classList.add('locked');
+    }
+
+    function closeModal() {
+      $('modal').classList.remove('open');
+      document.documentElement.classList.remove('locked');
+    }
+
+    $('info-btn').addEventListener('click', openModal);
+    $('modal-close').addEventListener('click', closeModal);
+    $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
+
+    // ── Boot ──────────────────────────────────────────────────
+
+    async function boot() {
+      const res = await fetch(`${API}?data=1&s=${encodeURIComponent(key)}`);
+      if (res.status === 401) return logout();
+      if (!res.ok) return;
+      data = await res.json();
+      buildFeed();
+    }
+
+    (async () => {
+      if (key && await tryKey(key)) {
+        $('gate').classList.add('hidden');
+        boot();
+      } else {
+        localStorage.removeItem(LS_KEY);
+        showGate(false);
+      }
+    })();
+  </script>
+
+</body>
+</html>
