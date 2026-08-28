@@ -1511,34 +1511,186 @@
     }
   }
 
+  // Threshold: files smaller than this use the single-shot /api/upload path.
+  // Files >= this route through multipart (which chunks around the 100 MB
+  // Cloudflare Worker request limit).
+  const MULTIPART_THRESHOLD = 80 * 1024 * 1024;   // 80 MB
+  const MULTIPART_CHUNK_SIZE = 50 * 1024 * 1024;  // 50 MB per chunk
+
   async function uploadItem(item) {
-    // Capture duration client-side so it's stored as metadata on R2
+    try {
+      if (item.file.size >= MULTIPART_THRESHOLD) {
+        await uploadItemMultipart(item);
+      } else {
+        await uploadItemSingle(item);
+      }
+    } catch (err) {
+      console.error('uploadItem threw:', err);
+      item.status = 'error';
+      // Preserve specific inline messages (e.g. 'invalid key') set by inner
+      // handlers; only fall back to the generic when no message is set yet.
+      if (!item.error) item.error = err.message || 'upload failed';
+      updateQueueItem(item); updateQueueSummary();
+    } finally {
+      running--;
+      processQueue();
+    }
+  }
+
+  // Single-shot path (files < 80 MB) — unchanged behavior via XHR for progress
+  async function uploadItemSingle(item) {
     const duration = await getDurationOfBlob(item.file);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/upload');
-    xhr.setRequestHeader('x-upload-secret', secret);
-    xhr.setRequestHeader('x-file-name', encodeURIComponent(item.name));
-    xhr.setRequestHeader('x-file-type', item.file.type || 'application/octet-stream');
-    if (duration != null) xhr.setRequestHeader('x-video-duration', String(duration));
+    await new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload');
+      xhr.setRequestHeader('x-upload-secret', secret);
+      xhr.setRequestHeader('x-file-name', encodeURIComponent(item.name));
+      xhr.setRequestHeader('x-file-type', item.file.type || 'application/octet-stream');
+      if (duration != null) xhr.setRequestHeader('x-video-duration', String(duration));
 
-    xhr.upload.addEventListener('progress', function (e) {
-      if (e.lengthComputable) { item.pct = e.loaded / e.total; updateQueueItem(item); }
+      xhr.upload.addEventListener('progress', function (e) {
+        if (e.lengthComputable) { item.pct = e.loaded / e.total; updateQueueItem(item); }
+      });
+      xhr.addEventListener('load', function () {
+        if (xhr.status === 200 || xhr.status === 201) { item.status = 'done'; resolve(); }
+        else if (xhr.status === 401) {
+          item.status = 'error'; item.error = 'invalid key';
+          logout(); showAuthError('session expired');
+          reject(new Error('unauthorized'));
+        } else {
+          item.status = 'error'; item.error = 'failed (' + xhr.status + ')';
+          reject(new Error('server ' + xhr.status));
+        }
+        updateQueueItem(item); updateQueueSummary();
+      });
+      xhr.addEventListener('error', function () {
+        item.status = 'error'; item.error = 'network error';
+        updateQueueItem(item); updateQueueSummary();
+        reject(new Error('network error'));
+      });
+      xhr.send(item.file);
+      updateQueueItem(item);
     });
-    xhr.addEventListener('load', function () {
-      running--;
-      if (xhr.status === 200 || xhr.status === 201) { item.status = 'done'; }
-      else if (xhr.status === 401) { item.status = 'error'; item.error = 'invalid key'; logout(); showAuthError('session expired'); }
-      else { item.status = 'error'; item.error = 'failed (' + xhr.status + ')'; }
-      updateQueueItem(item); updateQueueSummary(); processQueue();
-    });
-    xhr.addEventListener('error', function () {
-      running--;
-      item.status = 'error'; item.error = 'network error';
-      updateQueueItem(item); updateQueueSummary(); processQueue();
-    });
-    xhr.send(item.file);
+  }
+
+  // Multipart path (files >= 80 MB) — chunked, resumable per chunk
+  async function uploadItemMultipart(item) {
+    const duration = await getDurationOfBlob(item.file);
+
+    // Show a hint that this file is going the chunked path
+    item.multipart = true;
     updateQueueItem(item);
+
+    // 1. Init — get uploadId + key
+    const initHeaders = {
+      'x-upload-secret': secret,
+      'x-file-name': encodeURIComponent(item.name),
+      'x-file-type': item.file.type || 'application/octet-stream',
+    };
+    if (duration != null) initHeaders['x-video-duration'] = String(duration);
+
+    const initRes = await fetch('/api/upload-init', { method: 'POST', headers: initHeaders });
+    if (initRes.status === 401) {
+      item.status = 'error'; item.error = 'invalid key';
+      logout(); showAuthError('session expired');
+      throw new Error('unauthorized');
+    }
+    if (!initRes.ok) throw new Error('init failed: ' + initRes.status);
+    const initData = await initRes.json();
+    const uploadId = initData.uploadId;
+    const key = initData.key;
+
+    // 2. Upload parts sequentially with per-chunk retry
+    const totalSize = item.file.size;
+    const totalChunks = Math.ceil(totalSize / MULTIPART_CHUNK_SIZE);
+    const parts = [];
+    let bytesUploaded = 0;
+
+    for (let partNumber = 1; partNumber <= totalChunks; partNumber++) {
+      const start = (partNumber - 1) * MULTIPART_CHUNK_SIZE;
+      const end = Math.min(start + MULTIPART_CHUNK_SIZE, totalSize);
+      const chunk = item.file.slice(start, end);
+
+      const partResult = await uploadChunkWithRetry({
+        chunk,
+        uploadId,
+        key,
+        partNumber,
+        onProgress: function (chunkBytes) {
+          item.pct = (bytesUploaded + chunkBytes) / totalSize;
+          updateQueueItem(item);
+        },
+      });
+      parts.push(partResult);
+
+      bytesUploaded = end;
+      item.pct = bytesUploaded / totalSize;
+      updateQueueItem(item);
+    }
+
+    // 3. Complete
+    const completeRes = await fetch('/api/upload-complete', {
+      method: 'POST',
+      headers: {
+        'x-upload-secret': secret,
+        'x-upload-id': uploadId,
+        'x-upload-key': key,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ parts }),
+    });
+    if (!completeRes.ok) {
+      const errText = await completeRes.text().catch(function () { return ''; });
+      throw new Error('complete failed: ' + completeRes.status + ' ' + errText);
+    }
+
+    item.status = 'done';
+    updateQueueItem(item);
+    updateQueueSummary();
+  }
+
+  // Retry a single chunk up to 3 times with exponential backoff
+  async function uploadChunkWithRetry({ chunk, uploadId, key, partNumber, onProgress }) {
+    const attempts = 3;
+    let lastErr;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        return await uploadChunkOnce({ chunk, uploadId, key, partNumber, onProgress });
+      } catch (e) {
+        lastErr = e;
+        if (attempt < attempts) {
+          await new Promise(function (r) { setTimeout(r, 1000 * attempt); });
+        }
+      }
+    }
+    throw lastErr || new Error('chunk ' + partNumber + ' failed');
+  }
+
+  function uploadChunkOnce({ chunk, uploadId, key, partNumber, onProgress }) {
+    return new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/upload-part');
+      xhr.setRequestHeader('x-upload-secret', secret);
+      xhr.setRequestHeader('x-upload-id', uploadId);
+      xhr.setRequestHeader('x-upload-key', encodeURIComponent(key));
+      xhr.setRequestHeader('x-part-number', String(partNumber));
+      xhr.upload.addEventListener('progress', function (e) {
+        if (e.lengthComputable && onProgress) onProgress(e.loaded);
+      });
+      xhr.addEventListener('load', function () {
+        if (xhr.status === 200 || xhr.status === 201) {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch (e) { reject(new Error('bad JSON from part endpoint')); }
+        } else if (xhr.status === 401) {
+          reject(new Error('unauthorized'));
+        } else {
+          reject(new Error('part ' + partNumber + ' failed: ' + xhr.status));
+        }
+      });
+      xhr.addEventListener('error', function () { reject(new Error('network error on part ' + partNumber)); });
+      xhr.send(chunk);
+    });
   }
 
   function renderQueueItem(item) {
@@ -1578,9 +1730,10 @@
       info.textContent = fmtTime(item.trimmed.start) + '–' + fmtTime(item.trimmed.end);
     } else if (info) { info.remove(); }
 
+    const multipartSuffix = item.multipart ? ' (chunked)' : '';
     if (item.status === 'pending')       { statusEl.textContent = 'pending'; bar.style.width = '0%'; }
     else if (item.status === 'processing'){ statusEl.textContent = 'trimming…'; bar.style.width = '0%'; }
-    else if (item.status === 'uploading'){ statusEl.textContent = Math.round(item.pct * 100) + '%'; bar.style.width = Math.round(item.pct * 100) + '%'; }
+    else if (item.status === 'uploading'){ statusEl.textContent = Math.round(item.pct * 100) + '%' + multipartSuffix; bar.style.width = Math.round(item.pct * 100) + '%'; }
     else if (item.status === 'done')     { statusEl.textContent = 'done'; bar.className = 'q-bar done'; }
     else if (item.status === 'error')    { statusEl.textContent = item.error || 'error'; bar.className = 'q-bar error'; }
   }
