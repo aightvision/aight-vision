@@ -37,6 +37,7 @@ async function listVideos(env) {
       include: ['customMetadata', 'httpMetadata'],
     });
     for (const obj of result.objects) {
+      if (obj.key.startsWith('swill/')) continue; // legacy swill staging set, not aight.vision media
       const durRaw = obj.customMetadata?.duration;
       const duration = durRaw && isFinite(parseFloat(durRaw)) ? parseFloat(durRaw) : null;
       // Missing `published` field = legacy; treat as published for main stream

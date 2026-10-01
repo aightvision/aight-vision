@@ -34,6 +34,7 @@ export async function onRequestGet({ request, env }) {
       include: ['customMetadata'],
     });
     for (const obj of result.objects) {
+      if (obj.key.startsWith('swill/')) continue; // legacy swill staging set, not aight.vision media
       const published = obj.customMetadata?.published;
       const isDraft = published === 'false';
 

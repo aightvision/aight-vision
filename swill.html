@@ -119,7 +119,7 @@
 
     #counter {
       position: fixed;
-      left: 18px; bottom: 16px;
+      right: 14px; top: 14px;
       z-index: 10;
       font-size: 11px;
       letter-spacing: 0.12em;
@@ -136,6 +136,69 @@
       padding: 8px 14px;
       visibility: hidden;
     }
+
+    .card video { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .card .tcard {
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+      text-align: center; max-width: 520px; width: 100%;
+    }
+    .card .tcard .tk { font-size: 11px; letter-spacing: 0.3em; color: rgba(200,166,60,0.85); text-transform: uppercase; }
+    .card .tcard .tt { font-size: 20px; letter-spacing: 0.04em; color: rgba(255,255,255,0.85); }
+    .card .tcard audio { width: 100%; }
+    .card .tcard a { text-decoration: none; }
+
+    /* ── Visitor {sort} ────────────────────────────────────────────── */
+
+    #sort-btn {
+      position: fixed;
+      top: 10px; left: 10px;
+      z-index: 10;
+      font-size: 10px;
+      padding: 5px 8px;
+      visibility: hidden;
+    }
+    #sort-btn.on { background: var(--aight-yellow); color: #000; }
+    #side {
+      position: fixed; inset: 0; z-index: 35;
+      background: rgba(0,0,0,0.55);
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    #side.open { opacity: 1; pointer-events: auto; }
+    #side-inner {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: min(300px, 80vw);
+      background: rgba(10,10,10,0.97);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      padding: 20px 18px;
+      overflow-y: auto;
+      transform: translateX(-100%); transition: transform 0.25s ease;
+    }
+    #side.open #side-inner { transform: none; }
+    #side-title { font-size: 10px; letter-spacing: 0.3em; color: rgba(255,255,255,0.35); margin-bottom: 12px; }
+    .s-row {
+      padding: 10px 4px; font-size: 14px; letter-spacing: 0.03em;
+      color: rgba(255,255,255,0.7); cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      user-select: none;
+    }
+    .s-row.sub { padding-left: 20px; font-size: 13px; color: rgba(255,255,255,0.5); }
+    .s-row.sel { color: var(--aight-yellow); }
+    .s-row .box { display: inline-block; width: 10px; height: 10px; margin-right: 9px; border: 1px solid rgba(255,255,255,0.35); border-radius: 2px; vertical-align: 0; }
+    .s-row.sel .box { background: var(--aight-yellow); border-color: var(--aight-yellow); }
+
+    /* ── Media-type switch (bottom left) ───────────────────────────── */
+
+    #types {
+      position: fixed;
+      left: 10px; bottom: 12px;
+      z-index: 10;
+      display: flex; gap: 6px; flex-wrap: wrap;
+      max-width: calc(50% - 40px);
+    }
+    #types .brace-btn, #sound-btn { font-size: 10px; padding: 5px 8px; }
+    #types .brace-btn.on, #sound-btn.on { background: var(--aight-yellow); color: #000; }
+    #sound-btn { position: fixed; right: 10px; bottom: 44px; z-index: 10; }
+    [hidden] { display: none !important; }
 
     /* ── Info modal ────────────────────────────────────────────────── */
 
@@ -184,8 +247,27 @@
     #modal-title {
       font-size: 16px;
       letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+    #modal-media {
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--aight-yellow);
       margin-bottom: 14px;
     }
+    #modal-media:empty { display: none; }
+    #modal-notes {
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.8);
+      padding-top: 10px;
+      margin-top: 4px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    #modal-notes:empty { display: none; }
+    #modal-thumbs a { display: block; }
     .row { display: flex; gap: 12px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.07); }
     .row .k {
       flex: 0 0 96px;
@@ -235,14 +317,26 @@
   <div id="feed"></div>
 
   <div id="counter"></div>
+  <button id="sort-btn" class="brace-btn">sort</button>
+  <div id="types"></div>
+  <button id="sound-btn" class="brace-btn" hidden>sound</button>
   <button id="info-btn" class="brace-btn">?</button>
+
+  <div id="side">
+    <div id="side-inner">
+      <div id="side-title">SORT</div>
+      <div id="side-list"></div>
+    </div>
+  </div>
 
   <div id="modal">
     <div id="modal-box">
       <button id="modal-close">{X}</button>
       <div id="modal-serial"></div>
       <div id="modal-title"></div>
+      <div id="modal-media"></div>
       <div id="modal-rows"></div>
+      <div id="modal-notes"></div>
       <div id="modal-thumbs"></div>
     </div>
   </div>
@@ -256,7 +350,13 @@
     //  window, then slides up (translateY) over the remainder,
     //  revealing the card beneath. 3 cycles of scroll space with a
     //  silent mid-rest reset make the feed loop forever. Only the
-    //  cards around the active index keep decoded pixels in memory.
+    //  cards around the active index keep decoded media in memory.
+    //
+    //  Data comes from {back} via /api/swill?op=feed: published works
+    //  at /swill, archived works at /swill/archive. Images show by
+    //  default; {video} {audio} {docs} switch the feed to that type.
+    //  {sort} filters by category (multi-select, parents include
+    //  their subcategories) and combines with the type switch.
     // ============================================================
 
     const API = '/api/swill';
@@ -266,12 +366,18 @@
     const CYCLES = 3;
 
     let key = localStorage.getItem(LS_KEY) || '';
-    let data = null;
+    let data = null;          // { works, categories }
+    let list = [];            // works currently in the feed (type + sort)
+    let sortSel = new Set();  // selected category ids
+    let type = 'image';       // image | video | audio | doc
+    let sound = false;
     let cards = [];
     let currentIdx = 0;
     let ticking = false;
 
     const $ = id => document.getElementById(id);
+    const ARCHIVE = /^\/swill\/archive\/?$/.test(location.pathname);
+    if (ARCHIVE) { document.title = 'SWILL / archive'; $('gate-title').textContent = 'SWILL / ARCHIVE'; }
 
     // ── Gate ──────────────────────────────────────────────────
 
@@ -289,7 +395,7 @@
     }
 
     async function tryKey(k) {
-      const res = await fetch(`${API}?verify=1&s=${encodeURIComponent(k)}`);
+      const res = await fetch(`${API}?op=verify&s=${encodeURIComponent(k)}`);
       if (!res.ok) return false;
       key = k;
       localStorage.setItem(LS_KEY, k);
@@ -312,50 +418,113 @@
 
     // ── Feed ──────────────────────────────────────────────────
 
-    const imgUrl = f => `${API}?img=${encodeURIComponent(f)}&s=${encodeURIComponent(key)}`;
+    const fileUrl = k => `${API}?op=file&k=${encodeURIComponent(k)}&s=${encodeURIComponent(key)}`;
 
     function windowH() { return window.innerHeight; }
     function stepW() { return windowH() / SWIPE; }
 
-    function buildFeed() {
+    function cardBody(w) {
+      const f = w.files[0];
+      if (!f) return null;
+      if (f.kind === 'image' && f.web) {
+        const img = document.createElement('img');
+        img.draggable = false;
+        img.alt = '';
+        img.dataset.src = f.web;
+        return img;
+      }
+      if (f.kind === 'video') {
+        const v = document.createElement('video');
+        v.muted = true; v.loop = true; v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.preload = 'none';
+        v.dataset.src = f.k;
+        if (f.web) v.dataset.poster = f.web;
+        return v;
+      }
+      // audio, documents, undecodable images: a title card
+      const t = document.createElement('div');
+      t.className = 'tcard';
+      const kind = document.createElement('div');
+      kind.className = 'tk';
+      kind.textContent = w.mediaType || f.kind;
+      const title = document.createElement('div');
+      title.className = 'tt';
+      title.textContent = w.title || f.name;
+      t.append(kind, title);
+      if (f.kind === 'audio') {
+        const a = document.createElement('audio');
+        a.controls = true;
+        a.preload = 'none';
+        a.dataset.src = f.k;
+        t.appendChild(a);
+      } else {
+        const a = document.createElement('a');
+        a.className = 'brace-btn';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.href = fileUrl(f.k);
+        a.textContent = 'open';
+        t.appendChild(a);
+      }
+      return t;
+    }
+
+    function buildFeed(startIdx = 0) {
       const feed = $('feed');
       feed.innerHTML = '';
-      cards = data.order.map(serial => {
-        const w = data.works[serial];
+      cards = list.map(w => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `
-          <div class="cap"></div>
-          <img draggable="false" alt="">
-          <div class="ser"></div>`;
-        card.querySelector('.cap').textContent = w.caption || '';
-        card.querySelector('.ser').textContent = serial;
-        card.dataset.serial = serial;
-        card.dataset.src = w.images[0];
+        card.innerHTML = `<div class="cap"></div><div class="ser"></div>`;
+        card.querySelector('.cap').textContent = w.title || '';
+        card.querySelector('.ser').textContent = w.serial || '';
+        const body = cardBody(w);
+        if (body) card.insertBefore(body, card.querySelector('.ser'));
         feed.appendChild(card);
         return card;
       });
       $('scroll-space').style.height =
         (cards.length * stepW() * CYCLES + windowH()) + 'px';
       $('counter').style.visibility = 'visible';
-      $('info-btn').style.visibility = 'visible';
-      window.scrollTo(0, 0);
+      $('info-btn').style.visibility = cards.length ? 'visible' : 'hidden';
+      $('sort-btn').style.visibility = data.categories.length ? 'visible' : 'hidden';
+      $('sound-btn').hidden = type !== 'video' || !cards.length;
+      window.scrollTo(0, startIdx * stepW() + stepW() * 0.02);
       update();
     }
 
     function loadCard(card) {
-      const img = card.querySelector('img');
-      if (!img.getAttribute('src')) img.src = imgUrl(card.dataset.src);
+      const m = card.querySelector('[data-src]');
+      if (!m || m.getAttribute('src')) return;
+      if (m.dataset.poster) m.poster = fileUrl(m.dataset.poster);
+      m.src = fileUrl(m.dataset.src);
     }
     function unloadCard(card) {
-      const img = card.querySelector('img');
-      if (img.getAttribute('src')) img.removeAttribute('src');
+      const m = card.querySelector('[data-src]');
+      if (!m || !m.getAttribute('src')) return;
+      if (m.pause) m.pause();
+      m.removeAttribute('src');
+      if (m.load) m.load();
+    }
+    function playOnly(active) {
+      cards.forEach((card, i) => {
+        const v = card.querySelector('video');
+        if (!v || !v.getAttribute('src')) return;
+        v.muted = !sound;
+        if (i === active) { if (v.paused) v.play().catch(() => {}); }
+        else if (!v.paused) v.pause();
+      });
+      cards.forEach((card, i) => {
+        const a = card.querySelector('audio');
+        if (a && i !== active && !a.paused) a.pause();
+      });
     }
 
     function update() {
       ticking = false;
       const n = cards.length;
-      if (!n) return;
+      if (!n) { $('counter').textContent = '0 / 0'; return; }
 
       const W = stepW();
       const cycle = n * W;
@@ -404,6 +573,7 @@
         }
       });
 
+      playOnly(currentIdx);
       $('counter').textContent = `${currentIdx + 1} / ${n}`;
     }
 
@@ -426,6 +596,10 @@
         if (e.key === 'Escape') closeModal();
         return;
       }
+      if ($('side').classList.contains('open')) {
+        if (e.key === 'Escape') closeSide();
+        return;
+      }
       if (!data || !$('gate').classList.contains('hidden')) return;
       const W = stepW();
       const k = Math.floor(window.scrollY / W);
@@ -441,57 +615,121 @@
       }
     });
 
+    // ── Visitor {sort} + media-type switch ────────────────────
+
+    const kindOf = w => (w.files[0] && w.files[0].kind) || 'doc';
+
+    function withDescendants(ids) {
+      const out = new Set(ids);
+      let grew = true;
+      while (grew) {
+        grew = false;
+        data.categories.forEach(c => {
+          if (c.parent && out.has(c.parent) && !out.has(c.id)) { out.add(c.id); grew = true; }
+        });
+      }
+      return out;
+    }
+
+    function applyFilters() {
+      const want = sortSel.size ? withDescendants(sortSel) : null;
+      list = data.works.filter(w => kindOf(w) === type && (!want || w.cats.some(id => want.has(id))));
+      $('sort-btn').classList.toggle('on', sortSel.size > 0);
+      renderTypes();
+      buildFeed(0);
+    }
+
+    // Buttons only for non-image types that exist in this feed.
+    function renderTypes() {
+      const have = new Set(data.works.map(kindOf));
+      const labels = { video: 'video', audio: 'audio', doc: 'docs' };
+      $('types').innerHTML = Object.keys(labels).filter(k => have.has(k))
+        .map(k => `<button class="brace-btn ${type === k ? 'on' : ''}" data-t="${k}">${labels[k]}</button>`).join('');
+    }
+    $('types').addEventListener('click', e => {
+      const t = e.target.dataset.t;
+      if (!t) return;
+      type = type === t ? 'image' : t;
+      applyFilters();
+    });
+    $('sound-btn').addEventListener('click', () => {
+      sound = !sound;
+      $('sound-btn').classList.toggle('on', sound);
+      playOnly(currentIdx);
+    });
+
+    function renderSide() {
+      const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+      const kids = pid => data.categories.filter(c => (c.parent || '') === pid).sort((a, b) => a.name.localeCompare(b.name));
+      const rows = [`<div class="s-row ${!sortSel.size ? 'sel' : ''}" data-all="1">all</div>`];
+      (function walk(pid, depth) {
+        kids(pid).forEach(c => {
+          rows.push(`<div class="s-row ${sortSel.has(c.id) ? 'sel' : ''}" data-id="${c.id}" style="padding-left:${4 + depth * 16}px"><span class="box"></span>${esc(c.name)}</div>`);
+          walk(c.id, depth + 1);
+        });
+      })('', 0);
+      $('side-list').innerHTML = rows.join('');
+    }
+    function closeSide() { $('side').classList.remove('open'); }
+
+    $('sort-btn').addEventListener('click', () => { renderSide(); $('side').classList.add('open'); });
+    // Clicking outside the panel closes it; selections stay applied.
+    $('side').addEventListener('click', e => { if (e.target === $('side')) closeSide(); });
+    $('side-list').addEventListener('click', e => {
+      const r = e.target.closest('.s-row');
+      if (!r) return;
+      if (r.dataset.all) sortSel.clear();
+      else if (sortSel.has(r.dataset.id)) sortSel.delete(r.dataset.id);
+      else sortSel.add(r.dataset.id);
+      renderSide();
+      applyFilters();
+    });
+
     // ── Info modal ────────────────────────────────────────────
 
-    const FIELDS = [
-      ['category', 'Category'],
-      ['description', 'Description'],
-      ['dimensions', 'Dimensions'],
-      ['material', 'Material'],
-      ['approx_date', 'Approx date'],
-      ['condition', 'Condition'],
-      ['stretched_or_unstretched', 'Canvas'],
-      ['past_exhibition', 'Exhibited'],
-      ['notes', 'Notes'],
-    ];
+    function addRow(label, value) {
+      if (!value) return;
+      const row = document.createElement('div');
+      row.className = 'row';
+      const kd = document.createElement('div');
+      kd.className = 'k';
+      kd.textContent = label;
+      const vd = document.createElement('div');
+      vd.className = 'v';
+      vd.textContent = value;
+      row.append(kd, vd);
+      $('modal-rows').appendChild(row);
+    }
 
     function openModal() {
-      const serial = data.order[currentIdx];
-      const w = data.works[serial];
-      $('modal-serial').textContent = serial;
-      $('modal-title').textContent = w.theme_title || w.caption || '';
+      const w = list[currentIdx];
+      if (!w) return;
+      $('modal-serial').textContent = w.serial || '';
+      $('modal-title').textContent = w.title || '';
+      $('modal-media').textContent = w.mediaType || '';
 
-      const rows = $('modal-rows');
-      rows.innerHTML = '';
-      FIELDS.forEach(([k, label]) => {
-        if (!w[k]) return;
-        const row = document.createElement('div');
-        row.className = 'row';
-        const kd = document.createElement('div');
-        kd.className = 'k';
-        kd.textContent = label;
-        const vd = document.createElement('div');
-        vd.className = 'v';
-        vd.textContent = w[k];
-        row.append(kd, vd);
-        rows.appendChild(row);
-      });
+      $('modal-rows').innerHTML = '';
+      addRow('Size', w.size);
+      addRow('Materials', w.materials);
+      w.params.forEach(p => addRow(p.name, p.value));
+      $('modal-notes').textContent = w.notes || '';
 
       const thumbs = $('modal-thumbs');
       thumbs.innerHTML = '';
-      const extra = [];
-      w.images.slice(1).forEach(f => extra.push([f, 'alt view']));
-      (w.related || []).forEach(r => {
-        const rw = data.works[r];
-        if (rw) extra.push([rw.images[0], r]);
-      });
-      extra.forEach(([f, label]) => {
+      w.files.slice(1).forEach(f => {
         const fig = document.createElement('figure');
-        const img = document.createElement('img');
-        img.src = imgUrl(f);
+        const a = document.createElement('a');
+        a.href = fileUrl(f.web && f.kind === 'image' ? f.web : f.k);
+        a.target = '_blank';
+        a.rel = 'noopener';
+        if (f.thumb || f.web) {
+          const img = document.createElement('img');
+          img.src = fileUrl(f.thumb || f.web);
+          a.appendChild(img);
+        }
         const cap = document.createElement('figcaption');
-        cap.textContent = label;
-        fig.append(img, cap);
+        cap.textContent = /^[A-Z]{1,4}\d/.test(f.name) && !f.name.includes('.') ? f.name : (f.kind === 'image' ? 'alt view' : f.kind);
+        fig.append(a, cap);
         thumbs.appendChild(fig);
       });
 
@@ -511,11 +749,13 @@
     // ── Boot ──────────────────────────────────────────────────
 
     async function boot() {
-      const res = await fetch(`${API}?data=1&s=${encodeURIComponent(key)}`);
+      const res = await fetch(`${API}?op=feed${ARCHIVE ? '&set=archive' : ''}&s=${encodeURIComponent(key)}`);
       if (res.status === 401) return logout();
       if (!res.ok) return;
       data = await res.json();
-      buildFeed();
+      // Fall back to the first type that exists if a feed has no images.
+      if (!data.works.some(w => kindOf(w) === 'image') && data.works.length) type = kindOf(data.works[0]);
+      applyFilters();
     }
 
     (async () => {
